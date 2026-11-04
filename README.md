@@ -1,53 +1,39 @@
-# Yoru 3.0 — Journal & Daily Glow
+# Yoru 3.1 — A week of stories
 
-A native SwiftUI anime journal with a midnight palette, full-cover artwork, and iOS Liquid Glass navigation and controls.
+A native SwiftUI anime library for iPhone, iPad, and Mac, with a midnight palette and Liquid Glass controls.
 
-## New in 3.0
+## What changed
 
-- **Journal:** dated entries per anime, optional episode number, personal rating, mood, and spoiler flag. A reader hides spoiler bodies until revealed; entries can be edited or deleted.
-- **Watch history:** first-watched and finished dates, personal series rating, and planning/watching/completed/paused/dropped status.
-- **Collections:** named playlists/categories with a symbol and color. Shows can belong to multiple collections. Renaming preserves membership; deleting a collection preserves notes, shows, and progress.
-- **Daily Glow:** a Liquid Glass streak screen with current/best streak, seven-day activity row, and 28-day grid. Log an episode or save a new/changed journal entry to earn a local day. Historical dates do not backfill streaks. Unchanged saves do not earn a new day; undo and note deletion remove the associated credits. A streak ending yesterday remains active for today.
-- **Branding:** a 1024×1024 opaque app icon with a crescent moon and “yoru” wordmark. Reusable vector and renderer are in `Brand/`.
+- Fixed the slow, empty Calendar: one MyAnimeList weekly schedule fetch replaces scanning every Kitsu airing page and guessing weekdays from missing next-release dates. Switching weekdays uses the loaded week immediately.
+- Schedule refresh button, six-hour cache, last-retrieved date, labeled offline fallback, and explicit retry errors. Invalid/challenge HTML cannot replace a good week with an empty result.
+- Calendar My library filter, Today shortcut, title counts, and links to official streaming calendars.
+- One-tap daily check-in with a Liquid Glass popup on the first active visit each local day when today is not already active. Dismissing it avoids repeat prompts that day; Daily Glow always provides a manual button. No journal or episode is required.
+- Check-ins persist and count once per local day. Episode logs and changed journal entries still count too. Existing watchlists, journals, collections, and streak history are retained.
+- Search saved shows and filter by watch status, within any collection.
+- Mac Catalyst app for Apple Silicon and Intel, alongside the iPhone/iPad IPA.
 
-Journal text, dates, collections, and activity are kept locally and are not sent to Kitsu. v3 uses a new local storage key and leaves the v2 backup untouched. Earlier progress has no activity timestamps, so it cannot earn retroactive streaks.
+## Keep your stories
 
-## Discover
+Save anime, track episodes, set first-watched/finished dates and ratings, and organize shows into collections with symbols and colors. A show can belong to multiple collections. Write dated journal entries with moods, episode numbers, and optional spoiler flags. View your current/best daily streak, seven-day activity, and 28-day grid.
 
-- This season: automatically selects the current year and season, loading every catalog page.
-- Calendar: ongoing titles, including series that began in earlier seasons, grouped by the next release date supplied by Kitsu. Shows Japan time and the local date/time. Unknown dates appear under TBA; All shows all ongoing titles.
-- Explore: previous seasons, all airing titles, completed anime, global search, and streaming-provider filters. Archive/search use a Load more button instead of downloading the entire database.
-- Title details: real source-listed streaming links, provider names, cover art, synopsis, categories, progress, save/unsave, and undo.
-- Library: local watchlist and episode history, including migration of saved v1 progress.
+Library data and daily check-ins stay on the device. v1/v2 progress migrates; the v2 backup is preserved. The v3 storage key is retained for this update. Existing history is not backfilled into streaks. Local day boundaries follow the device time zone; a yesterday-ending streak remains active while today is still available.
 
-## Data and limitations
+## Sources and limits
 
-Catalog, images, next-release dates, and streaming links come from [Kitsu](https://kitsu.app) through its [public JSON:API](https://kitsu.docs.apiary.io). MyAnimeList IDs are used for cross-version identity where mappings exist. Explicit adult entries are excluded. At validation, Fall 2026 loaded 120 non-explicit titles over seven pages.
+Catalog/search/detail/streaming-provider data use [Kitsu](https://kitsu.app) and its public API. Calendar uses [MyAnimeList’s public weekly schedule](https://myanimelist.net/anime/season/schedule). Explicit adult genres are excluded. Weekly days are Japan broadcast days, **not** local dates or verified subtitle/dub streaming premieres. Exact times are not supplied by this calendar reader. All includes other and unknown-day listings. Source coverage can be incomplete and schedules can change.
 
-Provider listings include Crunchyroll, HIDIVE, Netflix, Hulu, Amazon, YouTube, and others when supplied by Kitsu. They are source listings, not guarantees of current availability in every country. Missing links mean unknown. No licensor-to-provider guessing is used.
+Streaming provider links are supplied by Kitsu, not inferred. Missing links mean unknown; regional availability can differ. Crunchyroll, HIDIVE, Netflix, and other official links are available in the app. If MyAnimeList changes its page format, the app shows an error or a labeled previous cache rather than claiming a quiet day. Calendar refresh uses one request with a 12-second request timeout and no retry loop. Kitsu catalog pagination remains separate.
 
-The calendar is based on Kitsu next-release timestamps. It does not scrape Crunchyroll, HIDIVE, or Netflix calendars, and does not claim their exact subtitle/dub release times. An official Crunchyroll calendar link and HIDIVE/Netflix links are included for verification. Catalog coverage, release dates, and streaming links can be incomplete or outdated.
+Search terms/catalog requests go to Kitsu, weekly schedule requests go to MyAnimeList, and artwork loads from those sources’ image hosts. Journal text, watch history, and check-ins are not uploaded. No accounts, API keys, or third-party packages are required.
 
-Catalog responses are cached for six hours. Pull to refresh fetches again; offline fallback is labeled and retains the retrieval date. Requests are paced, 429 responses are retried, and failed requests show a retry state. Search/catalog requests go to Kitsu; artwork loads from Kitsu image servers. Watchlists stay on-device.
+## Downloads and building
 
-Jikan was evaluated but its live API was unreachable during development. AniList was not integrated because its API terms restrict competing tracker services.
+- `Yoru-3.1-Mac.dmg`: open and drag Yoru into Applications. Requires macOS 26+. Universal Apple Silicon/Intel Mac Catalyst app, locally ad-hoc signed, not Apple-notarized.
+- `Yoru-3.1-unsigned.ipa`: requires iOS/iPadOS 26+ and signing before installation.
+- `Yoru-3.1-source.zip`: clean Xcode project and validation sources. Extract and open `Yoru.xcodeproj` in Xcode 26. For device signing, select your own development team. No signing credentials are bundled.
 
-## Build and install
+## Validation
 
-Requires iOS 26.0 or later and Xcode with an iOS 26 SDK. Extract `Yoru-3.0-source.zip` and open `Yoru.xcodeproj`. No API keys, accounts, or third-party packages are needed. Unsigned builds have `CODE_SIGNING_ALLOWED=NO`; use your development team and set it to YES for direct device installation. The IPA must be signed before sideloading.
+Release iPhone device, Debug iPhone simulator, and universal Release Mac Catalyst builds pass with Xcode 26.6. Calendar was checked against live data on Mac, including switching weekdays and the saved-show filter. Automated Foundation checks cover schedule parsing and malformed responses, persistent cache reuse/offline fallback, prompt suppression/day rollover, duplicate check-ins, streak persistence, journal/collection CRUD, v1/v2 migration, corruption protection, and DST boundaries.
 
-## Validation and build status
-
-Xcode 26.6 was reinstalled and the **iOS Release device build and Debug simulator build both passed**. The v3 app launched in an iPhone 17 Pro simulator; the redesigned Library and Daily Glow screens were visually checked. Journal, collection, persistence, migration, and streak behavior passed the Foundation checks described below. Full interactive coverage of every editor flow has not been performed.
-
-`Yoru-3.0-unsigned.ipa` is the iPhone/iPad arm64 build, version 3.0 (build 3), requiring iOS 26.0 or later and signing before installation. The packaged IPA passed ZIP integrity checks and includes the moon-and-yoru app icon.
-
-The Foundation model checks run with the installed Command Line Tools. They cover catalog decoding/caching plus journal creation/edit/delete, watch dates, ratings, multi-collection membership, persistence, v1/v2 migration, corruption protection, and streaks across gaps, midnight, and both DST transitions.
-
-```sh
-python3 Validation/run_checks.py
-# Optional live catalog integration checks:
-python3 Validation/run_checks.py --live
-```
-
-Extract `Yoru-3.0-source.zip` and open `Yoru.xcodeproj` in Xcode with iOS support to build or run the app. For direct installation, select your own development team and enable signing. No credentials or signing identities are bundled.
+Run `python3 Validation/run_checks.py`. The sanitized schedule fixture retains public structural samples only; no cookies, scripts, or session tokens. The optional `--live` flag also checks Kitsu catalog integration. Full interactive coverage of every journal editor has not been performed.
