@@ -1,6 +1,16 @@
-# Yoru 2.0
+# Yoru 3.0 — Journal & Daily Glow
 
 A native SwiftUI anime journal with a midnight palette, full-cover artwork, and iOS Liquid Glass navigation and controls.
+
+## New in 3.0
+
+- **Journal:** dated entries per anime, optional episode number, personal rating, mood, and spoiler flag. A reader hides spoiler bodies until revealed; entries can be edited or deleted.
+- **Watch history:** first-watched and finished dates, personal series rating, and planning/watching/completed/paused/dropped status.
+- **Collections:** named playlists/categories with a symbol and color. Shows can belong to multiple collections. Renaming preserves membership; deleting a collection preserves notes, shows, and progress.
+- **Daily Glow:** a Liquid Glass streak screen with current/best streak, seven-day activity row, and 28-day grid. Log an episode or save a new/changed journal entry to earn a local day. Historical dates do not backfill streaks. Unchanged saves do not earn a new day; undo and note deletion remove the associated credits. A streak ending yesterday remains active for today.
+- **Branding:** a 1024×1024 opaque app icon with a crescent moon and “yoru” wordmark. Reusable vector and renderer are in `Brand/`.
+
+Journal text, dates, collections, and activity are kept locally and are not sent to Kitsu. v3 uses a new local storage key and leaves the v2 backup untouched. Earlier progress has no activity timestamps, so it cannot earn retroactive streaks.
 
 ## Discover
 
@@ -24,17 +34,20 @@ Jikan was evaluated but its live API was unreachable during development. AniList
 
 ## Build and install
 
-Requires iOS 26.0 or later and Xcode with an iOS 26 SDK. Download and extract `Yoru-2.0-source.zip`, then open `Yoru.xcodeproj`. No API keys, accounts, or third-party packages are needed. Unsigned builds have `CODE_SIGNING_ALLOWED=NO`; use your development team and set it to YES for direct device installation. The IPA must be signed before sideloading.
+Requires iOS 26.0 or later and Xcode with an iOS 26 SDK. Extract `Yoru-3.0-source.zip` and open `Yoru.xcodeproj`. No API keys, accounts, or third-party packages are needed. Unsigned builds have `CODE_SIGNING_ALLOWED=NO`; use your development team and set it to YES for direct device installation. The IPA must be signed before sideloading.
 
-## Validation
+## Validation and build status
 
-Simulator and device builds are checked. `Validation/ModelChecks.swift` verifies actual API decoding, provider relationships, HTTPS links, legacy watchlist migration, persistence, episode bounds, Japan time conversion, cache/offline behavior, seasonal pagination queries, and provider filters. Pass `--live` to additionally fetch all pages of the current season and test global search and HIDIVE filtering.
+Xcode 26.6 was reinstalled and the **iOS Release device build and Debug simulator build both passed**. The v3 app launched in an iPhone 17 Pro simulator; the redesigned Library and Daily Glow screens were visually checked. Journal, collection, persistence, migration, and streak behavior passed the Foundation checks described below. Full interactive coverage of every editor flow has not been performed.
 
-From the extracted project root on macOS:
+`Yoru-3.0-unsigned.ipa` is the iPhone/iPad arm64 build, version 3.0 (build 3), requiring iOS 26.0 or later and signing before installation. The packaged IPA passed ZIP integrity checks and includes the moon-and-yoru app icon.
+
+The Foundation model checks run with the installed Command Line Tools. They cover catalog decoding/caching plus journal creation/edit/delete, watch dates, ratings, multi-collection membership, persistence, v1/v2 migration, corruption protection, and streaks across gaps, midnight, and both DST transitions.
 
 ```sh
-xcrun swiftc -swift-version 5 -parse-as-library Yoru/Anime.swift Yoru/Kitsu.swift Yoru/AnimeAPI.swift Yoru/Library.swift Validation/ModelChecks.swift -o /tmp/yoru-checks
-/tmp/yoru-checks Validation --live
+python3 Validation/run_checks.py
+# Optional live catalog integration checks:
+python3 Validation/run_checks.py --live
 ```
 
-The fixtures are recorded public Kitsu responses; no credentials or account information are included.
+Extract `Yoru-3.0-source.zip` and open `Yoru.xcodeproj` in Xcode with iOS support to build or run the app. For direct installation, select your own development team and enable signing. No credentials or signing identities are bundled.
