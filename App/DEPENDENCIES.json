@@ -1,0 +1,26 @@
+[
+  {
+    "package": "Nuke",
+    "revision": "0ead44350d2737db384908569c012fe67c421e4d"
+  },
+  {
+    "package": "SwiftSoup",
+    "revision": "32f5aea5af25d4229f3b1a72d6ed0edb3a12a03b"
+  },
+  {
+    "package": "Texture",
+    "revision": "6a6475db9bf9f7e04731ab60053c3ca4934c1ac6"
+  },
+  {
+    "package": "ZIPFoundation",
+    "revision": "02b6abe5f6eef7e3cbd5f247c5cc24e246efcfe0"
+  },
+  {
+    "package": "synchronized",
+    "revision": "85653e23270ec88ae19f8d494157769487e34aed"
+  },
+  {
+    "package": "wasm-interpreter-apple",
+    "revision": "f6103d81509202d87cf7e71aed8f7dcc5f927d57"
+  }
+]

@@ -1,0 +1,2 @@
+d3964cbaa738d5de97ec905199ed3a99f7d6a62424a1f7be7b57548c319f19c6  Yoru-4.0-Aidoku-unsigned.ipa
+be2f41cedbd6387559ac949c5003c9baee3f9fb4e5395d6150b78ed759ee3e17  Yoru-4.0-Aidoku-source.zip

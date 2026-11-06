@@ -1,0 +1,14 @@
+{
+  "foundationChecksPassed": 64,
+  "animeLibraryUnchangedAfterMangaReading": true,
+  "aidokuPreferenceDomain": "studio.yoru.embedded-aidoku",
+  "aidokuDatabaseDirectory": "Library/Application Support/Aidoku",
+  "liveSourceTest": "Komga v3, official public demo",
+  "chapterPages": 35,
+  "readerPageAdvanceVerified": "1 of 35 \u2192 2 of 35, rendered page 2",
+  "readerDismissalVerified": true,
+  "resumeReadingButtonVerified": true,
+  "animeDailyPopupVerified": true,
+  "separateSettingsAndReturnToYoruVerified": true,
+  "physicalDeviceSignulousTested": false
+}

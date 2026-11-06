@@ -1,0 +1,80 @@
+//
+//  SettingsAboutViewController.swift
+//  Aidoku (iOS)
+//
+//  Created by Skitty on 2/12/22.
+//
+
+import UIKit
+
+class SettingsAboutViewController: UITableViewController {
+
+    init() {
+        super.init(style: .insetGrouped)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        title = NSLocalizedString("ABOUT", comment: "")
+
+        if #available(iOS 15.0, *) {
+            tableView.sectionHeaderTopPadding = 0
+        }
+    }
+}
+
+// MARK: - Table View Data Source
+extension SettingsAboutViewController {
+
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        3
+    }
+
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        var cell: UITableViewCell? = tableView.dequeueReusableCell(withIdentifier: "AboutCell")
+        if cell == nil {
+            cell = UITableViewCell(style: .value1, reuseIdentifier: "AboutCell")
+        }
+
+        switch indexPath.row {
+        case 0:
+            cell?.textLabel?.text = NSLocalizedString("VERSION", comment: "")
+            cell?.detailTextLabel?.text = Optional("0.6.11")
+                                            ?? NSLocalizedString("UNKNOWN", comment: "")
+        case 1:
+            cell?.textLabel?.text = NSLocalizedString("BUILD", comment: "")
+            cell?.detailTextLabel?.text = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
+                                            ?? NSLocalizedString("UNKNOWN", comment: "")
+        case 2:
+            cell?.textLabel?.text = "Open-source notices"
+            cell?.detailTextLabel?.text = nil
+            cell?.accessoryType = .disclosureIndicator
+        default: break
+        }
+        cell?.detailTextLabel?.textColor = .secondaryLabel
+        cell?.selectionStyle = indexPath.row == 2 ? .default : .none
+
+        return cell ?? UITableViewCell()
+    }
+
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        guard indexPath.row == 2 else { return }
+        let controller = UIViewController()
+        controller.title = "Open-source notices"
+        let text = UITextView()
+        text.isEditable = false
+        text.font = .preferredFont(forTextStyle: .footnote)
+        text.textColor = .label
+        text.backgroundColor = .systemBackground
+        text.textContainerInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
+        if let url = Bundle.main.url(forResource: "LegalNotices", withExtension: "txt") { text.text = try? String(contentsOf: url, encoding: .utf8) }
+        controller.view = text
+        navigationController?.pushViewController(controller, animated: true)
+    }
+}
