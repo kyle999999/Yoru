@@ -16,6 +16,10 @@ enum HttpMethod: Int {
     case HEAD = 2
     case PUT = 3
     case DELETE = 4
+    case PATCH = 5
+    case OPTIONS = 6
+    case CONNECT = 7
+    case TRACE = 8
 }
 
 class WasmResponseObject: KVCObject {
@@ -79,6 +83,7 @@ class WasmNet: WasmImports {
     var passedRequests: Int = 0
 
     var storedResponse: WasmResponseObject?
+    var lastResponseSummary: String?
 
     init(globalStore: WasmGlobalStore) {
         self.globalStore = globalStore
@@ -145,14 +150,32 @@ extension WasmNet {
         EmbeddedNetwork.shared.session.dataTask(with: request) { data, response, error in
             self.incrementRequest()
 
-            let headers = ((response as? HTTPURLResponse)?.allHeaderFields as? [String: String]) ?? [:]
+            let httpResponse = response as? HTTPURLResponse
+            let server = httpResponse?.value(forHTTPHeaderField: "Server")?.lowercased()
             let code = (response as? HTTPURLResponse)?.statusCode ?? -1
 
+            if let error {
+                LogManager.logger.error("[\(self.globalStore.id)] network \(request.url?.host ?? "unknown"): \(error.localizedDescription)")
+            } else if !(200..<300).contains(code) {
+                // Never log request queries, bodies, headers or cookies (may contain credentials).
+                LogManager.logger.error("[\(self.globalStore.id)] HTTP \(code) from \(request.url?.host ?? "unknown")")
+            }
+            self.lastResponseSummary = "HTTP \(code), \(data?.count ?? 0) bytes, \(httpResponse?.value(forHTTPHeaderField: "Content-Type") ?? "unknown type") from \(response?.url?.host ?? "unknown")"
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("--source-compatibility-probe") {
+                LogManager.logger.log("[\(self.globalStore.id)] \(self.lastResponseSummary!)")
+            }
+            #endif
+            // Keep the original failure if the challenge cannot be resolved.
+            self.storedResponse = WasmResponseObject(data: data, response: response, error: error)
             // check for cloudflare block
-            if cloudflare && headers["Server"] == "cloudflare" && (code == 503 || code == 403 || code == 429) {
+            let browserVerification = response?.url?.path == "/edge/challenge"
+                && response?.url?.host == "mangadex.org"
+                && request.url?.host == "api.mangadex.org"
+            if cloudflare && (browserVerification || (server == "cloudflare" && (code == 503 || code == 403 || code == 429))) {
                 DispatchQueue.main.async {
                     let request = request
-                    let handler = WasmNetWebViewHandler(netModule: self, request: request)
+                    let handler = WasmNetWebViewHandler(netModule: self, request: request, browserVerification: browserVerification)
                     handler.load()
                 }
             } else {
@@ -240,16 +263,9 @@ extension WasmNet {
         { descriptor in
             guard let request = self.globalStore.requests[descriptor] else { return }
             let url: URL?
-            // iOS 17 encodes by default the url string causing double encoded characters
-            if #available(iOS 17.0, *) {
-                // it seems if we pass a valid RFC 3986 url string to URL() it behaves the same as on iOS 16
-                let urlEncoded = request.URL?
-                    .removingPercentEncoding?
-                    .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-                url = URL(string: urlEncoded ?? "", encodingInvalidCharacters: false)
-            } else {
-                url = URL(string: request.URL ?? "")
-            }
+            // URL preserves existing percent escapes. Decoding first changes encoded separators
+            // such as %26 and %2B into query syntax and corrupts signed URLs.
+            url = URL(string: request.URL ?? "")
             guard let url else { return }
 
             var urlRequest = URLRequest(url: url)
@@ -267,6 +283,10 @@ extension WasmNet {
             case .HEAD: urlRequest.httpMethod = "HEAD"
             case .PUT: urlRequest.httpMethod = "PUT"
             case .DELETE: urlRequest.httpMethod = "DELETE"
+            case .PATCH: urlRequest.httpMethod = "PATCH"
+            case .OPTIONS: urlRequest.httpMethod = "OPTIONS"
+            case .CONNECT: urlRequest.httpMethod = "CONNECT"
+            case .TRACE: urlRequest.httpMethod = "TRACE"
             default: break
             }
 
@@ -300,7 +320,7 @@ extension WasmNet {
             if let response = self.globalStore.requests[descriptor]?.response,
                let data = response.data,
                response.bytesRead + Int(size) <= data.count {
-                let result = Array(data.dropLast(data.count - Int(size) - response.bytesRead))
+                let result = Array(data.dropFirst(response.bytesRead).prefix(Int(size)))
                 self.globalStore.write(bytes: result, offset: buffer)
                 self.globalStore.requests[descriptor]?.response?.bytesRead += Int(size)
             }

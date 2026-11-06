@@ -70,12 +70,13 @@ class BrowseViewModel {
         unfilteredExternalSources = await withTaskGroup(of: [ExternalSourceInfo]?.self) { group in
             for url in SourceManager.shared.sourceLists {
                 // load sources from list
-                let url = url.pathExtension.isEmpty ? url : url.deletingLastPathComponent()
+                let indexURL = SourceManager.repositoryIndexURL(url)
+                let baseURL = SourceManager.repositoryBaseURL(url)
                 group.addTask {
-                    guard var sources = await SourceManager.shared.loadSourceList(url: url) else { return nil }
+                    guard var sources = await SourceManager.shared.loadSourceList(url: indexURL) else { return nil }
                     // set source url in external infos
                     for index in sources.indices {
-                        sources[index].sourceUrl = url
+                        sources[index].sourceUrl = baseURL
                     }
                     return sources
                 }

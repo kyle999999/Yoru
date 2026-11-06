@@ -173,6 +173,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
 
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--source-compatibility-probe") {
+            Task { await SourceCompatibilityProbe.run() }
+        }
+        #endif
         return true
     }
 

@@ -26,7 +26,9 @@ extension URLSession {
 
     func download(for request: URLRequest) async throws -> URL {
         if #available(iOS 15.0, *), #available(macOS 12.0, *) {
-            let (data, _) = try await self.download(for: request, delegate: nil)
+            let (data, response) = try await self.download(for: request, delegate: nil)
+            do { try SourceHTTPValidation.validate(response) }
+            catch { try? FileManager.default.removeItem(at: data); throw error }
             return data
         } else {
             let data: URL = try await withCheckedThrowingContinuation({ continuation in
@@ -67,10 +69,11 @@ extension URLSession {
 
     func object<T: Codable>(from req: URLRequest) async throws -> T {
         // let start = DispatchTime.now()
-        let (data, _) = try await self.data(for: req)
+        let (data, response) = try await self.data(for: req)
+        try SourceHTTPValidation.validate(response)
         // let end = DispatchTime.now()
         // print("got data (took \(Double(end.uptimeNanoseconds - start.uptimeNanoseconds) / 1_000_000_000)s)")
-        let response = try JSONDecoder().decode(T.self, from: data)
-        return response
+        let object = try JSONDecoder().decode(T.self, from: data)
+        return object
     }
 }

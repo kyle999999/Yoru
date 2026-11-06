@@ -11,9 +11,12 @@ class WasmNetWebViewHandler: NSObject, WKNavigationDelegate {
 
     var netModule: WasmNet
     var request: URLRequest
+    let browserVerification: Bool
 
     lazy var webView: WKWebView = {
-        let webView = WKWebView(frame: .zero)
+        let config = WKWebViewConfiguration()
+        config.websiteDataStore = WKWebsiteDataStore(forIdentifier: UUID(uuidString: "8E8834F8-18A8-4EC8-B965-ED03751F2446")!)
+        let webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = self
         webView.customUserAgent = request.value(forHTTPHeaderField: "User-Agent")
         webView.load(request)
@@ -31,9 +34,10 @@ class WasmNetWebViewHandler: NSObject, WKNavigationDelegate {
         popup?.presentingViewController != nil
     }
 
-    init(netModule: WasmNet, request: URLRequest) {
+    init(netModule: WasmNet, request: URLRequest, browserVerification: Bool = false) {
         self.netModule = netModule
         self.request = request
+        self.browserVerification = browserVerification
     }
 
     func load() {
@@ -56,11 +60,12 @@ class WasmNetWebViewHandler: NSObject, WKNavigationDelegate {
         ])
 
         // timeout after 12s if bypass doesn't work
-        perform(#selector(timeout), with: nil, afterDelay: 12)
+        perform(#selector(timeout), with: nil, afterDelay: browserVerification ? 30 : 12)
     }
 
     func openWebViewPopup() {
         NSObject.cancelPreviousPerformRequests(withTarget: self)
+        perform(#selector(timeout), with: nil, afterDelay: 90)
         webView.removeFromSuperview()
         popup?.dismiss(animated: true)
 
@@ -90,12 +95,16 @@ class WasmNetWebViewHandler: NSObject, WKNavigationDelegate {
         if !done {
             done = true
             webView.removeFromSuperview()
+            popup?.dismiss(animated: true)
+            LogManager.logger.error("[\(netModule.globalStore.id)] website challenge timed out; original HTTP response retained")
             netModule.semaphore.signal()
         }
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        WKWebsiteDataStore.default().httpCookieStore.getAllCookies { webViewCookies in
+        guard !done else { return }
+        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { webViewCookies in
+            guard !self.done else { return }
             guard let url = self.request.url else { return }
 
             // check for old (expired) clearance cookie
@@ -118,16 +127,20 @@ class WasmNetWebViewHandler: NSObject, WKNavigationDelegate {
             #endif
 
             // check for clearance cookie
-            guard webViewCookies.contains(where: {
+            let browserVerified = self.browserVerification
+                && webView.url?.host == url.host
+                && webView.url?.path != "/edge/challenge"
+            guard browserVerified || (!self.browserVerification && webViewCookies.contains(where: {
                 $0.name == "cf_clearance" &&
                 $0.value != oldCookie?.value ?? "" &&
                 ($0.domain.contains(url.host ?? "") || (url.host?.contains($0.domain) ?? false))
-            }) else {
+            })) else {
                 return
             }
 
             webView.removeFromSuperview()
             self.done = true
+            NSObject.cancelPreviousPerformRequests(withTarget: self)
             #if !os(OSX)
             self.popup?.dismiss(animated: true)
             #endif
@@ -140,6 +153,7 @@ class WasmNetWebViewHandler: NSObject, WKNavigationDelegate {
 
             // re-send request
             EmbeddedNetwork.shared.session.dataTask(with: self.request) { data, response, error in
+                self.netModule.lastResponseSummary = "HTTP \((response as? HTTPURLResponse)?.statusCode ?? -1), \(data?.count ?? 0) bytes, \((response as? HTTPURLResponse)?.value(forHTTPHeaderField: "Content-Type") ?? "unknown type") from \(response?.url?.host ?? "unknown")"
                 self.netModule.storedResponse = WasmResponseObject(data: data, response: response, error: error)
                 self.netModule.incrementRequest()
                 self.netModule.semaphore.signal()

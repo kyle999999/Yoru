@@ -41,7 +41,7 @@ extension CoreDataManager {
     @discardableResult
     func createSource(source: Source, context: NSManagedObjectContext? = nil) -> SourceObject {
         let context = context ?? self.context
-        let object = SourceObject(context: context)
+        let object = getSource(id: source.id, context: context) ?? SourceObject(context: context)
         object.load(from: source)
         return object
     }

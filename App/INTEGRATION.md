@@ -1,6 +1,6 @@
 # Integration provenance and changes
 
-Base: Aidoku v0.6.11, `0fd6ee2847f06bdc0354c91345cc2f976506cb16`, GPLv3. Yoru host: 3.1, combined version 4.0 build 5. This modified build is not distributed or endorsed by Aidoku’s original developer.
+Base: Aidoku v0.6.11, `0fd6ee2847f06bdc0354c91345cc2f976506cb16`, GPLv3. Yoru host: 3.1, combined version 4.0.1 build 6. This modified build is not distributed or endorsed by Aidoku’s original developer.
 
 Yoru lives in Yoru/. The original GPL Aidoku source remains in Shared/ and iOS/. Original artwork is retained in OriginalBrand/. The app product name, bundle identifier, icon, and localized display name remain Yoru. The upstream explicit Xcode source/resource lists are retained; two synchronized groups add the host and integration adapter. Restricted AidokuRunner code is excluded.
 
@@ -11,3 +11,5 @@ Integration adapters establish a second same-app window for Aidoku’s actual na
 Aidoku defaults, network session/cookies/cache, SQLite paths, files, backups, and source preferences are namespaced separately. Source import preserves local input archives. Compatibility/version checks use the legacy engine’s real version. Source Lists explains legacy compatibility and offers an explicit community-list setup button. No repository is auto-added to a clean production install.
 
 Device signing is disabled for export; private iCloud/push entitlements are omitted and CloudKit mirroring is disabled. Existing sideload warnings remain. Swift optimization is disabled for the validation/re-signable Release build. No API keys, account sessions, signing certificates, or physical-device data are distributed.
+
+For the 4.0.1 runtime/network/install changes and upstream ABI comparison, see [SOURCE_COMPATIBILITY.md](SOURCE_COMPATIBILITY.md).

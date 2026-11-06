@@ -1,0 +1,182 @@
+[
+  {
+    "result" : "34 entries",
+    "source" : "repository",
+    "stage" : "load"
+  },
+  {
+    "result" : "starting",
+    "source" : "multi.komga",
+    "stage" : "install"
+  },
+  {
+    "result" : "installed v3",
+    "source" : "multi.komga",
+    "stage" : "install"
+  },
+  {
+    "result" : "true",
+    "source" : "runtime",
+    "stage" : "chunked response regression"
+  },
+  {
+    "result" : "7 manga",
+    "source" : "multi.komga",
+    "stage" : "browse"
+  },
+  {
+    "result" : "1 manga",
+    "source" : "multi.komga",
+    "stage" : "search"
+  },
+  {
+    "result" : "Space Adventures",
+    "source" : "multi.komga",
+    "stage" : "details"
+  },
+  {
+    "result" : "4 chapters",
+    "source" : "multi.komga",
+    "stage" : "chapters"
+  },
+  {
+    "result" : "36 pages",
+    "source" : "multi.komga",
+    "stage" : "pages"
+  },
+  {
+    "result" : "HTTP 200, 453363 bytes, decoded=true",
+    "source" : "multi.komga",
+    "stage" : "image"
+  },
+  {
+    "result" : "starting",
+    "source" : "multi.xkcd",
+    "stage" : "install"
+  },
+  {
+    "result" : "installed v1",
+    "source" : "multi.xkcd",
+    "stage" : "install"
+  },
+  {
+    "result" : "1 manga",
+    "source" : "multi.xkcd",
+    "stage" : "browse"
+  },
+  {
+    "result" : "not offered by this extension",
+    "source" : "multi.xkcd",
+    "stage" : "search"
+  },
+  {
+    "result" : "xkcd",
+    "source" : "multi.xkcd",
+    "stage" : "details"
+  },
+  {
+    "result" : "3319 chapters",
+    "source" : "multi.xkcd",
+    "stage" : "chapters"
+  },
+  {
+    "result" : "2 pages",
+    "source" : "multi.xkcd",
+    "stage" : "pages"
+  },
+  {
+    "result" : "HTTP 200, 34984 bytes, decoded=true",
+    "source" : "multi.xkcd",
+    "stage" : "image"
+  },
+  {
+    "result" : "starting",
+    "source" : "multi.webtoon",
+    "stage" : "install"
+  },
+  {
+    "result" : "installed v3",
+    "source" : "multi.webtoon",
+    "stage" : "install"
+  },
+  {
+    "result" : "615 manga",
+    "source" : "multi.webtoon",
+    "stage" : "browse"
+  },
+  {
+    "result" : "14 manga",
+    "source" : "multi.webtoon",
+    "stage" : "search"
+  },
+  {
+    "result" : "If You So Desire My Despair",
+    "source" : "multi.webtoon",
+    "stage" : "details"
+  },
+  {
+    "result" : "2 chapters",
+    "source" : "multi.webtoon",
+    "stage" : "chapters"
+  },
+  {
+    "result" : "66 pages",
+    "source" : "multi.webtoon",
+    "stage" : "pages"
+  },
+  {
+    "result" : "HTTP 200, 150368 bytes, decoded=true",
+    "source" : "multi.webtoon",
+    "stage" : "image"
+  },
+  {
+    "result" : "starting",
+    "source" : "multi.mangadex",
+    "stage" : "install"
+  },
+  {
+    "result" : "installed v8",
+    "source" : "multi.mangadex",
+    "stage" : "install"
+  },
+  {
+    "result" : "20 manga",
+    "source" : "multi.mangadex",
+    "stage" : "browse"
+  },
+  {
+    "result" : "20 manga",
+    "source" : "multi.mangadex",
+    "stage" : "search"
+  },
+  {
+    "result" : "The Ghostly Doctor",
+    "source" : "multi.mangadex",
+    "stage" : "details"
+  },
+  {
+    "result" : "446 chapters",
+    "source" : "multi.mangadex",
+    "stage" : "chapters"
+  },
+  {
+    "result" : "5 pages",
+    "source" : "multi.mangadex",
+    "stage" : "pages"
+  },
+  {
+    "result" : "HTTP 200, 3785040 bytes, decoded=true",
+    "source" : "multi.mangadex",
+    "stage" : "image"
+  },
+  {
+    "result" : "rejected=true, original preserved=true, installed version=3",
+    "source" : "multi.webtoon",
+    "stage" : "incompatible update rollback"
+  },
+  {
+    "result" : "finished",
+    "source" : "probe",
+    "stage" : "complete"
+  }
+]

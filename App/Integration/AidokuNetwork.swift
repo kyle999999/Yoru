@@ -26,6 +26,8 @@ public final class EmbeddedNetwork: @unchecked Sendable {
                 if let cookie = HTTPCookie(properties: properties) { cookieStorage.setCookie(cookie) }
             }
         }
+        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForResource = 60
         config.urlCache = cache
         config.httpCookieStorage = cookieStorage
         session = URLSession(configuration: config)
@@ -33,6 +35,8 @@ public final class EmbeddedNetwork: @unchecked Sendable {
     }
     public func configuration() -> URLSessionConfiguration {
         let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForResource = 60
         config.urlCache = cache
         config.httpCookieStorage = cookieStorage
         return config

@@ -1,4 +1,4 @@
-# Yoru 4.0 — aidoku
+# Yoru 4.0.1 — aidoku
 
 Yoru’s anime tracker plus a **separate native manga section** named **aidoku**, in one iPhone/iPad app.
 
@@ -46,7 +46,7 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
   SWIFT_OPTIMIZATION_LEVEL=-Onone ENABLE_DEBUG_DYLIB=NO ENABLE_PREVIEWS=NO CODE_SIGNING_ALLOWED=NO build
 ```
 
-The distributed IPA is an unsigned arm64 device build, version **4.0 (5)**. It uses Release configuration with Swift optimization disabled to avoid an expensive upstream optimization pass; it has no development-signing entitlement requirement. Re-sign with Signulous. **Use the same signing identity/application identifier as your previous Yoru installation, and do not uninstall the old app first**, to preserve its iOS data container. Actual Signulous signing and a physical iPhone installation have not been tested here.
+The distributed IPA is an unsigned arm64 device build, version **4.0.1 (6)**. It uses Release configuration with Swift optimization disabled to avoid an expensive upstream optimization pass; it has no development-signing entitlement requirement. Re-sign with Signulous. **Use the same signing identity/application identifier as your previous Yoru installation, and do not uninstall the old app first**, to preserve its iOS data container. Actual Signulous signing and a physical iPhone installation have not been tested here.
 
 Original developer iCloud/CloudKit entitlements are not usable in this re-signable integration. Aidoku’s iCloud option stays unavailable; local persistence, downloads, and backups remain available. This update targets iPhone/iPad; the previous Yoru Mac release is unchanged.
 
@@ -59,3 +59,5 @@ The combined application is GPLv3; preserve `LICENSE`, original authorship heade
 ## Validation
 
 Foundation regression checks: `python3 Validation/run_checks.py`. Isolation check instructions and build/smoke-test results are recorded in `VALIDATION.md`. Successful builds do not guarantee that every provider works. Full physical-device, exhaustive reader gesture, tracker-login, and background-download coverage has not been performed.
+
+Source compatibility patch: [findings, fixes, actual live tests and limitations](SOURCE_COMPATIBILITY.md).

@@ -104,6 +104,10 @@ class Source: Identifiable {
     init(from url: URL) throws {
         self.url = url
         let data = try Data(contentsOf: url.appendingPathComponent("source.json"))
+        if let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let info = object["info"] as? [String: Any], info["lang"] == nil, info["languages"] != nil {
+            throw CompatibilityError.modernSourceABI
+        }
         manifest = try JSONDecoder().decode(SourceManifest.self, from: data)
 
         let bytes = try Data(contentsOf: url.appendingPathComponent("main.wasm"))
@@ -117,6 +121,13 @@ class Source: Identifiable {
 
         handlesImageRequests = (try? vm.function(named: "modify_image_request")) != nil
         initialize()
+    }
+
+    enum CompatibilityError: LocalizedError {
+        case modernSourceABI
+        var errorDescription: String? {
+            "This extension uses the Aidoku 0.7+ source ABI. The integrated GPL legacy runtime cannot execute it. The existing installed extension was preserved."
+        }
     }
 
     func toInfo() -> SourceInfo2 {
@@ -333,15 +344,15 @@ extension Source {
     func fetchSearchManga(query: String, filters: [FilterBase] = [], page: Int = 1) async throws -> MangaPageResult {
         var newFilters = filters
         newFilters.append(TitleFilter(value: query))
-        return await actor.getMangaList(filters: newFilters, page: page)
+        return try await actor.getMangaList(filters: newFilters, page: page)
     }
 
     func getMangaList(filters: [FilterBase], page: Int = 1) async throws -> MangaPageResult {
-        await actor.getMangaList(filters: filters, page: page)
+        try await actor.getMangaList(filters: filters, page: page)
     }
 
     func getMangaListing(listing: Listing, page: Int = 1) async throws -> MangaPageResult {
-        await actor.getMangaListing(listing: listing, page: page)
+        try await actor.getMangaListing(listing: listing, page: page)
     }
 
     func getMangaDetails(manga: Manga) async throws -> Manga {
@@ -349,7 +360,7 @@ extension Source {
     }
 
     func getChapterList(manga: Manga) async throws -> [Chapter] {
-        await actor.getChapterList(manga: manga)
+        try await actor.getChapterList(manga: manga)
     }
 
     func getPageList(chapter: Chapter, skipDownloadedCheck: Bool = false) async throws -> [Page] {
@@ -358,7 +369,7 @@ extension Source {
                 return await DownloadManager.shared.getDownloadedPages(for: chapter)
             }
         }
-        return await actor.getPageList(chapter: chapter)
+        return try await actor.getPageList(chapter: chapter)
     }
 
     func getPageListWithoutContents(chapter: Chapter) async throws -> [Page] {
@@ -366,7 +377,7 @@ extension Source {
             return await DownloadManager.shared.getDownloadedPagesWithoutContents(for: chapter)
         }
 
-        return await actor.getPageList(chapter: chapter)
+        return try await actor.getPageList(chapter: chapter)
     }
 
     struct ImageRequest: Sendable {

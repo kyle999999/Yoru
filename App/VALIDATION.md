@@ -1,4 +1,8 @@
-# Validation
+# Current patch validation
+
+See [SOURCE_COMPATIBILITY.md](SOURCE_COMPATIBILITY.md) for the 4.0.1 live test matrix and limits.
+
+# Historical 4.0 validation
 
 - Xcode 26.6, iOS 26.5 SDK: Debug arm64 simulator and Release arm64 device builds pass. Export uses unsigned Release configuration with Swift optimization disabled and preview/debug dylibs disabled.
 - 63 original Foundation checks plus one Aidoku isolation check pass (64 total). They cover anime catalog/cache, migration, journals, collections, date validation, streaks/DST, and reset isolation.
