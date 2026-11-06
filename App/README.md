@@ -1,4 +1,4 @@
-# Yoru 4.1 — current community sources
+# Yoru 4.1.1 — current community sources
 
 This is the native iPhone/iPad project for Yoru (iOS 26+), combining the anime tracker with its separate aidoku section. Build scheme **Aidoku (iOS)** produces **Yoru**, bundle `studio.yoru.Yoru`.
 
@@ -17,6 +17,6 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
   SWIFT_OPTIMIZATION_LEVEL=-Onone build
 ```
 
-The unsigned IPA is version **4.1 (7)**. It requires Signulous or another signer. Preserve the same signing/application identifier and update without uninstalling to retain app data. Signing and physical-device installation are not verified here.
+The unsigned IPA is version **4.1.1 (8)**. It requires Signulous or another signer. Preserve the same signing/application identifier and update without uninstalling to retain app data. Signing and physical-device installation are not verified here.
 
 Use Validation/run_checks.py for the 63 anime model checks. Additional source/runtime validation is described in SOURCE_COMPATIBILITY.md. Debug-only probes are opt-in launch arguments and absent from the release executable.

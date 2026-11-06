@@ -1,4 +1,4 @@
-# Current community sources — Yoru 4.1 (7)
+# Current community sources — Yoru 4.1.1 (8)
 
 ## What changed
 
@@ -36,7 +36,7 @@ The repository contained **146 packages** requiring **74 distinct host imports**
 | MangaPlus v6 | Pass | 20 / 1 | 12 / 2 | Decrypted by source and decoded |
 | MangaFire v8 | Pass | 50 / 50 | 34 / 25 | CDN TLS failure in this environment |
 
-MangaPlus was also loaded through the **existing ReaderPageView/Nuke pipeline**, which returned success. Its decrypted first page was visibly rendered in the unchanged full-screen native reader with the glass toolbar. The final native probe is [modern-native-reader-results.json](Validation/modern-native-reader-results.json). The live summary combines the observed probe runs; it is not a claim that all 146 websites were browsed.
+MangaPlus was also loaded through the **existing ReaderPageView/Nuke pipeline**, which returned success. Its decrypted first page was visibly rendered in the unchanged full-screen native reader with the glass toolbar. A cold-process cover reload also passed; cover routes retain their source/original URL so database and backup references are reconstructible. The final native probe is [modern-native-reader-results.json](Validation/modern-native-reader-results.json). The live summary combines the observed probe runs; it is not a claim that all 146 websites were browsed.
 
 MangaFire's page list succeeded, but its mfcdn3.xyz image endpoints failed TLS negotiation. An independent TLS client outside the app failed too. This remains unresolved and may be provider/CDN/network related; the site is not declared globally unavailable. The extension is not marked as a successful image-loading test.
 

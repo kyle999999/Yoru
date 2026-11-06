@@ -258,13 +258,28 @@ final class ModernPageProtocol: URLProtocol {
         let input = source.id + chapter + String(index) + String(describing: content["URL"])
         let key = SHA256.hash(data: Data(input.utf8)).map { String(format: "%02x", $0) }.joined()
         lock.lock(); entries[key] = Entry(source: source, content: content); lock.unlock()
-        return URL(string: "yoru-page://image/\(key)")!
+        var address = URLComponents(string: "yoru-page://image/\(key)")!
+        if content["Cover"] as? Bool == true, let original = content["URL"] as? String {
+            // Covers are persisted in the manga database and backups. Their route must
+            // remain reconstructible after this process's in-memory registry is gone.
+            address.queryItems = [URLQueryItem(name: "source", value: source.id), URLQueryItem(name: "image", value: original)]
+        }
+        return address.url!
     }
     override class func canInit(with request: URLRequest) -> Bool { request.url?.scheme == "yoru-page" }
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
         guard let url = request.url else { return }
-        Self.lock.lock(); let entry = Self.entries[url.lastPathComponent]; Self.lock.unlock()
+        Self.lock.lock(); var entry = Self.entries[url.lastPathComponent]; Self.lock.unlock()
+        if entry == nil {
+            let query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+            if let sourceID = query.first(where: { $0.name == "source" })?.value,
+               let original = query.first(where: { $0.name == "image" })?.value,
+               let scheme = URL(string: original)?.scheme, ["https", "http"].contains(scheme),
+               let source = SourceManager.shared.source(for: sourceID)?.modern {
+                entry = Entry(source: source, content: ["URL": original, "Cover": true])
+            }
+        }
         guard let entry else { client?.urlProtocol(self, didFailWithError: URLError(.resourceUnavailable)); return }
         operationTask = Task.detached { [weak self] in
             guard let self else { return }

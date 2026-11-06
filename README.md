@@ -1,8 +1,8 @@
 # Yoru — anime tracker + separate aidoku section
 
-Yoru 4.1 adds a native runtime for the **current [Aidoku community repository](https://aidoku-community.github.io/sources/)** while retaining the existing anime tracker, separate manga data, native layouts and Liquid Glass reader.
+Yoru 4.1.1 adds a native runtime for the **current [Aidoku community repository](https://aidoku-community.github.io/sources/)** while retaining the existing anime tracker, separate manga data, native layouts and Liquid Glass reader.
 
-Download the unsigned iPhone/iPad IPA and complete corresponding source from [v4.1.0 releases](https://github.com/kyle999999/Yoru/releases/tag/v4.1.0). Requires iOS 26+ and signing, such as Signulous. Update with the same app identifier/signing setup without uninstalling to preserve data. Physical-device installation/signing were not tested here.
+Download the unsigned iPhone/iPad IPA and complete corresponding source from [v4.1.1 releases](https://github.com/kyle999999/Yoru/releases/tag/v4.1.1). Requires iOS 26+ and signing, such as Signulous. Update with the same app identifier/signing setup without uninstalling to preserve data. Physical-device installation/signing were not tested here.
 
 **146/146 current source packages instantiated**, and all 146 native manifests decoded. Current WEBTOON v5, MangaDex v14, WeebCentral v8 and MangaPlus v6 passed browsing/search/chapters/page-image tests. MangaPlus also visibly rendered through the existing native reader. MangaFire v8 loaded its catalog and chapters but its CDN images failed TLS negotiation from this environment. Other websites and authenticated access were not exhaustively tested. [Full evidence and limitations](App/SOURCE_COMPATIBILITY.md).
 

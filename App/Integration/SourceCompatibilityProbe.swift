@@ -16,6 +16,14 @@ enum SourceCompatibilityProbe {
         try? await Task.sleep(nanoseconds: 1_000_000_000)
         await AidokuIntegration.present()
         let manager = SourceManager.shared
+        if ProcessInfo.processInfo.arguments.contains("--cover-probe") {
+            do {
+                guard let address = AidokuStorage.defaults.string(forKey: "Validation.coverRoute"), let url = URL(string: address) else { return }
+                let (data, _) = try await EmbeddedNetwork.shared.session.data(for: URLRequest(url: url))
+                record("cover", "loaded after process relaunch", String(UIImage(data: data) != nil))
+            } catch { record("cover", "loaded after process relaunch", String(describing: error)) }
+            return
+        }
         let base = URL(string: "https://aidoku-community.github.io/sources/")!
         guard let list = await manager.loadSourceList(url: base) else { record("repository", "load", "failed"); return }
         record("repository", "load", "\(list.count) entries")
@@ -67,6 +75,7 @@ enum SourceCompatibilityProbe {
                 }
                 let details = try await source.getMangaDetails(manga: manga)
                 record(id, "details", details.title ?? "missing title")
+                if id == "multi.mangaplus", let cover = details.coverUrl { AidokuStorage.defaults.set(cover.absoluteString, forKey: "Validation.coverRoute") }
                 let chapters = try await source.getChapterList(manga: details)
                 record(id, "chapters", "\(chapters.count) chapters")
                 guard let chapter = chapters.first else { continue }
