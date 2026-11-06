@@ -1,14 +1,26 @@
 {
-  "foundationChecksPassed": 64,
-  "animeLibraryUnchangedAfterMangaReading": true,
-  "aidokuPreferenceDomain": "studio.yoru.embedded-aidoku",
-  "aidokuDatabaseDirectory": "Library/Application Support/Aidoku",
-  "liveSourceTest": "Komga v3, official public demo",
-  "chapterPages": 35,
-  "readerPageAdvanceVerified": "1 of 35 \u2192 2 of 35, rendered page 2",
-  "readerDismissalVerified": true,
-  "resumeReadingButtonVerified": true,
-  "animeDailyPopupVerified": true,
-  "separateSettingsAndReturnToYoruVerified": true,
-  "physicalDeviceSignulousTested": false
+  "version": "4.1",
+  "build": 7,
+  "packageLoad": {
+    "passed": 146,
+    "total": 146
+  },
+  "nativeManifestDecode": {
+    "passed": 146,
+    "total": 146
+  },
+  "animeChecks": 63,
+  "liveImageSuccess": [
+    "multi.webtoon-v5",
+    "multi.mangadex-v14",
+    "en.weebcentral-v8",
+    "multi.mangaplus-v6"
+  ],
+  "remainingFailure": "MangaFire v8 CDN TLS negotiation in this environment",
+  "notVerified": [
+    "all live websites",
+    "personal account authentication",
+    "physical iPhone installation",
+    "Signulous signing"
+  ]
 }

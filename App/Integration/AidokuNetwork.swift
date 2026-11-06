@@ -28,6 +28,7 @@ public final class EmbeddedNetwork: @unchecked Sendable {
         }
         config.timeoutIntervalForRequest = 30
         config.timeoutIntervalForResource = 60
+        config.protocolClasses = [ModernPageProtocol.self] + (config.protocolClasses ?? [])
         config.urlCache = cache
         config.httpCookieStorage = cookieStorage
         session = URLSession(configuration: config)
@@ -37,6 +38,7 @@ public final class EmbeddedNetwork: @unchecked Sendable {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 30
         config.timeoutIntervalForResource = 60
+        config.protocolClasses = [ModernPageProtocol.self] + (config.protocolClasses ?? [])
         config.urlCache = cache
         config.httpCookieStorage = cookieStorage
         return config

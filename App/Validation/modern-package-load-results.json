@@ -1,0 +1,3798 @@
+[
+  {
+    "id": "ar.aasq",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "ar.aasq",
+      "version": 2
+    },
+    "sha256": "e12f34f477515397cdf0ddf88870883a17168d1266dba5cd13f84ddf4975b59f"
+  },
+  {
+    "id": "en.aquamanga",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": false,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "en.aquamanga",
+      "version": 2
+    },
+    "sha256": "0dc16a0ec4f486ece6e6113a96a5424bf42722a136ce6f01ba42fb0e568cd5a1"
+  },
+  {
+    "id": "en.armageddon",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.armageddon",
+      "version": 5
+    },
+    "sha256": "8e79219875d205671f6fc15bc3d4fa3bdaa611ea709cf24d5205c771a7f41958"
+  },
+  {
+    "id": "en.asurascans",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": true,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": true,
+        "HandlesMigration": true
+      },
+      "key": "en.asurascans",
+      "version": 19
+    },
+    "sha256": "adb07abac9f57542d63292ade261bc6a6f4a57726e1e8addbcf3991dca177551"
+  },
+  {
+    "id": "en.athreascans",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.athreascans",
+      "version": 1
+    },
+    "sha256": "9521216b4dd242fd66e55cd4e0a82ef486bab1eeddb29b255467e30ba69434e7"
+  },
+  {
+    "id": "en.atsumaru",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": true,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.atsumaru",
+      "version": 1
+    },
+    "sha256": "16ec2d37fdcf81fe431baaac158b52a55e6c6003a98aa2799df7721b43297ada"
+  },
+  {
+    "id": "en.batcave",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": true,
+        "HandlesMigration": false
+      },
+      "key": "en.batcave",
+      "version": 3
+    },
+    "sha256": "a4b8e5311ed98f0cc3aa31550a8893afbc64fa136cbf9d757072535109f4caa7"
+  },
+  {
+    "id": "en.chikari",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.chikari",
+      "version": 3
+    },
+    "sha256": "da51d5bb42015cdc16371ed2f882420346e37eaa8c8eba3761eb4b1df76b10a0"
+  },
+  {
+    "id": "en.comix",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": true,
+        "HandlesMigration": false
+      },
+      "key": "en.comix",
+      "version": 27
+    },
+    "sha256": "1b6ca8bd8480b1ce23f5213c3a978704f15608a6393a6906b77e7369a12895c8"
+  },
+  {
+    "id": "en.dankefurslesen",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.dankefurslesen",
+      "version": 3
+    },
+    "sha256": "9548eaef009a36bb468fdfc0eec786b04308e7b2c5f2f03bb45b627458ae5f81"
+  },
+  {
+    "id": "en.drakescans",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.drakescans",
+      "version": 2
+    },
+    "sha256": "f7f3fbec2803ab683900332bf1f43ae0238ded9f512274238e3951763c799fac"
+  },
+  {
+    "id": "en.dynastyscans",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": true,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "en.dynastyscans",
+      "version": 4
+    },
+    "sha256": "34f1c56b7b9518907b9f0594c47e213c368d4b926b717e7cfa2023401943d0e3"
+  },
+  {
+    "id": "en.elftoon",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.elftoon",
+      "version": 3
+    },
+    "sha256": "462de0784524561be11a4c3c240be45f500557c14e89f5ee16e9b111d6aaabf9"
+  },
+  {
+    "id": "en.ezmanga",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.ezmanga",
+      "version": 2
+    },
+    "sha256": "a722d60b635bc7f31044e1b993a7326472301cbaec10d35272bc87888a6deb63"
+  },
+  {
+    "id": "en.firescans",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "en.firescans",
+      "version": 2
+    },
+    "sha256": "2fd5521fc204f89e85e28bf73327fc3d3de9c322586ef3c10da3b0932aa4901d"
+  },
+  {
+    "id": "en.flamecomics",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.flamecomics",
+      "version": 5
+    },
+    "sha256": "c411c66e4a71ed3c279e39ae451b7a8386fb5d6777b725da549f51494664aeac"
+  },
+  {
+    "id": "en.freewebnovel",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.freewebnovel",
+      "version": 3
+    },
+    "sha256": "bab65b71afd35093db6acae81b553a89c9c2d1435c9322f33071d565222dde45"
+  },
+  {
+    "id": "en.guya",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.guya",
+      "version": 2
+    },
+    "sha256": "67d75375ef96721521cb1dc0f6f5836d47a3dccdeee31b1438a1dbb028ca4c13"
+  },
+  {
+    "id": "en.hennoveltranslations",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.hennoveltranslations",
+      "version": 1
+    },
+    "sha256": "1cb2f9b5dcdab568cb4c28f5283ae8b7ebf51862c386cdbfcbb6bbcbf069a7a1"
+  },
+  {
+    "id": "en.hentai2read",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.hentai2read",
+      "version": 3
+    },
+    "sha256": "20582a8811ec0b0c802bc1f7ca3c9eb321442306afa6985744fd8c36ecf37398"
+  },
+  {
+    "id": "en.hivescans",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.hivescans",
+      "version": 2
+    },
+    "sha256": "cea51e1f3ef13d64123dc8955781501c33620184d3cc9e35c25177ed2b0207d5"
+  },
+  {
+    "id": "en.madokami",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.madokami",
+      "version": 1
+    },
+    "sha256": "7a5b63c141bb5919d53e6c352bd7776357adb8269ec06f391482d1808dc85e2a"
+  },
+  {
+    "id": "en.magusmanga",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.magusmanga",
+      "version": 2
+    },
+    "sha256": "68048d89aa43f287da3ed1c76eb4c7f285d521f7fc541bdb1ac77637123d3367"
+  },
+  {
+    "id": "en.mangabat",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.mangabat",
+      "version": 9
+    },
+    "sha256": "e4c275042333fffa06f7910fdadaef60d783bd80be478cf8b550c7d583eea6c5"
+  },
+  {
+    "id": "en.mangademon",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.mangademon",
+      "version": 7
+    },
+    "sha256": "8bce29104e0c5c3bf1cc5d1a1463e91e1cbb02d172de4957259f408c39032950"
+  },
+  {
+    "id": "en.mangadistrict",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.mangadistrict",
+      "version": 1
+    },
+    "sha256": "9ee1404993bb495267c7bbaca97852a47bfce0996b7ac55205e71986497d26e9"
+  },
+  {
+    "id": "en.mangago",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.mangago",
+      "version": 4
+    },
+    "sha256": "cc799d59892967b4484566fd879ea9ba40028ae78a66e1c93b5a7b2a0a608876"
+  },
+  {
+    "id": "en.mangak",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.mangak",
+      "version": 1
+    },
+    "sha256": "0d3f6c55a457c1a1cbb2288e66697d86a63554dc5e192cb3187f500b83bf80f9"
+  },
+  {
+    "id": "en.mangakakalot",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.mangakakalot",
+      "version": 5
+    },
+    "sha256": "245f808fd847d40ea76216813c79a31833b67e2d0e5ad72c860f827a9193003b"
+  },
+  {
+    "id": "en.manganato",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.manganato",
+      "version": 8
+    },
+    "sha256": "47daf5e9749a6b906b351151b8b4ad9fc5952148b463b0c510a840d99cf6d9c0"
+  },
+  {
+    "id": "en.manganelo",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.manganelo",
+      "version": 4
+    },
+    "sha256": "194418ec078b593cc37a7b444a88a91a789687332d33c369629a230458e85b7b"
+  },
+  {
+    "id": "en.mangareadorg",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "en.mangareadorg",
+      "version": 2
+    },
+    "sha256": "3576b4e4651e7a064313f2a8a5cb0dbfe80d07cd85a82c7f5e3933c088308f6b"
+  },
+  {
+    "id": "en.mangasect",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.mangasect",
+      "version": 1
+    },
+    "sha256": "93568cd10ef8ff6463aa84833034c76e47b7f0b066ed5b1bee85fb89c6705343"
+  },
+  {
+    "id": "en.mangatx",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.mangatx",
+      "version": 10
+    },
+    "sha256": "21daf1a4c57a98cfb30b7bfe8d2f22af49dbbfbdcb0b87761b1114fb1f83c7df"
+  },
+  {
+    "id": "en.manhuagold",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.manhuagold",
+      "version": 1
+    },
+    "sha256": "52710e4a4c1ebcc562e0e8a79939dcd842bcd773a51e9e82e037d6941c53de6e"
+  },
+  {
+    "id": "en.manhuaplusorg",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.manhuaplusorg",
+      "version": 1
+    },
+    "sha256": "cd001bbf7d375e8a5ad4ef6334ebdd4187775acddc77c6af6d44960d73222c94"
+  },
+  {
+    "id": "en.manhwax",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.manhwax",
+      "version": 5
+    },
+    "sha256": "df32489e48d3f5b9132aa5e4aa07c7417e8ac8b645692f837023423921703b4b"
+  },
+  {
+    "id": "en.novelbuddy",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.novelbuddy",
+      "version": 9
+    },
+    "sha256": "3d1f4397b456d0548a05ee66cf79f8ff1b0f1bc15bb82c60db1f4fb192d03a77"
+  },
+  {
+    "id": "en.nyxscans",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.nyxscans",
+      "version": 1
+    },
+    "sha256": "379eb9be5908bd97cb76824384e9b28a9d38dfa614e5a2ad21d3886e6a7d8881"
+  },
+  {
+    "id": "en.qiscans",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.qiscans",
+      "version": 2
+    },
+    "sha256": "88891d51cf5f36b21bf3148b9a0789a2694b217be3a470d3909a458b5a9ee760"
+  },
+  {
+    "id": "en.readcomicsonline",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.readcomicsonline",
+      "version": 3
+    },
+    "sha256": "7f87a3e81af5d13332c098b25ef062ade38beb369b924eade67ae82e28e83cc8"
+  },
+  {
+    "id": "en.rizzfables",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.rizzfables",
+      "version": 2
+    },
+    "sha256": "45cb8c8cc58bcb513cfb250f4b057d352cc4d1d30ffebd1a2d5f1a2173f0c370"
+  },
+  {
+    "id": "en.stonescape",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.stonescape",
+      "version": 2
+    },
+    "sha256": "51a2997b20392b56997914bf4e4f4e64309a824bbe568a976344c284cc2dc346"
+  },
+  {
+    "id": "en.tcbscans",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.tcbscans",
+      "version": 6
+    },
+    "sha256": "a4ca8e02f05897220ededadb3f418ea0bae081a5ed4468ef5642d884466777a4"
+  },
+  {
+    "id": "en.toonily",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "en.toonily",
+      "version": 10
+    },
+    "sha256": "2ef2738eebbab6859dc300a0f5fa5897bfbffbc29cb5cba4c16df9a67afc243e"
+  },
+  {
+    "id": "en.toonilyme",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.toonilyme",
+      "version": 3
+    },
+    "sha256": "33bb8c5dec7b3dd784385259dd4de6dbdd956988598051b8e4e4f26ff828da50"
+  },
+  {
+    "id": "en.toonkotsu",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": true,
+        "DynamicSettings": true,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.toonkotsu",
+      "version": 2
+    },
+    "sha256": "4adea653c9bb238d493ee8f8704ad2decc62104c7d690a829867ba36f7903eb4"
+  },
+  {
+    "id": "en.vortexscans",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.vortexscans",
+      "version": 3
+    },
+    "sha256": "6e6c1d066bab653ce51c913ce6b57c65ed7842e191d596172d4e141e489a6cd0"
+  },
+  {
+    "id": "en.webtoonxyz",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "en.webtoonxyz",
+      "version": 2
+    },
+    "sha256": "01f091df5418277f69bd8b6d762a31d07abdc48f49e969c4e49b438b62f3fac7"
+  },
+  {
+    "id": "en.weebcentral",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "en.weebcentral",
+      "version": 8
+    },
+    "sha256": "750dac6932ce9ed9153d8cc3516129cc1b2e620019d1427e429d8c3f70e409db"
+  },
+  {
+    "id": "es.catharsisworld",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "es.catharsisworld",
+      "version": 1
+    },
+    "sha256": "f8b3089e111a109360be5c8bf172e75cf6811b102e27cd8c9b8e5f8988ff1215"
+  },
+  {
+    "id": "es.eternalmangas",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "es.eternalmangas",
+      "version": 2
+    },
+    "sha256": "58a7deb2348988cb9ea5bef85638423da4f2199f8621862c7ea5a5c1cefc7063"
+  },
+  {
+    "id": "es.fandogamia",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "es.fandogamia",
+      "version": 1
+    },
+    "sha256": "7078b5208f58682d3f7b61474cad2f8ea57bf8c9be954e7d549be6b7b7d8f3e6"
+  },
+  {
+    "id": "es.latazamediollena",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "es.latazamediollena",
+      "version": 1
+    },
+    "sha256": "bd5eef3eec9a994efdfd9e248bca49162280fecdf48745fd1d3c63317da4ea7c"
+  },
+  {
+    "id": "es.olympusscanlation",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": true,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "es.olympusscanlation",
+      "version": 1
+    },
+    "sha256": "84f73aaa1058c35426263f05e326dc8d4f97f38b45024de2a3f27954cb2f6aa2"
+  },
+  {
+    "id": "fr.bigsolo",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": true,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "fr.bigsolo",
+      "version": 4
+    },
+    "sha256": "f575d6f4c745caa93906e71ba108a4b5a28f7868aa1d592c8b415a0b340d5c9d"
+  },
+  {
+    "id": "fr.fmteam",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": true,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "fr.fmteam",
+      "version": 1
+    },
+    "sha256": "091dcd7f334b5024bfb0aafbf0daa06ffe2c063068bb29096967b7b8613e6647"
+  },
+  {
+    "id": "fr.sushiscan",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "fr.sushiscan",
+      "version": 8
+    },
+    "sha256": "413fb9f316cfd4a2f57745c5fa0ff5487b85e48f9f71a63ebab8d02923823fde"
+  },
+  {
+    "id": "id.kanzenin",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "id.kanzenin",
+      "version": 6
+    },
+    "sha256": "88ddf473943a5988134a90909da3e787eea0584d43789a5401d114e3ccac5fa1"
+  },
+  {
+    "id": "id.komiksin",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "id.komiksin",
+      "version": 6
+    },
+    "sha256": "6ea94cbc7ece20ff05123ff03d82c626c9ae5dec9a8122ee70b2b940477a8baa"
+  },
+  {
+    "id": "id.komiktap",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "id.komiktap",
+      "version": 7
+    },
+    "sha256": "6229220bf3bc3553cf406cd5a51a0ceec079534452e455a7ac736532520f1524"
+  },
+  {
+    "id": "id.komikucom",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "id.komikucom",
+      "version": 5
+    },
+    "sha256": "b4a3c201fc78fc123a3fd7c79f971caf114f912eb33e4d31f95f0140ca396c22"
+  },
+  {
+    "id": "id.mangasusu",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "id.mangasusu",
+      "version": 6
+    },
+    "sha256": "f8928dc5bae51dae4b62bb70a550115a052c513cd122de49438a12d44b6cd7d2"
+  },
+  {
+    "id": "id.manhwalist",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "id.manhwalist",
+      "version": 6
+    },
+    "sha256": "0561a8321351085ac385586f48df7682740966f8590ba886fb1073bcf07e0797"
+  },
+  {
+    "id": "id.natsu",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "id.natsu",
+      "version": 2
+    },
+    "sha256": "fa9162cc8cdfe5da4b689a4dd76ad3a4fcf2bd4f0c52ab65cc44a34f481f6019"
+  },
+  {
+    "id": "it.mangaworld",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "it.mangaworld",
+      "version": 6
+    },
+    "sha256": "aa91706ac543c5f3b014d8d39702e927ab52d285affea94493108d5137ca49d4"
+  },
+  {
+    "id": "it.mangaworldadult",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "it.mangaworldadult",
+      "version": 4
+    },
+    "sha256": "f5e77fd00c997324ca44eb90eaacafbf5cd4903c2059395fdef00c9c73d44808"
+  },
+  {
+    "id": "ja.comicaction",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.comicaction",
+      "version": 1
+    },
+    "sha256": "80b55f122d9c615ccbb4ad0816733d70475cd8dcffc85f2d8047812f4e0aa8c6"
+  },
+  {
+    "id": "ja.comicdays",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.comicdays",
+      "version": 2
+    },
+    "sha256": "4d05d2f346d10ffccc29044e693cbd85c2d317066c51139b7a4b29519388aeb1"
+  },
+  {
+    "id": "ja.doctruyen5s",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.doctruyen5s",
+      "version": 2
+    },
+    "sha256": "6c21a5634a256025599e28a9dd947069e2d08d7033ce814632c412ff022d4fee"
+  },
+  {
+    "id": "ja.mangamura",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.mangamura",
+      "version": 4
+    },
+    "sha256": "fd2d7b1c620425b3832d6e6a8c2dc7d51a36f27c765551ed22344babd371a5f2"
+  },
+  {
+    "id": "ja.mangarawbest",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.mangarawbest",
+      "version": 3
+    },
+    "sha256": "1eabf1d7bd9a4b88ba974022fc52e91e759d8cf297001ae1e6844d3f9e93022d"
+  },
+  {
+    "id": "ja.mangarawjp",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.mangarawjp",
+      "version": 2
+    },
+    "sha256": "4970c4f37a94091f68c02985a3d24b1a31977bf4edec4de767ed8c681cb2c61f"
+  },
+  {
+    "id": "ja.niceovideoseiga",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.niceovideoseiga",
+      "version": 1
+    },
+    "sha256": "45e6f8e8302895724cf5cb51706b0cd386fce1fb82092446f4dc33800821af52"
+  },
+  {
+    "id": "ja.raw1001",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.raw1001",
+      "version": 1
+    },
+    "sha256": "391e2059aeaccb6fa0179eab7d93f435e97e45a0a98dea2b471d43de6661f583"
+  },
+  {
+    "id": "ja.rawdevart",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": true,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.rawdevart",
+      "version": 3
+    },
+    "sha256": "19bf732dc901dd4cf9d164fd94009053b66a5c469eb3eb8c987f5f377c4880b5"
+  },
+  {
+    "id": "ja.rawfree",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": true,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.rawfree",
+      "version": 11
+    },
+    "sha256": "c7c3592e9e3779c921976c2c9b2beb3d0b247509d72c89b239948a8194a3302c"
+  },
+  {
+    "id": "ja.rawkuma",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.rawkuma",
+      "version": 6
+    },
+    "sha256": "e3d663fabc0c1fbe3e85bb36f594594cf470ade08a7ad8cb514033ebf7bd85b1"
+  },
+  {
+    "id": "ja.rawkuro",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.rawkuro",
+      "version": 1
+    },
+    "sha256": "cf963bf9aa44b65e0c33654524f9ff4751497aa00a7b8b6e5ecdf3a479ab14b0"
+  },
+  {
+    "id": "ja.rawotaku",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.rawotaku",
+      "version": 2
+    },
+    "sha256": "c2176aa59a5d9fdc7b958f07c52f27599318d712059f47d50368330eeaf6bf12"
+  },
+  {
+    "id": "ja.senmanga",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "ja.senmanga",
+      "version": 2
+    },
+    "sha256": "62a5f81e53552626ae3c79fbcf83b22c93ffe82963c0e225f8f79f01b084c07c"
+  },
+  {
+    "id": "ja.shonenjumpplus",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.shonenjumpplus",
+      "version": 2
+    },
+    "sha256": "405a0a3d752dd1eb2b2d0e0cf374d2e176ec0ea58c69e43dd0d131117604f90b"
+  },
+  {
+    "id": "ja.soraraw",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": true,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.soraraw",
+      "version": 9
+    },
+    "sha256": "952613cc3783a23c32937bb0e4939680a689c70994879f09e051bee0ff8bf8a1"
+  },
+  {
+    "id": "ja.spoilerplus",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ja.spoilerplus",
+      "version": 1
+    },
+    "sha256": "51ed0e2cf7f37cfee3ac8779f8607c81fd964203d6920609c6336ae43d3a7172"
+  },
+  {
+    "id": "ko.naverwebtoon",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": true,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": true,
+        "HandlesMigration": false
+      },
+      "key": "ko.naverwebtoon",
+      "version": 1
+    },
+    "sha256": "28965a3ea53d699aae8a39b7987800b7da82c1024dd89aa3c19b4f504744f037"
+  },
+  {
+    "id": "multi.cubari",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.cubari",
+      "version": 1
+    },
+    "sha256": "e2a8c763a0ae251de05ae2d7637f78f9bdb9b9dbf8cbc9ba3c0d2f43a6c2b381"
+  },
+  {
+    "id": "multi.ehentai",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": true,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.ehentai",
+      "version": 2
+    },
+    "sha256": "9f5f078998a82ba0844097d90db178121d1f1bf67e1e9054a4e7efe3cea379fd"
+  },
+  {
+    "id": "multi.grabberzone",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.grabberzone",
+      "version": 1
+    },
+    "sha256": "0677c4409217b07f090f919aa83ba3f076d4ffef96462b32f855f5c693a3a5d6"
+  },
+  {
+    "id": "multi.hitomi",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.hitomi",
+      "version": 2
+    },
+    "sha256": "d034da7a3097cec8173a5ce367e6017fef9b5d455030891fccd6ffaa52ab10c0"
+  },
+  {
+    "id": "multi.kagane",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": true,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.kagane",
+      "version": 5
+    },
+    "sha256": "15fea9bcc3d68b0c05327c48ba7b878eeb86b66197d8f213f25d730d162f46de"
+  },
+  {
+    "id": "multi.lanraragi",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": true,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": true,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": false,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.lanraragi",
+      "version": 4
+    },
+    "sha256": "9b584a0194fa510cf10dde06b54e99ce3bbed769cc7e175e133c67a8146231c3"
+  },
+  {
+    "id": "multi.mangadex",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": true,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": true,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.mangadex",
+      "version": 14
+    },
+    "sha256": "bc9708065dc8a861294302d37ec59d49d220beb02fbf830a9f455197fc109b4c"
+  },
+  {
+    "id": "multi.mangadotnet",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": true,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": true,
+        "HandlesMigration": false
+      },
+      "key": "multi.mangadotnet",
+      "version": 8
+    },
+    "sha256": "7995cf6a73d79a64b1ea7c1e7fc87b06a385f223e41e2ccf55cf2c5af3982e9f"
+  },
+  {
+    "id": "multi.mangafire",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.mangafire",
+      "version": 8
+    },
+    "sha256": "5e1ef92a3c659a4d982e74d3a40da0fe630c3512b0cdc4818ac6aae13b4e3ecf"
+  },
+  {
+    "id": "multi.mangaplus",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.mangaplus",
+      "version": 6
+    },
+    "sha256": "15346c6df30c2186bf37d48fe2ce2e53365d639148764b4617d17f94ef78cad1"
+  },
+  {
+    "id": "multi.myreadingmanga",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": true,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.myreadingmanga",
+      "version": 12
+    },
+    "sha256": "e54602a0d63c147a5421cb747663022e271d7b65f8b44d454b7eceafeade7309"
+  },
+  {
+    "id": "multi.nhentai",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.nhentai",
+      "version": 17
+    },
+    "sha256": "3ad5a61297a67ddcd551402a64f10f279035d16ab9ed94ae9421997b24162413"
+  },
+  {
+    "id": "multi.sumidoku",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": true,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": true,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.sumidoku",
+      "version": 1
+    },
+    "sha256": "fbc7d8122677fa7cc6655b0cb973b4b11946cd52f49268d78aa4cd1e3690bed1"
+  },
+  {
+    "id": "multi.suwayomi",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": true,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": true,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": false,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.suwayomi",
+      "version": 4
+    },
+    "sha256": "68513eab599d090f17ddc78de597a27a90f39fcd4582459ade4eda45aafeb8b0"
+  },
+  {
+    "id": "multi.webtoon",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": true,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.webtoon",
+      "version": 5
+    },
+    "sha256": "c6d0a6fe900bc628d47ad307e4ea5cba41ae56c2954aa62fe3aa14159c00c9f2"
+  },
+  {
+    "id": "multi.xcomic",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": true,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "multi.xcomic",
+      "version": 5
+    },
+    "sha256": "35feb549b0dacb26acf5a9e65011454994a303271cc6263f2eb9a0da2131ff86"
+  },
+  {
+    "id": "pt.flowermanga",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "pt.flowermanga",
+      "version": 3
+    },
+    "sha256": "e258a76d96fe902d6b55cad4013d3314dc3652055e34384953452831e532ae1a"
+  },
+  {
+    "id": "pt.mangalivre",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "pt.mangalivre",
+      "version": 2
+    },
+    "sha256": "2a8d894cf7068b9719391598951da20d90a4d9e587bb7f220db4543e0f91c254"
+  },
+  {
+    "id": "ru.desu",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": true,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": true,
+        "HandlesMigration": true
+      },
+      "key": "ru.desu",
+      "version": 8
+    },
+    "sha256": "db13c7d55bcb1580c5e4d8545ebdd64ffb9ff921d0a01ab037ba41c6244cd1b9"
+  },
+  {
+    "id": "ru.hentailib",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": true,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": false,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "ru.hentailib",
+      "version": 4
+    },
+    "sha256": "e41f21021824d83fc5dc3e53cb1cb0889ca965e16bd4d65f8442702bf1749723"
+  },
+  {
+    "id": "ru.inkstory",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": true,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "ru.inkstory",
+      "version": 1
+    },
+    "sha256": "a42e1409492e48af47a3d37bfe93864620209f4e383dfac4d895db7e760615a7"
+  },
+  {
+    "id": "ru.mangalib",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": true,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": false,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "ru.mangalib",
+      "version": 9
+    },
+    "sha256": "062ab0e5cdc123f5a6b3133f3c07be835e5c615d103ebfb1e83db803193fe729"
+  },
+  {
+    "id": "ru.ranobelib",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": true,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": false,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "ru.ranobelib",
+      "version": 3
+    },
+    "sha256": "a72390dd97a373b77119ea4fd6ab3391fb62e8b5c773e3588658ce3b75eccf5c"
+  },
+  {
+    "id": "ru.remanga",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": true,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": true,
+        "HandlesMigration": false
+      },
+      "key": "ru.remanga",
+      "version": 3
+    },
+    "sha256": "616092495883d3b07ed21ee5ab194be65142cb8ac9fe4f5c0b16a4ae397ac6c9"
+  },
+  {
+    "id": "ru.senkuro",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": true,
+        "HandlesMigration": false
+      },
+      "key": "ru.senkuro",
+      "version": 1
+    },
+    "sha256": "5621532cafabe03c92de01624c02bdf9052c81d1db8260a3603c48895722d00d"
+  },
+  {
+    "id": "ru.slashlib",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": true,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": false,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "ru.slashlib",
+      "version": 4
+    },
+    "sha256": "77a0e121e9d014b24063f9b0fdea31c588d5c51878a9c18cbc523ff007ee3590"
+  },
+  {
+    "id": "th.gomanga",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "th.gomanga",
+      "version": 1
+    },
+    "sha256": "5d0e8b99858182a37615e4a6476ecbbf43fcd7d2f1e57bca4a3f1bac85951ddd"
+  },
+  {
+    "id": "th.prettyfrank",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "th.prettyfrank",
+      "version": 1
+    },
+    "sha256": "c98377671d09708c85151b270236a715ec871a012587b5abf4b2466ae55dd2f3"
+  },
+  {
+    "id": "th.upmanga",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "th.upmanga",
+      "version": 1
+    },
+    "sha256": "b137eb94666dc84a695ea1553b17d19849b9e2ddc539e0c6dcddf6c1d1c1827c"
+  },
+  {
+    "id": "tr.tortugaceviri",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": true
+      },
+      "key": "tr.tortugaceviri",
+      "version": 1
+    },
+    "sha256": "1066911c658802e7852ad9d7585b45f2561c5488038813267161e1f39d6cbdd8"
+  },
+  {
+    "id": "vi.cmanga",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": false,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "vi.cmanga",
+      "version": 8
+    },
+    "sha256": "c5bb0644508bc9825b4b5525a4233c5e0187598ee160ae6978dc0d268eb43c24"
+  },
+  {
+    "id": "vi.cuutruyen",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": true,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "vi.cuutruyen",
+      "version": 5
+    },
+    "sha256": "2bae8dbc8799f7b1ac93d60d6f5977d007e7262021befd26448bfbaf4f320b6d"
+  },
+  {
+    "id": "vi.dilib",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "vi.dilib",
+      "version": 3
+    },
+    "sha256": "c97bb90d88b9ea80fe4048a58ba5981459b4e806292105546a79ff0c8533e4ce"
+  },
+  {
+    "id": "vi.foxtruyen",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "vi.foxtruyen",
+      "version": 6
+    },
+    "sha256": "b258ec54837f75c40b01f97ce70a14c3f8e020d4a5ae38e61279f231ffd42d69"
+  },
+  {
+    "id": "vi.nettruyen",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "vi.nettruyen",
+      "version": 20
+    },
+    "sha256": "5f01cfdc7dd3e45a8937c88ffb2af0ac47a461c2205929be97c43a93b4fb55bd"
+  },
+  {
+    "id": "vi.truyen3q",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "vi.truyen3q",
+      "version": 4
+    },
+    "sha256": "1feff1d847715790d25b80881ee99adce65264ec900e1efab5a2ed38f48f08cd"
+  },
+  {
+    "id": "vi.truyenqq",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "vi.truyenqq",
+      "version": 11
+    },
+    "sha256": "0ba73270e46f7f1b751b858ee95939ce4b7c4552de3da4674ba59e214c67390f"
+  },
+  {
+    "id": "vi.truyenqq2",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "vi.truyenqq2",
+      "version": 2
+    },
+    "sha256": "a4de488e6179a5cbed26507d3de63b64f62e19f79ef0fbcf8cdbb4cf88f71648"
+  },
+  {
+    "id": "vi.zettruyen",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "vi.zettruyen",
+      "version": 8
+    },
+    "sha256": "044029a5b7b8021032fc4ae14291a10cc1bd60f931068936821a0f5867284f47"
+  },
+  {
+    "id": "zh.bakamh",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.bakamh",
+      "version": 2
+    },
+    "sha256": "057d261828e23c0f898b2db6998eab82d98c9c5717d7af9bb93872fe4a16ca9d"
+  },
+  {
+    "id": "zh.baozimanhua",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.baozimanhua",
+      "version": 7
+    },
+    "sha256": "695bb57d9134138d779f4b893c8c74c28cd494d48f8197de2d396f6c680ebb80"
+  },
+  {
+    "id": "zh.bilimanga",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.bilimanga",
+      "version": 5
+    },
+    "sha256": "b4e22c92e7fecbb2531e13f484ee0b1bd31729ec2b5dfee164019c2568a8e97c"
+  },
+  {
+    "id": "zh.bilinovel",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.bilinovel",
+      "version": 2
+    },
+    "sha256": "ce4105e1bce1f33f1443b0d0cc0be6bafd0594f2352fa1bbc1704b958868366b"
+  },
+  {
+    "id": "zh.boylove",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": true,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": true,
+        "HandlesMigration": false
+      },
+      "key": "zh.boylove",
+      "version": 13
+    },
+    "sha256": "c517816ee631e062e2b46b5c262958bc3698ea86734825e0d49a8b99d8bd3b48"
+  },
+  {
+    "id": "zh.copymanga",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": true,
+        "DynamicSettings": false,
+        "DynamicListings": true,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.copymanga",
+      "version": 24
+    },
+    "sha256": "85939f9988d1fdcd5b1498dc9ff4d86eca3632fdaf26f71c22aba61cbc6fbfa5"
+  },
+  {
+    "id": "zh.dm5",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.dm5",
+      "version": 4
+    },
+    "sha256": "d5c289b901cc6374baeb89b5e0e72ddcd2a1030a9e5fdb9225bc5cad1ef2f0c5"
+  },
+  {
+    "id": "zh.godamanga",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.godamanga",
+      "version": 3
+    },
+    "sha256": "a0fb7552565c48a3f2559b03509f10a0c19d72ae98790123c1c115c42bcc23bf"
+  },
+  {
+    "id": "zh.jmcomic",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": true,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.jmcomic",
+      "version": 3
+    },
+    "sha256": "a0ee47f62ce0a2746bb3b95bdd416aa033548462c2537883c932f5b12bc506c3"
+  },
+  {
+    "id": "zh.komiic",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.komiic",
+      "version": 1
+    },
+    "sha256": "e208957a1ef0ed99e3256fc13314b49cd897e1fa151dd0abcf648143ae99eaa2"
+  },
+  {
+    "id": "zh.mangabz",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.mangabz",
+      "version": 6
+    },
+    "sha256": "73da90d70c325c6f927fcb9fb22b18e93be2e8ab3f4532c21cfa520994312964"
+  },
+  {
+    "id": "zh.manhuagui",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": true,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.manhuagui",
+      "version": 10
+    },
+    "sha256": "23d1f56ae2c441ef126fb91e9d9c353292c5d0ba8a09853462b6939af1da2a95"
+  },
+  {
+    "id": "zh.mycomic",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.mycomic",
+      "version": 3
+    },
+    "sha256": "fcddfd4031647cf8d7d7a0dabb3351dd334cf03ac251d867be2e50e80add14a3"
+  },
+  {
+    "id": "zh.noyacg",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": true,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.noyacg",
+      "version": 3
+    },
+    "sha256": "38a88a9b7b3426ebab17be6a44fc4754aaa7727ccfcf90a9f9dee516a387a024"
+  },
+  {
+    "id": "zh.picacomic",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.picacomic",
+      "version": 4
+    },
+    "sha256": "4ea67bb9fe9ae0e3ba157d34da3ef20806a669bdeaa93d108acc343936a09ca0"
+  },
+  {
+    "id": "zh.relamanhua",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": true,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.relamanhua",
+      "version": 3
+    },
+    "sha256": "a1a4e0a1a762e8dc53d205d330f61b17092b204e5cb90f1de74d10f024bcb03e"
+  },
+  {
+    "id": "zh.rumanhua",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.rumanhua",
+      "version": 1
+    },
+    "sha256": "d45e79fc85de7584246f5b96740e9136cdd0ec2ab238828a6db9ac4d1024479f"
+  },
+  {
+    "id": "zh.wenku8",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.wenku8",
+      "version": 1
+    },
+    "sha256": "b2af6a5cf410e0597b68e1ac700bdf78791d1825fbcf32a01ef8676c61d5e3cd"
+  },
+  {
+    "id": "zh.wnacg",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": true,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": false,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.wnacg",
+      "version": 4
+    },
+    "sha256": "7a8e9a13f015fdbe681e0c08bca3550180f97c7aa0b4abbd7a019c6ed718c096"
+  },
+  {
+    "id": "zh.zaimanhua",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": true,
+        "DynamicSettings": true,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.zaimanhua",
+      "version": 7
+    },
+    "sha256": "81c7422aa97087b20aa77d7c0d84d383d2d0a239e80c649c56c1de36b9bde768"
+  },
+  {
+    "id": "zh.zaimanhuanovel",
+    "value": {
+      "features": {
+        "ProvidesListings": true,
+        "ProvidesHome": true,
+        "DynamicFilters": true,
+        "DynamicSettings": true,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": true,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.zaimanhuanovel",
+      "version": 1
+    },
+    "sha256": "71c6006dd62ac49cb2819e9e892685c72a1344dfa26287234bd9eb5f268f127a"
+  },
+  {
+    "id": "zh.zerobyw",
+    "value": {
+      "features": {
+        "ProvidesListings": false,
+        "ProvidesHome": false,
+        "DynamicFilters": false,
+        "DynamicSettings": false,
+        "DynamicListings": false,
+        "ProcessesPages": false,
+        "ProcessesCovers": false,
+        "ProvidesImageRequests": false,
+        "ProvidesPageDescriptions": false,
+        "ProvidesAlternateCovers": false,
+        "ProvidesBaseURL": false,
+        "HandlesNotifications": false,
+        "HandlesDeepLinks": true,
+        "HandlesBasicLogin": true,
+        "HandlesWebLogin": false,
+        "HandlesMigration": false
+      },
+      "key": "zh.zerobyw",
+      "version": 1
+    },
+    "sha256": "b5f364d8a291d5ef5a37e9c459f5f66622e96e3b4f4d00d916d8ae918c934dff"
+  }
+]

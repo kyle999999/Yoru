@@ -1,0 +1,132 @@
+# github.com/andybalholm/cascadia v1.3.5
+## explicit; go 1.25.0
+github.com/andybalholm/cascadia
+# github.com/dustin/go-humanize v1.1.0
+## explicit; go 1.21
+github.com/dustin/go-humanize
+# github.com/fogleman/gg v1.3.0
+## explicit
+github.com/fogleman/gg
+# github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
+## explicit
+github.com/golang/freetype/raster
+github.com/golang/freetype/truetype
+# github.com/google/uuid v1.6.0
+## explicit
+github.com/google/uuid
+# github.com/mattn/go-isatty v0.0.24
+## explicit; go 1.20
+github.com/mattn/go-isatty
+# github.com/ncruces/go-strftime v1.1.0
+## explicit; go 1.24
+github.com/ncruces/go-strftime
+# github.com/ohaiibuzzle/aidokurunner-go v0.0.0 => ../Backend
+## explicit; go 1.26.5
+github.com/ohaiibuzzle/aidokurunner-go/cbz
+github.com/ohaiibuzzle/aidokurunner-go/internal/fsutil
+github.com/ohaiibuzzle/aidokurunner-go/models
+github.com/ohaiibuzzle/aidokurunner-go/postcard
+github.com/ohaiibuzzle/aidokurunner-go/runtime
+github.com/ohaiibuzzle/aidokurunner-go/runtime/host
+github.com/ohaiibuzzle/aidokurunner-go/source
+# github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
+## explicit; go 1.12
+github.com/remyoudompheng/bigfft
+# github.com/tetratelabs/wazero v1.12.0
+## explicit; go 1.25.0
+github.com/tetratelabs/wazero
+github.com/tetratelabs/wazero/api
+github.com/tetratelabs/wazero/experimental
+github.com/tetratelabs/wazero/experimental/sys
+github.com/tetratelabs/wazero/internal/descriptor
+github.com/tetratelabs/wazero/internal/engine/interpreter
+github.com/tetratelabs/wazero/internal/engine/wazevo
+github.com/tetratelabs/wazero/internal/engine/wazevo/backend
+github.com/tetratelabs/wazero/internal/engine/wazevo/backend/isa/amd64
+github.com/tetratelabs/wazero/internal/engine/wazevo/backend/isa/arm64
+github.com/tetratelabs/wazero/internal/engine/wazevo/backend/regalloc
+github.com/tetratelabs/wazero/internal/engine/wazevo/frontend
+github.com/tetratelabs/wazero/internal/engine/wazevo/ssa
+github.com/tetratelabs/wazero/internal/engine/wazevo/wazevoapi
+github.com/tetratelabs/wazero/internal/expctxkeys
+github.com/tetratelabs/wazero/internal/filecache
+github.com/tetratelabs/wazero/internal/ieee754
+github.com/tetratelabs/wazero/internal/internalapi
+github.com/tetratelabs/wazero/internal/leb128
+github.com/tetratelabs/wazero/internal/moremath
+github.com/tetratelabs/wazero/internal/platform
+github.com/tetratelabs/wazero/internal/sock
+github.com/tetratelabs/wazero/internal/sys
+github.com/tetratelabs/wazero/internal/sysfs
+github.com/tetratelabs/wazero/internal/u32
+github.com/tetratelabs/wazero/internal/u64
+github.com/tetratelabs/wazero/internal/version
+github.com/tetratelabs/wazero/internal/wasm
+github.com/tetratelabs/wazero/internal/wasm/binary
+github.com/tetratelabs/wazero/internal/wasmdebug
+github.com/tetratelabs/wazero/internal/wasmruntime
+github.com/tetratelabs/wazero/sys
+# golang.org/x/image v0.47.0
+## explicit; go 1.26.0
+golang.org/x/image/draw
+golang.org/x/image/font
+golang.org/x/image/font/basicfont
+golang.org/x/image/font/gofont/gobold
+golang.org/x/image/font/gofont/goregular
+golang.org/x/image/math/f64
+golang.org/x/image/math/fixed
+golang.org/x/image/riff
+golang.org/x/image/vp8
+golang.org/x/image/vp8l
+golang.org/x/image/webp
+# golang.org/x/net v0.61.0
+## explicit; go 1.26.0
+golang.org/x/net/html
+golang.org/x/net/html/atom
+golang.org/x/net/publicsuffix
+# golang.org/x/sys v0.49.0
+## explicit; go 1.26.0
+golang.org/x/sys/cpu
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# modernc.org/libc v1.79.0
+## explicit; go 1.26.0
+modernc.org/libc
+modernc.org/libc/errno
+modernc.org/libc/fcntl
+modernc.org/libc/fts
+modernc.org/libc/grp
+modernc.org/libc/honnef.co/go/netdb
+modernc.org/libc/langinfo
+modernc.org/libc/limits
+modernc.org/libc/netdb
+modernc.org/libc/netinet/in
+modernc.org/libc/poll
+modernc.org/libc/pthread
+modernc.org/libc/pwd
+modernc.org/libc/signal
+modernc.org/libc/stdio
+modernc.org/libc/stdlib
+modernc.org/libc/sys/socket
+modernc.org/libc/sys/stat
+modernc.org/libc/sys/types
+modernc.org/libc/termios
+modernc.org/libc/time
+modernc.org/libc/unistd
+modernc.org/libc/utime
+modernc.org/libc/uuid
+modernc.org/libc/uuid/uuid
+modernc.org/libc/wctype
+# modernc.org/libquickjs v0.14.0
+## explicit; go 1.26.0
+modernc.org/libquickjs
+# modernc.org/mathutil v1.7.1
+## explicit; go 1.21
+modernc.org/mathutil
+# modernc.org/memory v1.12.1
+## explicit; go 1.23.0
+modernc.org/memory
+# modernc.org/quickjs v0.27.0
+## explicit; go 1.26.0
+modernc.org/quickjs
+# github.com/ohaiibuzzle/aidokurunner-go => ../Backend

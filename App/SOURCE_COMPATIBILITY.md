@@ -1,44 +1,50 @@
-# Source compatibility patch — Yoru 4.0.1 (6)
+# Current community sources — Yoru 4.1 (7)
 
-Tested 2026-11-06 with Xcode 26.6 and iOS 26.5 simulator/SDK.
+## What changed
 
-## Findings and scope
+The app now executes the current packages from https://aidoku-community.github.io/sources/. It embeds the independent GPL [aidoku-backend-0.7](https://github.com/ohaiibuzzle/aidoku-backend-0.7), base commit `660e08724d78f7ab2d9921b2b1e8c76f71478fb6`, through a native C/JSON bridge. Wazero runs in interpreter mode with no JIT. The existing GPL 0.6.11 engine remains available for already installed legacy packages. The restricted Swift AidokuRunner implementation is not included.
 
-The integrated engine really is GPL Aidoku v0.6.11, not a stale displayed version. Latest stable upstream checked: [v0.9-4](https://github.com/Aidoku/Aidoku/releases/tag/v0.9-4). Its current source engine uses AidokuRunner, whose [licensing notice](https://github.com/Aidoku/AidokuRunner#licensing) restricts redistribution of derivatives without an exception. This patch does not include that code or claim current-engine parity.
+Current-repository support is implemented, not a version-label change: modern manifests and repository envelopes, serialized source ABI, network/HTML/JavaScript/canvas/defaults imports, dynamic listings/settings/filters, searches, manga updates, chapters, image requests, processed page/cover images and native WebKit execution are connected to the existing app. Backend dependencies are pinned and vendored. See [runtime provenance and build instructions](ModernRuntime/UPSTREAM.md).
 
-The MIT [Aidoku Rust SDK](https://github.com/Aidoku/aidoku-rs) was inspected. Modern packages use a different ABI: serialized postcard buffers, start/free_result/get_manga_update/get_search_manga_list exports, different network import signatures and additional modules. The real current WEBTOON v5 package was inspected with Validation/inspect_source_abi.py. Renaming the engine or skipping minAppVersion cannot make it executable. Modern 0.7+ repositories/packages remain unsupported; they are explicitly diagnosed in logs and incompatible updates do not replace working sources. No dependency version changes were needed for the verified legacy fixes. A permissively licensed SDK does not itself supply a functioning replacement runner.
+The current repository is added once alongside existing lists. Repository merging selects the newest package deterministically, so a faster legacy repository cannot hide a modern update. Download and icon URLs use the repository's actual relative URLs. Legacy source records, library/history databases and host data keys are retained. Existing language/content filters still apply; Thai and normalized language codes are supported. Source requirements are checked against the verified modern API ceiling (0.9.0), separately from the legacy engine's real 0.6.11 version. Instantiation validates actual imports before file replacement; unsupported future packages are not simply declared compatible.
 
-## Fixes
+## Compatibility fixes found through real failures
 
-- Correct multi-chunk network buffer reads; previously subsequent reads included earlier bytes and could write beyond the requested length. A test invokes the actual WASM import in three chunks and verifies all bytes.
-- Preserve existing percent escapes, including encoded query separators and signed image URL components.
-- Recognize MangaDex's HTTP-200 browser-verification redirect, run its normal JavaScript verification in WebKit, transfer domain cookies into the isolated source session, then retry. No server/version checks are bypassed.
-- Case-insensitive Cloudflare header lookup; retain the original failed response when verification fails; prevent late callbacks from double-signalling the runtime semaphore. Verification is bounded.
-- Isolate verification website data from the host app and retain isolated persistent network cookies. Set bounded network timeouts.
-- Validate HTTP status before decoding repository JSON or unzipping downloads, and normalize repository base/index URLs without treating dotted directory names as files.
-- Surface extension traps/negative error codes in existing logs rather than reporting an empty successful catalog. Network diagnostics omit request queries, bodies, cookies and authorization headers.
-- Validate required legacy exports while treating initialize as optional. Stage updates and restore the previous files if replacement or database saving fails. Preserve local import archives.
-- Update existing source database records rather than creating duplicates. Preserve records when a source fails to load. No data schema migration, host data-key change, navigation redesign, reader redesign or version-check bypass.
+- Correct native settings types across JSON: string arrays, booleans, integers, floats and encoded data remain distinct. This fixed current MangaDex v14's `Unable to fetch languages` error.
+- Preserve original response bytes until source decryption. MangaPlus's encrypted JPEG cannot be image-decoded first; its source receives the raw ImageRef bytes, decrypts them, and supplies the decoded image. Original encoded bytes are retained for ImageRef.data(), avoiding lossy re-encoding and large PNG expansion.
+- Bridge page context and image-request modification through a private URLProtocol into the existing Nuke reader pipeline. Images, inline images, archives and source-side processing use the actual source implementation.
+- Map modern listing IDs/name fallbacks, including MangaPlus's ID-only listings. All source manifests pass the native decoder.
+- Omit empty text filters. Sending empty author/artist values caused MangaFire v8's catalog parser to fail; browsing now returns results.
+- Retain modern source languages, viewer direction and chapter metadata in legacy UI models; use the chapter title when an extension provides no chapter number.
+- Route networking and WebKit through Aidoku's isolated stores, preserving host appearance/settings/cookies. Keep native browser verification support and bounded request lifetimes. No TLS checks are disabled.
+- Keep failed updates transactional and preserve installed sources. Metadata/network failures after a successful install are reported separately and can retry.
+- Keep existing native navigation, library and reader layouts. New account fields use the existing native settings style. No second installed app or remote website wrapper is involved.
 
-## Live source results
+## Actual tests on 2026-11-06
 
-The Debug-only --source-compatibility-probe invokes the app's real SourceManager, WASM runtime, network imports and image-request modification. It installs actual packages from the community legacy repository, not mocked source responses.
+The repository contained **146 packages** requiring **74 distinct host imports**.
 
-| Source | Install | Browse | Search | Details / chapters / page list | First image |
-|---|---|---|---|---|---|
-| Komga v3, public demo | Pass | 7 series | 1 result for Space | 4 chapters; 36 pages in selected chapter | HTTP 200; UIKit decoded |
-| xkcd v1, English | Pass | 1 comic | Not offered by extension | 3,319 chapters; 2 pages | HTTP 200; UIKit decoded |
-| WEBTOON v3, English | Pass | 615 series | 14 results for Alice | 2 chapters; 66 pages | HTTP 200; UIKit decoded |
-| MangaDex v8 | Pass | 20 results | 20 results for Alice | 446 chapters; 5 pages | HTTP 200; UIKit decoded |
+1. Downloaded all 146 real packages and inspected their manifests, imports and exports. Instantiated **146/146** in the independent replacement runtime with no missing-import failures. Package versions, SHA-256 hashes and detected capabilities are recorded in [modern-package-load-results.json](Validation/modern-package-load-results.json). This is an ABI/loading test, not a live website test.
+2. The actual iOS Source initializer decoded **146/146** manifests in the simulator. This caught and fixed ID-only listing compatibility.
+3. Live tests used actual current packages, the native bridge, real HTTP requests and source functions:
 
-MangaDex initially returned HTTP 200 text/html from mangadex.org/edge/challenge and its legacy parser returned -1. After the WebKit verification fix it completed the full path. One earlier run hit an intermittent malformed-WASM install error; the prior installation survived and the subsequent final installation/full test passed. This is not evidence that every provider or package works.
+| Current source | Install | Browse / search | Chapters / selected page count | Page image |
+|---|---|---|---|---|
+| WEBTOON v5 | Pass | 615 / 14 | 95 / 99 | Decoded |
+| MangaDex v14 | Pass | 20 / 20 | 446 / 5 | Decoded |
+| WeebCentral v8 | Pass | 32 / 25 | 6 / 168 | Decoded |
+| MangaPlus v6 | Pass | 20 / 1 | 12 / 2 | Decrypted by source and decoded |
+| MangaFire v8 | Pass | 50 / 50 | 34 / 25 | CDN TLS failure in this environment |
 
-A real modern WEBTOON v5 update was rejected; the installed v3 main.wasm remained byte-for-byte identical. Exact sanitized live results are in Validation/source-compatibility-results.json. Legacy repository loading returned 34 entries. Legacy repositories are unmaintained, so future website/API changes can still break extensions. No website was declared unavailable merely because an extension failed.
+MangaPlus was also loaded through the **existing ReaderPageView/Nuke pipeline**, which returned success. Its decrypted first page was visibly rendered in the unchanged full-screen native reader with the glass toolbar. The final native probe is [modern-native-reader-results.json](Validation/modern-native-reader-results.json). The live summary combines the observed probe runs; it is not a claim that all 146 websites were browsed.
 
-## Existing app and limits
+MangaFire's page list succeeded, but its mfcdn3.xyz image endpoints failed TLS negotiation. An independent TLS client outside the app failed too. This remains unresolved and may be provider/CDN/network related; the site is not declared globally unavailable. The extension is not marked as a successful image-loading test.
 
-63 anime model/journal/calendar/check-in checks pass. The existing isolated-settings reset check passes. Additional transport checks cover encoded query integrity, accepted HTTP 200, six error statuses and credential-safe error messages. The actual multi-chunk ABI regression passes. The existing host and separate Aidoku native section launch; screenshots were inspected. Existing host source, UI and reader files are unchanged except Debug probe startup; no manga action writes anime library data. The host library preference was also hashed across normal relaunch after the live probe.
+4. Backend runtime/host/source/model/postcard tests pass. New regressions cover typed native preferences and original JPEG byte ownership. Native Foundation tests cover modern URL/schema handling and deterministic modern-over-legacy repository precedence. The existing 63 anime regression checks and Aidoku settings-isolation check pass. Host anime library persistence matches its pre-modern-probe hash, including after source installation and manga reading.
+5. Xcode 26.6 / iOS 26.5 SDK: arm64 simulator and unsigned arm64 Release device builds pass. No debug probe arguments or simulator/user data are packaged in the release. The IPA needs signing.
 
-The live tests exercise engine operations and decode the first image; they do not test every touch gesture, every page, tracker login, all providers, long/background downloads, physical-device installation or Signulous signing. Previous 4.0 reader interaction evidence is historical, not a repeated touch-gesture test for this patch.
+## Limits
 
-The release IPA is unsigned and requires signing. Use the same application identifier/signing setup as the previous install and update without uninstalling to preserve its data container. Production packages contain no probe data, installed sources, website cookies, user libraries or credentials.
+All 146 packages loaded, but not every website was live tested. Websites can be offline, region-restricted, require an account, or change their API/anti-bot behavior. Markdown-only notice pages remain limited by the retained image reader. Account login, OAuth/PKCE variations, every advanced settings/filter interaction, every page, long background downloads and every touch gesture were not exhaustively verified. Basic/web login bridge paths are implemented but were not tested with personal accounts. Existing language/content filters can hide entries without indicating engine incompatibility.
+
+Physical iPhone installation and Signulous signing were not tested. Update using the same signing/app identifier without uninstalling to retain the iOS data container. This modified build is not endorsed by Aidoku or the independent backend's author.

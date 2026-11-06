@@ -361,7 +361,11 @@ extension SettingsTableViewController {
             source?.performAction(key: action)
             NotificationCenter.default.post(name: NSNotification.Name(action), object: nil)
         case "login":
-            guard item.method == "oauth", let key = item.key else { return } // TODO: support more than OAuth
+            if let source, source.modern != nil, ["basic", "web"].contains(item.method ?? "") {
+                ModernSourceLogin.present(item: item, source: source, from: self)
+                return
+            }
+            guard item.method == "oauth", let key = item.key else { return }
             let url: URL?
             if item.urlKey != nil, let urlString = AidokuStorage.defaults.string(forKey: item.urlKey ?? "") {
                 url = URL(string: urlString)

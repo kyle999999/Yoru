@@ -1,0 +1,62 @@
+[
+  {
+    "result" : "145 entries",
+    "source" : "repository",
+    "stage" : "load"
+  },
+  {
+    "result" : "146\/146",
+    "source" : "repository",
+    "stage" : "native manifest decoding"
+  },
+  {
+    "result" : "starting",
+    "source" : "multi.mangaplus",
+    "stage" : "install"
+  },
+  {
+    "result" : "installed v6",
+    "source" : "multi.mangaplus",
+    "stage" : "install"
+  },
+  {
+    "result" : "20 manga",
+    "source" : "multi.mangaplus",
+    "stage" : "browse"
+  },
+  {
+    "result" : "1 manga",
+    "source" : "multi.mangaplus",
+    "stage" : "search"
+  },
+  {
+    "result" : "Hatori and Furuta's Extraordinarily Ordinary Life",
+    "source" : "multi.mangaplus",
+    "stage" : "details"
+  },
+  {
+    "result" : "12 chapters",
+    "source" : "multi.mangaplus",
+    "stage" : "chapters"
+  },
+  {
+    "result" : "2 pages",
+    "source" : "multi.mangaplus",
+    "stage" : "pages"
+  },
+  {
+    "result" : "812069 bytes, decoded=true, transport=yoru-page",
+    "source" : "multi.mangaplus",
+    "stage" : "image"
+  },
+  {
+    "result" : "true",
+    "source" : "multi.mangaplus",
+    "stage" : "existing reader image pipeline"
+  },
+  {
+    "result" : "finished",
+    "source" : "probe",
+    "stage" : "complete"
+  }
+]

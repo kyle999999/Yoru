@@ -1,0 +1,236 @@
+package postcard
+
+import (
+	"errors"
+	"math"
+)
+
+var (
+	// ErrUnexpectedEOF is returned when the buffer runs out of bytes
+	// mid-value.
+	ErrUnexpectedEOF = errors.New("postcard: unexpected end of buffer")
+	// ErrVarintOverflow is returned when a varint doesn't terminate within
+	// the maximum number of bytes for its target width, or its value exceeds
+	// that width.
+	ErrVarintOverflow = errors.New("postcard: varint overflow")
+	// ErrInvalidBool is returned when a bool byte is neither 0 nor 1.
+	ErrInvalidBool = errors.New("postcard: invalid bool byte")
+)
+
+// Reader consumes bytes in the postcard wire format. Every model type in
+// the models package hand-implements a Decode(*Reader) method mirroring its
+// Encode counterpart.
+type Reader struct {
+	buf []byte
+	pos int
+}
+
+func NewReader(b []byte) *Reader {
+	return &Reader{buf: b}
+}
+
+// Remaining reports how many unread bytes are left in the buffer.
+func (r *Reader) Remaining() int {
+	return len(r.buf) - r.pos
+}
+
+func (r *Reader) readByte() (byte, error) {
+	if r.pos >= len(r.buf) {
+		return 0, ErrUnexpectedEOF
+	}
+	b := r.buf[r.pos]
+	r.pos++
+	return b, nil
+}
+
+func (r *Reader) ReadBool() (bool, error) {
+	b, err := r.readByte()
+	if err != nil {
+		return false, err
+	}
+	switch b {
+	case 0:
+		return false, nil
+	case 1:
+		return true, nil
+	default:
+		return false, ErrInvalidBool
+	}
+}
+
+func (r *Reader) ReadU8() (uint8, error) {
+	return r.readByte()
+}
+
+func (r *Reader) ReadI8() (int8, error) {
+	b, err := r.readByte()
+	return int8(b), err
+}
+
+func (r *Reader) ReadU16() (uint16, error) {
+	v, err := r.readVarintMax(3, math.MaxUint16)
+	return uint16(v), err
+}
+
+func (r *Reader) ReadI16() (int16, error) {
+	v, err := r.readVarintMax(3, math.MaxUint16)
+	return unzigzag16(uint16(v)), err
+}
+
+func (r *Reader) ReadU32() (uint32, error) {
+	v, err := r.readVarintMax(5, math.MaxUint32)
+	return uint32(v), err
+}
+
+func (r *Reader) ReadI32() (int32, error) {
+	v, err := r.readVarintMax(5, math.MaxUint32)
+	return unzigzag32(uint32(v)), err
+}
+
+// readVarintMax rejects values past the target width instead of silently
+// truncating them (3 varint bytes hold 21 bits, 5 hold 35).
+func (r *Reader) readVarintMax(maxBytes int, max uint64) (uint64, error) {
+	v, err := r.readVarintU64(maxBytes)
+	if err == nil && v > max {
+		return 0, ErrVarintOverflow
+	}
+	return v, err
+}
+
+func (r *Reader) ReadU64() (uint64, error) {
+	return r.readVarintU64(10)
+}
+
+func (r *Reader) ReadI64() (int64, error) {
+	v, err := r.readVarintU64(10)
+	return unzigzag64(v), err
+}
+
+// ReadLen reads a sequence/string/map length prefix, bounded by the
+// buffer's remaining bytes. Every element of a length-n sequence needs at
+// least 1 more byte to encode (even a bool or a 1-byte enum tag), so n
+// bytes remaining is always a necessary condition -- rejecting a length
+// that fails it catches a corrupt or hostile prefix early. It does NOT make
+// make([]T, n) safe on its own (an element can be far bigger in memory than
+// its 1-byte minimum encoding) -- decode sequences with Seq instead.
+func (r *Reader) ReadLen() (int, error) {
+	v, err := r.readVarintU64(10)
+	if err != nil {
+		return 0, err
+	}
+	if v > uint64(r.Remaining()) {
+		return 0, ErrUnexpectedEOF
+	}
+	return int(v), nil
+}
+
+// Seq decodes n elements (n from a prior ReadLen) with decode, growing the
+// result as elements actually decode instead of pre-sizing it to n:
+// ReadLen only bounds n by bytes remaining, but a decoded element (a Manga,
+// a Setting, ...) can be 100+ bytes in memory for a 1-byte minimum encoding,
+// so make([]T, n) let a few MB of guest buffer allocate hundreds of MB.
+// Never returns a nil slice on success, so an empty sequence still
+// JSON-encodes as [] rather than null.
+func Seq[T any](r *Reader, n int, decode func(*T, *Reader) error) ([]T, error) {
+	out := make([]T, 0, min(n, 64))
+	for i := 0; i < n; i++ {
+		var v T
+		if err := decode(&v, r); err != nil {
+			return nil, err
+		}
+		out = append(out, v)
+	}
+	return out, nil
+}
+
+// ReadStringInto adapts ReadString to Seq's decode signature.
+func ReadStringInto(s *string, r *Reader) (err error) {
+	*s, err = r.ReadString()
+	return err
+}
+
+func (r *Reader) ReadF32() (float32, error) {
+	if r.Remaining() < 4 {
+		return 0, ErrUnexpectedEOF
+	}
+	b := r.buf[r.pos : r.pos+4]
+	r.pos += 4
+	bits := uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16 | uint32(b[3])<<24
+	return math.Float32frombits(bits), nil
+}
+
+func (r *Reader) ReadF64() (float64, error) {
+	if r.Remaining() < 8 {
+		return 0, ErrUnexpectedEOF
+	}
+	b := r.buf[r.pos : r.pos+8]
+	r.pos += 8
+	bits := uint64(b[0]) | uint64(b[1])<<8 | uint64(b[2])<<16 | uint64(b[3])<<24 |
+		uint64(b[4])<<32 | uint64(b[5])<<40 | uint64(b[6])<<48 | uint64(b[7])<<56
+	return math.Float64frombits(bits), nil
+}
+
+func (r *Reader) ReadString() (string, error) {
+	n, err := r.ReadLen()
+	if err != nil {
+		return "", err
+	}
+	if n < 0 || r.Remaining() < n {
+		return "", ErrUnexpectedEOF
+	}
+	s := string(r.buf[r.pos : r.pos+n])
+	r.pos += n
+	return s, nil
+}
+
+// ReadBytes reads a length-prefixed byte slice (postcard's Vec<u8>/&[u8]).
+func (r *Reader) ReadBytes() ([]byte, error) {
+	n, err := r.ReadLen()
+	if err != nil {
+		return nil, err
+	}
+	if n < 0 || r.Remaining() < n {
+		return nil, ErrUnexpectedEOF
+	}
+	b := make([]byte, n)
+	copy(b, r.buf[r.pos:r.pos+n])
+	r.pos += n
+	return b, nil
+}
+
+// ReadRaw reads exactly n unframed bytes.
+func (r *Reader) ReadRaw(n int) ([]byte, error) {
+	if n < 0 || r.Remaining() < n {
+		return nil, ErrUnexpectedEOF
+	}
+	b := r.buf[r.pos : r.pos+n]
+	r.pos += n
+	return b, nil
+}
+
+// ReadOptionTag reads an Option<T> presence byte: true means a value
+// follows.
+func (r *Reader) ReadOptionTag() (bool, error) {
+	return r.ReadBool()
+}
+
+func (r *Reader) readVarintU64(maxBytes int) (uint64, error) {
+	var result uint64
+	var shift uint
+	for i := 0; i < maxBytes; i++ {
+		b, err := r.readByte()
+		if err != nil {
+			return 0, err
+		}
+		if shift == 63 && b > 1 {
+			// 10th byte of a u64 carries only bit 63; more would be truncated.
+			return 0, ErrVarintOverflow
+		}
+		result |= uint64(b&0x7f) << shift
+		if b&0x80 == 0 {
+			return result, nil
+		}
+		shift += 7
+	}
+	return 0, ErrVarintOverflow
+}

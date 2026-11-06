@@ -1,0 +1,820 @@
+// Command aidoku-run is a minimal CLI test harness for exercising a
+// compiled Aidoku source directory (source.json + main.wasm, optionally
+// filters.json/settings.json) from the terminal, since AidokuRunner itself
+// has no standalone binary — it's a library the Aidoku app embeds.
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/ohaiibuzzle/aidokurunner-go/cbz"
+	"github.com/ohaiibuzzle/aidokurunner-go/downloads"
+	"github.com/ohaiibuzzle/aidokurunner-go/internal/fsutil"
+	"github.com/ohaiibuzzle/aidokurunner-go/models"
+	"github.com/ohaiibuzzle/aidokurunner-go/repo"
+	"github.com/ohaiibuzzle/aidokurunner-go/runtime"
+	"github.com/ohaiibuzzle/aidokurunner-go/runtime/host"
+	"github.com/ohaiibuzzle/aidokurunner-go/settingsstore"
+	"github.com/ohaiibuzzle/aidokurunner-go/source"
+	"github.com/tetratelabs/wazero"
+)
+
+func main() {
+	if len(os.Args) < 2 {
+		usage()
+		os.Exit(2)
+	}
+	dir := os.Args[1]
+	command := "info"
+	var rest []string
+	if len(os.Args) > 2 {
+		command = os.Args[2]
+		rest = os.Args[3:]
+	}
+
+	if err := run(dir, command, rest); err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
+		os.Exit(1)
+	}
+}
+
+func usage() {
+	fmt.Fprintln(os.Stderr, `usage: aidoku-run <source-dir> [command] [args...]
+
+commands:
+  manifest                          print {"key","name","version","languages"} straight from
+                                     source.json, without loading main.wasm -- much cheaper than
+                                     info/search/etc. for callers that only need a source's
+                                     identity and display name (e.g. listing installed sources)
+  info                              print source metadata and detected features (default)
+  search <query> [page] [filters.json]
+                                     call get_search_manga_list; filters.json, if given, is a JSON array
+                                     of filter selections (see models.FilterValue's MarshalJSON)
+  home                              call get_home
+  listings                          list static + dynamic listings
+  filters                           list static + dynamic filters
+  settings                          list static + dynamic settings
+  settings get <key>                print the current value of one setting (its stored override, or
+                                     its manifest default, or null if neither exists)
+  settings set <key> <type> <value...>
+                                     store a setting value; type is one of toggle/select/text/multiselect
+                                     (toggle takes one true/false value, select/text join every value
+                                     with a space, multiselect takes each value as one selection)
+  manga <key>                       call get_manga_update (details + chapters)
+  pages <manga-key> <chapter-key>   call get_manga_update then get_page_list for the matching chapter
+  download <manga-key> <chapter-key> [output.cbz] [downloads-index-dir] [manga-dir-name]
+                                     download every page of a chapter and combine them into a CBZ archive;
+                                     if downloads-index-dir is given, also records the download into its
+                                     SQLite index there (see the downloads package); if manga-dir-name is
+                                     given, output.cbz's directory gets a new sanitized subdirectory named
+                                     after it created, and the archive is written inside that instead
+  redownload <same args as download>
+                                     like download, but re-fetches even if the chapter is already
+                                     indexed, replacing the old file only once the new one is complete
+  cookie load <cookies.txt>          load cookies from a Netscape cookies.txt file (cf_clearance etc.);
+                                     merges into the store by domain+name, leaving other cookies for the
+                                     same domain (and every other domain) untouched
+  cookie list                        show stored cookie domains
+  cookie clear                       erase every stored cookie
+  repo list <index-url>              fetch a source-repository index (index.min.json) and list its sources
+  repo install <index-url> <source-id> <dest-dir>
+                                     download a source's .aix from a repository index into dest-dir
+  update check <bin-arch> <current-version>
+                                     compare current-version against the latest GitHub release's
+                                     "aidoku-koplugin-<bin-arch>-*" asset; current-version is whatever
+                                     the caller read from its own VERSION file (empty/unparseable is fine --
+                                     reported back as status "unknown_current" rather than an error)
+  update apply <plugin-dir> <asset-url>
+                                     download a release zip (as named/produced above) and atomically
+                                     replace plugin-dir's contents with it
+Cookies stored with `+"`cookie load`"+` are injected into a source's requests
+for the matching domain on every command, helping get past Cloudflare.
+
+AIDOKU_SETTINGS_DIR, if set, persists settings under <dir>/settings.json and
+stored cookies under <dir>/cookies.json, instead of shared temp files, so
+values set with `+"`settings set`"+`/`+"`cookie load`"+` survive across
+invocations and processes -- set this to a real per-install directory for
+anything other than one-off CLI testing.
+
+NETWORK_CONCURRENCY, if set to a positive integer, bounds how many requests
+a guest's net.send_all call runs at once (default 8).
+
+AIDOKU_UPDATE_REPO, if set, overrides the "owner/repo" GitHub slug `+"`update`"+`
+checks/downloads releases from (default ohaiibuzzle/aidoku-backend-0.7).
+
+The <source-dir> argument is required but ignored by the `+"`cookie`"+`, `+"`repo`"+` and
+`+"`update`"+` subcommands, which don't operate on a loaded source. `+"`manifest`"+` does use
+it, but reads source.json directly rather than loading the source.`)
+}
+
+// Overall per-invocation deadlines, so a hung source/server can't keep a
+// process (and any download lock it holds) alive forever.
+const (
+	longCommandTimeout    = 60 * time.Minute // download/redownload/update
+	defaultCommandTimeout = 5 * time.Minute
+)
+
+func run(dir, command string, args []string) (err error) {
+	timeout := defaultCommandTimeout
+	switch command {
+	case "download", "redownload", "update":
+		timeout = longCommandTimeout
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	defer func() {
+		// A guest killed by WithCloseOnContextDone reports an exit code, not
+		// a ctx error, so check ctx itself.
+		if err != nil && errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			err = fmt.Errorf("timed out after %v: %w", timeout, err)
+		}
+	}()
+
+	settingsPath := filepath.Join(os.TempDir(), "aidoku-run-settings.json")
+	if dir := os.Getenv("AIDOKU_SETTINGS_DIR"); dir != "" {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return fmt.Errorf("creating settings dir: %w", err)
+		}
+		settingsPath = filepath.Join(dir, "settings.json")
+	}
+	settings, err := settingsstore.Open(settingsPath)
+	if err != nil {
+		return fmt.Errorf("opening settings store: %w", err)
+	}
+
+	cookiePath := filepath.Join(os.TempDir(), "aidoku-run-cookies.json")
+	if dir := os.Getenv("AIDOKU_SETTINGS_DIR"); dir != "" {
+		cookiePath = filepath.Join(dir, "cookies.json")
+	}
+
+	// If command is "cookie", handle it before loading the source (which is
+	// otherwise only needed so its base URLs are known for display/command
+	// dispatch).
+	if command == "cookie" {
+		return handleCookie(cookiePath, args)
+	}
+	if command == "repo" {
+		return handleRepo(ctx, args)
+	}
+	if command == "manifest" {
+		return handleManifest(dir)
+	}
+	if command == "update" {
+		return handleUpdate(ctx, args)
+	}
+
+	// Every aidoku-run is a fresh process, so only an on-disk cache saves
+	// recompiling main.wasm per command. Purely an optimization: failing to
+	// open it just means compiling from scratch.
+	cacheDir := filepath.Join(os.TempDir(), "aidoku-run-wazero-cache")
+	if dir := os.Getenv("AIDOKU_SETTINGS_DIR"); dir != "" {
+		cacheDir = filepath.Join(dir, "wazero-cache")
+	}
+	compilationCache, err := wazero.NewCompilationCacheWithDir(cacheDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "warning: wazero compilation cache unavailable: %v\n", err)
+		compilationCache = nil
+	} else {
+		defer compilationCache.Close(ctx)
+	}
+
+	interpConfig := runtime.Config{
+		PrintHandler:     func(s string) { fmt.Fprintln(os.Stderr, "[print]", s) },
+		Settings:         settings,
+		CompilationCache: compilationCache,
+		// When FLARESOLVERR_HOST is set and a source's request hits a
+		// Cloudflare challenge, the resulting cookies get persisted here
+		// too (in addition to the in-memory jar), same as `cookie load`.
+		OnFlareSolverrCookies: func(u *url.URL, cookies []*http.Cookie) {
+			_ = persistCookies(cookiePath, cookies) // best-effort: the in-memory jar already has them
+		},
+		NetworkConcurrency: host.NetworkConcurrencyFromEnv(),
+	}
+	src, err := source.LoadPath(ctx, dir, interpConfig, settings)
+	if errors.Is(err, runtime.ErrCompile) && compilationCache != nil {
+		// wazero fails compilation on a corrupt cache entry (checksum
+		// mismatch) instead of recompiling, and never deletes it -- so one
+		// bad file would fail every command for that source, every run
+		// (confirmed on-device). Drop the cache and retry once uncached;
+		// the next run repopulates it. Only on a compile failure: wiping
+		// on every load error (missing main.wasm, a start() trap) would
+		// rewrite the whole cache to flash each run for nothing.
+		fmt.Fprintf(os.Stderr, "warning: retrying without wazero compilation cache: %v\n", err)
+		_ = os.RemoveAll(cacheDir)
+		interpConfig.CompilationCache = nil
+		src, err = source.LoadPath(ctx, dir, interpConfig, settings)
+	}
+	if err != nil {
+		return fmt.Errorf("loading source: %w", err)
+	}
+	defer src.Runner.Close(ctx)
+
+	// Inject stored cookies (e.g. a browser's cf_clearance) into the source's
+	// jar for any of its base-url domains before running the requested
+	// command.
+	injectCookies(src, cookiePath)
+
+	switch command {
+	case "info", "":
+		return printJSON(map[string]any{
+			"key":           src.Key,
+			"name":          src.Name,
+			"version":       src.Version,
+			"languages":     src.Languages,
+			"urls":          src.URLs,
+			"contentRating": src.ContentRating,
+			"onlySearch":    src.OnlySearch(),
+			"hasListings":   src.HasListings(),
+			"features":      src.Features(),
+		})
+
+	case "search":
+		if len(args) < 1 {
+			return fmt.Errorf("usage: search <query> [page] [filters.json]")
+		}
+		page := 1
+		if len(args) > 1 && args[1] != "" {
+			p, err := strconv.Atoi(args[1])
+			if err != nil {
+				return fmt.Errorf("invalid page %q: %w", args[1], err)
+			}
+			page = p
+		}
+		query := args[0]
+		var filters []models.FilterValue
+		if len(args) > 2 && args[2] != "" {
+			data, err := os.ReadFile(args[2])
+			if err != nil {
+				return fmt.Errorf("reading filters file: %w", err)
+			}
+			if err := json.Unmarshal(data, &filters); err != nil {
+				return fmt.Errorf("parsing filters file: %w", err)
+			}
+		}
+		result, err := src.GetSearchMangaList(ctx, &query, page, filters)
+		if err != nil {
+			return err
+		}
+		return printJSON(result)
+
+	case "home":
+		result, err := src.GetHome(ctx, nil)
+		if err != nil {
+			return err
+		}
+		return printJSON(result)
+
+	case "listings":
+		result, err := src.GetListings(ctx)
+		if err != nil {
+			return err
+		}
+		return printJSON(result)
+
+	case "filters":
+		result, err := src.GetSearchFilters(ctx)
+		if err != nil {
+			return err
+		}
+		return printJSON(result)
+
+	case "settings":
+		if len(args) == 0 {
+			result, err := src.GetSettings(ctx)
+			if err != nil {
+				return err
+			}
+			return printJSON(result)
+		}
+		switch args[0] {
+		case "get":
+			if len(args) < 2 {
+				return fmt.Errorf("usage: settings get <key>")
+			}
+			return printJSON(map[string]any{"value": settings.Object(src.Key + "." + args[1])})
+		case "set":
+			if len(args) < 3 {
+				return fmt.Errorf("usage: settings set <key> <type> <value...>")
+			}
+			key := src.Key + "." + args[1]
+			settingType := args[2]
+			rest := args[3:]
+			var value any
+			switch settingType {
+			case "toggle":
+				if len(rest) < 1 {
+					return fmt.Errorf("usage: settings set <key> toggle <true|false>")
+				}
+				b, err := strconv.ParseBool(rest[0])
+				if err != nil {
+					return fmt.Errorf("invalid toggle value %q (want true/false): %w", rest[0], err)
+				}
+				value = b
+			case "select", "text":
+				value = strings.Join(rest, " ")
+			case "multiselect":
+				value = rest
+			default:
+				return fmt.Errorf("unsupported setting type %q (want toggle/select/text/multiselect)", settingType)
+			}
+			if err := settings.SetValue(key, value); err != nil {
+				return fmt.Errorf("setting value: %w", err)
+			}
+			// Every other successful command prints something to stdout
+			// (a JSON body, or at least a path), which is how
+			// subprocess.lua's Runner:exec tells success from failure --
+			// empty trimmed output is treated as an error there. Printing
+			// nothing here would misreport a successful set as failed.
+			fmt.Println("ok")
+			return nil
+		default:
+			return fmt.Errorf("unknown settings command %q (want get/set, or no args to list)", args[0])
+		}
+
+	case "manga":
+		if len(args) < 1 {
+			return fmt.Errorf("usage: manga <key>")
+		}
+		manga := models.Manga{Key: args[0]}
+		result, err := src.GetMangaUpdate(ctx, manga, true, true, nil)
+		if err != nil {
+			return err
+		}
+		return printJSON(result)
+
+	case "pages":
+		if len(args) < 2 {
+			return fmt.Errorf("usage: pages <manga-key> <chapter-key>")
+		}
+		manga := models.Manga{Key: args[0]}
+		updated, err := src.GetMangaUpdate(ctx, manga, true, true, nil)
+		if err != nil {
+			return err
+		}
+		var chapter *models.Chapter
+		for i := range updated.Chapters {
+			if updated.Chapters[i].Key == args[1] {
+				chapter = &updated.Chapters[i]
+				break
+			}
+		}
+		if chapter == nil {
+			return fmt.Errorf("chapter %q not found on manga %q", args[1], args[0])
+		}
+		pages, err := src.GetPageList(ctx, *updated, *chapter)
+		if err != nil {
+			return err
+		}
+		return printJSON(pages)
+
+	case "download", "redownload":
+		if len(args) < 2 {
+			return fmt.Errorf("usage: %s <manga-key> <chapter-key> [output.cbz] [downloads-index-dir] [manga-dir-name]", command)
+		}
+		redownload := command == "redownload"
+		manga := models.Manga{Key: args[0]}
+		updated, err := src.GetMangaUpdate(ctx, manga, true, true, nil)
+		if err != nil {
+			return err
+		}
+		var chapter *models.Chapter
+		for i := range updated.Chapters {
+			if updated.Chapters[i].Key == args[1] {
+				chapter = &updated.Chapters[i]
+				break
+			}
+		}
+		if chapter == nil {
+			return fmt.Errorf("chapter %q not found on manga %q", args[1], args[0])
+		}
+		outputPath := ""
+		if len(args) > 2 {
+			outputPath = args[2]
+		}
+		downloadsDir := ""
+		if len(args) > 3 {
+			downloadsDir = args[3]
+		}
+		mangaDirName := ""
+		if len(args) > 4 {
+			mangaDirName = args[4]
+		}
+
+		// A bare, non-indexed download (downloadsDir == "") has nothing to
+		// deduplicate against or record into, so it skips all of the below.
+		if downloadsDir == "" {
+			path, err := src.DownloadChapterCBZ(ctx, *updated, *chapter, outputPath, mangaDirName, printDownloadProgress)
+			if err != nil {
+				return err
+			}
+			fmt.Println(path)
+			return nil
+		}
+
+		// The cross-process lock exists purely to stop two invocations
+		// downloading the same indexed chapter at once -- see
+		// downloads.AcquireLock's doc.
+		lock, err := downloads.AcquireLock(ctx, src.Key, updated.Key, chapter.Key)
+		if err != nil {
+			return fmt.Errorf("acquiring download lock: %w", err)
+		}
+		defer lock.Release()
+
+		store, err := downloads.Open(downloadsDir)
+		if err != nil {
+			return fmt.Errorf("opening downloads index: %w", err)
+		}
+		defer store.Close()
+
+		// Whoever held this lock before us may have just finished
+		// downloading this exact chapter while we were blocked waiting for
+		// it -- re-check the index now that we own the lock, rather than
+		// unconditionally re-fetching every page. os.Stat guards against a
+		// stale row whose file was since deleted out from under it.
+		// redownload skips this on purpose, and replaces the old file only
+		// once the new one is fully written (cbz.Writer's atomic rename) --
+		// the plugin used to delete first, losing the only copy whenever
+		// the re-fetch failed or the user was offline.
+		existing, err := store.Path(src.Key, updated.Key, chapter.Key)
+		if err != nil {
+			return err
+		}
+		if existing != "" && !redownload {
+			if _, statErr := os.Stat(existing); statErr == nil {
+				fmt.Println(existing)
+				return nil
+			}
+		}
+
+		// Steer clear of a filename another chapter already owns (two
+		// chapters titled e.g. "Omake") before writing, so this download
+		// can't overwrite that chapter's file.
+		path, err := source.ResolveOutputPath(outputPath, mangaDirName, *updated, *chapter)
+		if err != nil {
+			return err
+		}
+		// The chapter lock above doesn't exclude a *different* chapter whose
+		// title sanitizes to the same path; this does, so UnusedPath below
+		// sees the other's row once it's recorded. Always chapter -> path.
+		pathLock, err := downloads.AcquirePathLock(ctx, path)
+		if err != nil {
+			return fmt.Errorf("acquiring output path lock: %w", err)
+		}
+		defer pathLock.Release()
+		if path, err = store.UnusedPath(src.Key, updated.Key, chapter.Key, path); err != nil {
+			return err
+		}
+		cbz.RemoveStaleTemps(filepath.Dir(path), time.Hour)
+		if path, err = src.DownloadChapterCBZ(ctx, *updated, *chapter, path, "", printDownloadProgress); err != nil {
+			return err
+		}
+		// Recording here, in the same process/invocation that just wrote
+		// the CBZ, means a failed or killed download can never leave the
+		// index pointing at a file that doesn't exist (or vice versa). The
+		// recorded path can still differ from the one just written, see
+		// downloads.Store.disambiguatePath.
+		entry, err := store.Record(src.Key, dir, updated.Key, chapter.Key, path, source.MangaLabel(*updated), source.ChapterLabel(*chapter), chapter.ChapterNumber, chapter.VolumeNumber)
+		if err != nil {
+			return fmt.Errorf("recording download: %w", err)
+		}
+		if redownload && existing != "" && existing != entry.Path {
+			_ = os.Remove(existing) // the title (and so its filename) changed since
+		}
+		fmt.Println(entry.Path)
+		return nil
+
+	default:
+		usage()
+		return fmt.Errorf("unknown command %q", command)
+	}
+}
+
+func printDownloadProgress(current, total int) {
+	fmt.Fprintf(os.Stderr, "[download] page %d/%d\n", current, total)
+}
+
+func printJSON(v any) error {
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	return enc.Encode(v)
+}
+
+// cookieEntry is one stored cookie. Domain is the bare host (no scheme, no
+// leading ".", no "www."); IncludeSubdomains=true makes it a domain cookie
+// (sent to the host and its subdomains), false makes it host-only.
+type cookieEntry struct {
+	Domain            string `json:"domain"`
+	IncludeSubdomains bool   `json:"include_subdomains"`
+	Path              string `json:"path,omitempty"`
+	Secure            bool   `json:"secure"`
+	Expires           int64  `json:"expires,omitempty"` // unix seconds; 0 = no expiry
+	Name              string `json:"name"`
+	Value             string `json:"value"`
+}
+
+// cookie maps a normalized domain to its stored cookies. Persisted so cookies
+// added in one invocation are injected on the next.
+type cookieFile map[string][]cookieEntry
+
+// readCookieFile returns an empty cookieFile if path is missing or corrupt;
+// corrupt reports the latter, so a caller about to write can keep a copy.
+func readCookieFile(path string) (f cookieFile, corrupt bool) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return cookieFile{}, false
+	}
+	if err := json.Unmarshal(b, &f); err != nil {
+		fmt.Fprintf(os.Stderr, "aidoku-run: cookie file %s is corrupt, ignoring: %v\n", path, err)
+		return cookieFile{}, true
+	}
+	if f == nil {
+		f = cookieFile{}
+	}
+	return f, false
+}
+
+// writeCookieFile writes via a temp file + rename in the same directory
+// (same pattern as settingsstore.save() and cbz.Writer.Close()), so a
+// crash, power loss, or a second aidoku-run invocation writing cookies at
+// the same time never leaves cookies.json truncated or corrupt.
+func writeCookieFile(path string, f cookieFile) error {
+	b, err := json.MarshalIndent(f, "", "  ")
+	if err != nil {
+		return err
+	}
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return err
+	}
+	tmp, err := os.CreateTemp(dir, ".cookies-*.tmp")
+	if err != nil {
+		return err
+	}
+	tmpPath := tmp.Name()
+	// Best-effort: CreateTemp already made it 0600, and FAT refuses chmod
+	// (EPERM) when the process doesn't own the mount.
+	_ = tmp.Chmod(0o600)
+	if _, err := tmp.Write(b); err != nil {
+		tmp.Close()
+		os.Remove(tmpPath)
+		return err
+	}
+	if err := tmp.Sync(); err != nil {
+		tmp.Close()
+		os.Remove(tmpPath)
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		os.Remove(tmpPath)
+		return err
+	}
+	if err := os.Rename(tmpPath, path); err != nil {
+		os.Remove(tmpPath)
+		return err
+	}
+	_ = fsutil.SyncDir(dir) // best-effort, see cbz.Writer.Close
+	return nil
+}
+
+// cookie returns the *http.Cookie corresponding to this stored entry, for
+// injection via cookiejar.Jar.SetCookies (see injectCookies). Per RFC 6265
+// (and Go's cookiejar implementation of it), any non-empty Domain
+// attribute -- dotted or not -- makes a cookie apply to subdomains too;
+// the only way to get a host-only cookie back out of SetCookies is to
+// leave Domain empty entirely, so IncludeSubdomains == false must not set
+// it to the bare hostname either. Setting it unconditionally used to turn
+// every re-injected host-only cookie into a domain cookie.
+func (e cookieEntry) cookie() *http.Cookie {
+	c := &http.Cookie{Name: e.Name, Value: e.Value, Path: e.Path}
+	if c.Path == "" {
+		c.Path = "/"
+	}
+	c.Secure = e.Secure
+	if e.Expires > 0 {
+		c.Expires = time.Unix(e.Expires, 0)
+	}
+	if e.IncludeSubdomains {
+		c.Domain = e.Domain
+	}
+	return c
+}
+
+// entriesFromNetscape converts parsed cookies.txt cookies into storage
+// entries, preserving domain/subdomain/path/secure/expiry.
+func entriesFromNetscape(cs []*http.Cookie) []cookieEntry {
+	var out []cookieEntry
+	for _, c := range cs {
+		e := cookieEntry{Name: c.Name, Value: c.Value, Path: c.Path, Secure: c.Secure}
+		if c.Domain != "" {
+			e.IncludeSubdomains = strings.HasPrefix(c.Domain, ".")
+			e.Domain = strings.TrimPrefix(c.Domain, ".")
+		}
+		if !c.Expires.IsZero() {
+			e.Expires = c.Expires.Unix()
+		}
+		out = append(out, e)
+	}
+	return out
+}
+
+// persistCookies merges cookies (e.g. a solved cf_clearance from
+// FlareSolverr) into the cookie store at path, so they're injected again on
+// the next invocation. Per domain, incoming cookies replace any existing
+// entry of the same name (a fresh solve supersedes a stale one) while
+// leaving other cookies for that domain untouched.
+func persistCookies(path string, cookies []*http.Cookie) error {
+	if len(cookies) == 0 {
+		return nil
+	}
+	// Under a cross-process lock: a background prefetch's FlareSolverr solve
+	// and a foreground command's can otherwise both read, merge, and write,
+	// with the second write dropping the first's cookies.
+	return settingsstore.Locked(path, func() error {
+		return mergeCookies(path, cookies)
+	})
+}
+
+func mergeCookies(path string, cookies []*http.Cookie) error {
+	f, corrupt := readCookieFile(path)
+	if corrupt {
+		// Writing below would otherwise permanently replace whatever was
+		// in it with only these cookies.
+		if err := os.Rename(path, path+".corrupt"); err != nil {
+			return fmt.Errorf("keeping a copy of corrupt cookie file: %w", err)
+		}
+	}
+	byDomain := map[string][]cookieEntry{}
+	for _, e := range entriesFromNetscape(cookies) {
+		if e.Domain == "" {
+			continue
+		}
+		byDomain[e.Domain] = append(byDomain[e.Domain], e)
+	}
+	for domain, incoming := range byDomain {
+		merged := make([]cookieEntry, 0, len(f[domain])+len(incoming))
+		for _, e := range f[domain] {
+			if !cookieEntriesContainName(incoming, e.Name) {
+				merged = append(merged, e)
+			}
+		}
+		f[domain] = append(merged, incoming...)
+	}
+	return writeCookieFile(path, f)
+}
+
+func cookieEntriesContainName(entries []cookieEntry, name string) bool {
+	for _, e := range entries {
+		if e.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+// handleManifest serves the "manifest" command, reading dir's source.json
+// directly instead of going through source.LoadPath -- deliberately not
+// loading main.wasm at all, so this is cheap enough to call once per
+// installed source on every listing (see source.ReadManifest).
+func handleManifest(dir string) error {
+	info, err := source.ReadManifest(dir)
+	if err != nil {
+		return err
+	}
+	return printJSON(map[string]any{
+		"key":       info.Key,
+		"name":      info.Name,
+		"version":   info.Version,
+		"languages": info.Languages,
+	})
+}
+
+func handleRepo(ctx context.Context, args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("usage: repo list <index-url> | repo install <index-url> <source-id> <dest-dir>")
+	}
+	switch args[0] {
+	case "list":
+		if len(args) < 2 {
+			return fmt.Errorf("usage: repo list <index-url>")
+		}
+		idx, err := repo.FetchIndex(ctx, args[1])
+		if err != nil {
+			return err
+		}
+		return printJSON(idx)
+
+	case "install":
+		if len(args) < 4 {
+			return fmt.Errorf("usage: repo install <index-url> <source-id> <dest-dir>")
+		}
+		path, err := repo.Install(ctx, args[1], args[2], args[3])
+		if err != nil {
+			return err
+		}
+		fmt.Println(path)
+		return nil
+
+	default:
+		return fmt.Errorf("unknown repo command %q", args[0])
+	}
+}
+
+func handleCookie(path string, args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("usage: cookie load <cookies.txt> | cookie list | cookie clear")
+	}
+	switch args[0] {
+	case "load":
+		if len(args) < 2 {
+			return fmt.Errorf("usage: cookie load <cookies.txt>")
+		}
+		data, err := os.ReadFile(args[1])
+		if err != nil {
+			return err
+		}
+		cookies, err := host.ParseNetscapeCookies(data)
+		if err != nil {
+			return err
+		}
+		if len(cookies) == 0 {
+			fmt.Println("no usable (non-expired) cookies in that file")
+			return nil
+		}
+		// persistCookies merges by domain+name, so an import only ever
+		// replaces same-named cookies -- it never wipes other cookies
+		// already stored for that domain (or any other domain).
+		if err := persistCookies(path, cookies); err != nil {
+			return fmt.Errorf("saving cookies: %w", err)
+		}
+		fmt.Printf("loaded %d cookie(s) from %s\n", len(cookies), args[1])
+		return nil
+
+	case "list":
+		f, _ := readCookieFile(path)
+		if len(f) == 0 {
+			fmt.Println("(no cookies stored)")
+			return nil
+		}
+		domains := make([]string, 0, len(f))
+		for d := range f {
+			domains = append(domains, d)
+		}
+		sort.Strings(domains)
+		for _, d := range domains {
+			for _, e := range f[d] {
+				scoped := e.Domain
+				if e.IncludeSubdomains {
+					scoped = "." + scoped
+				}
+				fmt.Printf("%s\t%s\n", scoped, e.Name+"="+e.Value)
+			}
+		}
+		return nil
+
+	case "clear":
+		if err := settingsstore.Locked(path, func() error { return writeCookieFile(path, cookieFile{}) }); err != nil {
+			return err
+		}
+		fmt.Println("cleared all stored cookies")
+		return nil
+
+	default:
+		return fmt.Errorf("unknown cookie command %q", args[0])
+	}
+}
+
+// injectCookies pushes every stored cookie into src's shared jar. Because the
+// jar is shared process-wide but scoped per-domain, each cookie goes in under
+// its own domain URL and is then sent on any request to that host (from any
+// source), which is exactly the URLSession.shared behavior upstream relies on.
+func injectCookies(src *source.Source, path string) {
+	f, _ := readCookieFile(path)
+	if len(f) == 0 {
+		return
+	}
+	jar := src.Runner.CookieJar()
+	if jar == nil {
+		return
+	}
+	for domain, entries := range f {
+		if domain == "" {
+			continue
+		}
+		cookies := make([]*http.Cookie, 0, len(entries))
+		for _, e := range entries {
+			cookies = append(cookies, e.cookie())
+		}
+		jar.SetCookies(&url.URL{Scheme: "https", Host: domain, Path: "/"}, cookies)
+	}
+}

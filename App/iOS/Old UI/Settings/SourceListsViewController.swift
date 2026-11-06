@@ -32,13 +32,13 @@ class SourceListsViewController: UITableViewController {
 
         title = NSLocalizedString("SOURCE_LISTS", comment: "")
         let note = UILabel()
-        note.text = "Separate manga sources, library, and history. This section supports legacy .aix sources. New Aidoku 0.7+ source packages are not compatible. The legacy community list is unmaintained, so some providers may no longer work."
+        note.text = "Separate manga sources, library, and history. Add the current community repository below. Existing legacy sources are retained. Website availability and account requirements vary by provider."
         note.font = .preferredFont(forTextStyle: .footnote)
         note.textColor = .secondaryLabel
         note.numberOfLines = 0
         let add = UIButton(type: .system)
         var configuration = UIButton.Configuration.glass()
-        configuration.title = "Add legacy community list"
+        configuration.title = "Add community source repository"
         add.configuration = configuration
         add.addTarget(self, action: #selector(addCompatibleList), for: .touchUpInside)
         let stack = UIStackView(arrangedSubviews: [note, add])
@@ -82,7 +82,7 @@ class SourceListsViewController: UITableViewController {
     }
 
     @objc private func addCompatibleList() {
-        let url = URL(string: "https://raw.githubusercontent.com/Skittyblock/aidoku-community-sources/gh-pages/")!
+        let url = URL(string: "https://aidoku-community.github.io/sources/")!
         guard !SourceManager.shared.sourceLists.contains(url) else { return }
         Task {
             let success = await SourceManager.shared.addSourceList(url: url)

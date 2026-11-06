@@ -44,7 +44,7 @@ extension SettingsAboutViewController {
         switch indexPath.row {
         case 0:
             cell?.textLabel?.text = NSLocalizedString("VERSION", comment: "")
-            cell?.detailTextLabel?.text = Optional("0.6.11")
+            cell?.detailTextLabel?.text = Optional("Modern sources + legacy 0.6.11")
                                             ?? NSLocalizedString("UNKNOWN", comment: "")
         case 1:
             cell?.textLabel?.text = NSLocalizedString("BUILD", comment: "")

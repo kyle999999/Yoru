@@ -18,7 +18,7 @@ class SourceManager {
     var sourceLists: [URL] = []
 
     static let languageCodes = [
-        "multi", "en", "ca", "de", "es", "fr", "id", "it", "pl", "pt-br", "vi", "tr", "ru", "ar", "zh", "zh-hans", "ja", "ko"
+        "multi", "en", "ca", "de", "es", "fr", "id", "it", "pl", "pt-br", "vi", "tr", "ru", "ar", "zh", "zh-hans", "ja", "ko", "th"
     ]
 
     private var sourceListsStrings: [String] {
@@ -51,6 +51,12 @@ class SourceManager {
         }
         sourceLists = (AidokuStorage.defaults.array(forKey: "Browse.sourceLists") as? [String] ?? []).compactMap { URL(string: $0) }
 
+        if !AidokuStorage.defaults.bool(forKey: "ModernSources.repositoryAdded") {
+            let current = URL(string: "https://aidoku-community.github.io/sources/")!
+            if !sourceLists.contains(where: { Self.repositoryBaseURL($0) == current }) { sourceLists.append(current) }
+            AidokuStorage.defaults.set(sourceListsStrings, forKey: "Browse.sourceLists")
+            AidokuStorage.defaults.set(true, forKey: "ModernSources.repositoryAdded")
+        }
         // load source filters
         Task {
             await withTaskGroup(of: Void.self) { group in
@@ -95,8 +101,10 @@ extension SourceManager {
             let payload = temporaryDirectory.appendingPathComponent("Payload")
             let source = try Source(from: payload)
             // Validate the ABI before replacing a working installation. No version bypass.
-            for function in ["get_manga_list", "get_manga_details", "get_chapter_list", "get_page_list"] {
-                _ = try source.globalStore.vm.function(named: function)
+            if source.modern == nil {
+                for function in ["get_manga_list", "get_manga_details", "get_chapter_list", "get_page_list"] {
+                    _ = try source.globalStore.vm.function(named: function)
+                }
             }
             try await source.actor.initialize()
             guard !source.id.isEmpty, !source.id.contains("/"), source.id != ".", source.id != ".." else {
@@ -131,7 +139,11 @@ extension SourceManager {
                 return lhs == rhs ? $0.manifest.info.name < $1.manifest.info.name : lhs < rhs
             }
             NotificationCenter.default.post(name: Notification.Name("updateSourceList"), object: nil)
-            _ = try await source.getFilters()
+            do { _ = try await source.getFilters() }
+            catch {
+                source.needsFilterRefresh = true
+                LogManager.logger.error("[\(source.id)] Installed successfully; metadata loading failed: \(error.localizedDescription)")
+            }
             return source
         } catch {
             LogManager.logger.error("Source installation failed (\(url.isFileURL ? "local file" : url.host ?? "unknown host")): \(error.localizedDescription)")
@@ -218,13 +230,6 @@ extension SourceManager {
         NotificationCenter.default.post(name: Notification.Name("updateSourceLists"), object: nil)
     }
 
-    enum RepositoryError: LocalizedError {
-        case modernABI
-        var errorDescription: String? {
-            "This is a modern Aidoku repository requiring the 0.7+ source ABI; use a legacy source list with the integrated runtime."
-        }
-    }
-
     static func repositoryIndexURL(_ url: URL) -> URL {
         url.pathExtension.lowercased() == "json" ? url : url.appendingPathComponent("index.min.json")
     }
@@ -241,10 +246,11 @@ extension SourceManager {
             try SourceHTTPValidation.validate(response)
             // A modern repository envelope is not proof of a compatible source ABI.
             // Decode legacy entries only; reject newer schemas rather than hiding all failures.
+            struct Repository: Decodable { let sources: [ExternalSourceInfo] }
+            let sources: [ExternalSourceInfo]
             if let object = try JSONSerialization.jsonObject(with: data) as? [String: Any], object["sources"] != nil {
-                throw RepositoryError.modernABI
-            }
-            let sources = try JSONDecoder().decode([ExternalSourceInfo].self, from: data)
+                sources = try JSONDecoder().decode(Repository.self, from: data).sources
+            } else { sources = try JSONDecoder().decode([ExternalSourceInfo].self, from: data) }
             return sources
         } catch {
             LogManager.logger.error("Repository load failed (\(url.host ?? "unknown")): \(error.localizedDescription)")

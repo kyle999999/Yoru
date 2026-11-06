@@ -39,6 +39,7 @@ actor SourceViewModel {
         guard let source = source else { return }
         let reset = source.needsFilterRefresh
         filters = (try? await source.getFilters()) ?? []
+        listings = source.listings
         if selectedFilters.filters.isEmpty || reset {
             resetSelectedFilters()
         }

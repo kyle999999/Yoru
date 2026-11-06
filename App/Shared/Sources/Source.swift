@@ -69,13 +69,14 @@ class Source: Identifiable {
     var id: String {
         manifest.info.id
     }
-    var url: URL
+    var url: URL { didSet { modern?.url = url } }
+    var modern: ModernSourceBridge?
     var manifest: SourceManifest
 
     var filters: [FilterBase] = []
     var defaultFilters: [FilterBase] = []
     var listings: [Listing] {
-        manifest.listings ?? []
+        modern?.listings.isEmpty == false ? modern!.listings : manifest.listings ?? []
     }
 
     var languages: [LanguageInfo] {
@@ -96,19 +97,41 @@ class Source: Identifiable {
     var handlesImageRequests = false
     var needsFilterRefresh = true
 
-    var globalStore: WasmGlobalStore
-    var netModule: WasmNet
+    var globalStore: WasmGlobalStore!
+    var netModule: WasmNet!
 
     var actor: SourceActor!
 
     init(from url: URL) throws {
         self.url = url
         let data = try Data(contentsOf: url.appendingPathComponent("source.json"))
-        if let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let info = object["info"] as? [String: Any], info["lang"] == nil, info["languages"] != nil {
-            throw CompatibilityError.modernSourceABI
+        var object = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+        var info = object["info"] as? [String: Any] ?? [:]
+        let modernABI = info["lang"] == nil && info["languages"] != nil
+        if modernABI {
+            let codes = info["languages"] as? [String] ?? []
+            info["lang"] = codes.count == 1 ? codes[0].lowercased() : "multi"
+            info["nsfw"] = info["contentRating"]
+            object["info"] = info
+            if let listings = object["listings"] as? [Any] {
+                object["listings"] = listings.map { item -> [String: Any] in
+                    if let name = item as? String { return ["name": name] }
+                    var listing = item as? [String: Any] ?? [:]
+                    listing["name"] = listing["name"] ?? listing["id"] ?? ""
+                    return listing
+                }
+            }
+            object["languageSelectType"] = (object["config"] as? [String: Any])?["languageSelectType"]
+            object["languages"] = codes.map { ["code": $0, "value": $0, "default": $0 == "en"] as [String: Any] }
         }
-        manifest = try JSONDecoder().decode(SourceManifest.self, from: data)
+        manifest = try JSONDecoder().decode(SourceManifest.self, from: JSONSerialization.data(withJSONObject: object))
+        if modernABI {
+            modern = ModernSourceBridge(id: manifest.info.id, url: url)
+            actor = SourceActor(source: self)
+            handlesImageRequests = true
+            loadSettings()
+            return
+        }
 
         let bytes = try Data(contentsOf: url.appendingPathComponent("main.wasm"))
         let vm = try WasmInterpreter(stackSize: 512 * 1024, module: [UInt8](bytes))
@@ -123,17 +146,12 @@ class Source: Identifiable {
         initialize()
     }
 
-    enum CompatibilityError: LocalizedError {
-        case modernSourceABI
-        var errorDescription: String? {
-            "This extension uses the Aidoku 0.7+ source ABI. The integrated GPL legacy runtime cannot execute it. The existing installed extension was preserved."
-        }
-    }
+    var iconURL: URL { url.appendingPathComponent(modern == nil ? "Icon.png" : "icon.png") }
 
     func toInfo() -> SourceInfo2 {
         SourceInfo2(
             sourceId: manifest.info.id,
-            iconUrl: url.appendingPathComponent("Icon.png"),
+            iconUrl: iconURL,
             name: manifest.info.name,
             lang: manifest.info.lang,
             version: manifest.info.version,
@@ -310,6 +328,13 @@ extension Source {
 
     func getFilters() async throws -> [FilterBase] {
         guard filters.isEmpty || needsFilterRefresh else { return filters }
+        if modern != nil {
+            filters = try await actor.loadModernMetadata()
+            needsFilterRefresh = false
+            defaultFilters = []
+            _ = getDefaultFilters()
+            return filters
+        }
 
         filters = []
 
@@ -400,6 +425,7 @@ extension Source {
     }
 
     func modifyUrlRequest(request: URLRequest) -> URLRequest? {
+        guard let netModule else { return request }
         guard !netModule.isRateLimited() else { return nil }
         return netModule.modifyRequest(request)
     }
@@ -409,6 +435,10 @@ extension Source {
     }
 
     func performAction(key: String) {
+        if modern != nil {
+            needsFilterRefresh = true
+            if key == id + ".refreshMetadata" { return }
+        }
         Task {
             await actor.handleNotification(notification: key)
         }

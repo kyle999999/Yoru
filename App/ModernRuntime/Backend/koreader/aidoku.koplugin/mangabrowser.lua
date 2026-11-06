@@ -1,0 +1,599 @@
+--[[--
+Shows one manga's chapter list, and downloads a chapter as a CBZ (skipping
+the network if already downloaded) then opens it. Bookmarking happens from
+searchbrowser.lua, not here. reload() (below) renders the local downloads
+index first, refreshing from the network only when connected.
+
+Requires both source_path (for search/mangaUpdate/download) and source_key
+(for downloads-index ops) -- see the downloads Go package doc for why
+they're kept separate. Callers with only one (e.g. librarybrowser.lua's
+bookmarks, which store source_key) must resolve the other via
+installedsources.lua's findByKey first.
+]]
+
+local ButtonDialog = require("ui/widget/buttondialog")
+local ChapterCache = require("chaptercache")
+local ChapterOrder = require("chapterorder")
+local ConfirmBox = require("ui/widget/confirmbox")
+local InfoMessage = require("ui/widget/infomessage")
+local InputDialog = require("ui/widget/inputdialog")
+local Menu = require("ui/widget/menu")
+local NetworkMgr = require("ui/network/manager")
+local OpenWidgets = require("openwidgets")
+local Prefetch = require("prefetch")
+local Trapper = require("ui/trapper")
+local UIManager = require("ui/uimanager")
+local lfs = require("libs/libkoreader-lfs")
+local util = require("util")
+local T = require("ffi/util").template
+local _ = require("aidoku_l10n")
+
+local MangaBrowser = Menu:extend{}
+
+local mangaLabel = Prefetch.mangaLabel
+local chapterLabel = Prefetch.chapterLabel
+
+function MangaBrowser:init()
+    self.title = mangaLabel(self.manga)
+    self.subtitle = self.source_name
+    self.chapters = {}
+    self.downloaded_keys = {} -- chapter Key -> local path, refreshed by reload()
+    self.item_table = {}
+    -- The hamburger menu (see onLeftButtonTap below) groups the sort-order
+    -- toggle and bulk-download -- same technique as librarybrowser.lua's
+    -- own title_bar_left_icon/onLeftButtonTap.
+    self.title_bar_left_icon = "appbar.menu"
+    Menu.init(self)
+    OpenWidgets.push(self)
+    -- See the same note in repobrowser.lua's init(): defer past the
+    -- caller's own UIManager:show(self), since reload()'s progress widget
+    -- would otherwise show (and get buried) first.
+    UIManager:nextTick(function() self:reload() end)
+end
+
+-- See librarybrowser.lua's onCloseWidget for why this is needed. Also
+-- records that this screen is gone, so a still-in-flight prefetchAhead
+-- (started before openLocal below closes this screen and switches to the
+-- reader) knows not to call refresh() on it once the prefetch finishes --
+-- see prefetchAhead's on_complete.
+function MangaBrowser:onCloseWidget()
+    Menu.onCloseWidget(self)
+    OpenWidgets.remove(self)
+    self.closed = true
+end
+
+-- The hamburger menu (see title_bar_left_icon above) groups the sort-order
+-- toggle (moved here from its own dedicated button -- its current state
+-- shows as this button's label, same as librarybrowser.lua's "Sort: X"
+-- convention, so no separate toast is needed on toggle) and bulk-downloading
+-- the next N chapters (see downloadNext()). Anchored under the hamburger
+-- icon itself, same technique as librarybrowser.lua:82-136.
+function MangaBrowser:onLeftButtonTap()
+    local dialog
+    local buttons = {
+        {{
+            text = self.store:sortOrder() == "asc" and _("Sort: Oldest first") or _("Sort: Newest first"),
+            callback = function()
+                UIManager:close(dialog)
+                self.store:setSortOrder(self.store:sortOrder() == "asc" and "desc" or "asc")
+                self:refresh()
+            end,
+        }},
+    }
+    -- Bulk pre-downloading conflicts with Ephemeral Mode's residency cap
+    -- (removeAllExcept keeps at most ~1-2 chapters resident globally -- see
+    -- CLAUDE.md's "Ephemeral Mode" section) -- anything queued here would
+    -- just get deleted again before it's ever read, so hide the option
+    -- entirely rather than let it queue work that can't stick.
+    if not self.store:isEphemeralMode() then
+        table.insert(buttons, {{
+            text = _("Download next chapters…"),
+            callback = function()
+                UIManager:close(dialog)
+                self:promptBulkDownload()
+            end,
+        }})
+    end
+    table.insert(buttons, {{
+        text = _("Reset reading progress…"),
+        callback = function()
+            UIManager:close(dialog)
+            self:promptResetProgress()
+        end,
+    }})
+    dialog = ButtonDialog:new{
+        shrink_unneeded_width = true,
+        anchor = function() return self.title_bar.left_button.image.dimen end,
+        buttons = buttons,
+    }
+    UIManager:show(dialog)
+end
+
+-- promptResetProgress clears every read mark for this manga (so Resume and
+-- "Download next chapters…" start over from the first chapter) and wipes
+-- the saved page position of its downloaded chapters (so they reopen at
+-- page 1). Downloads themselves and the Library's last_read timestamp are
+-- left alone.
+function MangaBrowser:promptResetProgress()
+    UIManager:show(ConfirmBox:new{
+        text = T(_("Reset progress for %1?\n\nClears read marks and page positions."),
+            mangaLabel(self.manga)),
+        ok_text = _("Reset"),
+        ok_callback = function()
+            self.store:resetReadChapters(self.source_key, self.manga.Key)
+            self.downloads_engine:resetProgress(self.source_key, self.manga.Key)
+            self:refresh()
+        end,
+    })
+end
+
+-- downloadedPath returns the local CBZ path for chapter_key if downloaded
+-- and still present, else "". Reads self.downloaded_keys (an in-memory
+-- snapshot, not a fresh index.db query each time -- a manga can have dozens
+-- of chapters) with a cheap local lfs stat; a stale entry is just treated
+-- as "not downloaded" rather than cleaned up here.
+function MangaBrowser:downloadedPath(chapter_key)
+    local path = self.downloaded_keys[chapter_key]
+    if not path or path == "" then
+        return ""
+    end
+    if lfs.attributes(path, "mode") ~= "file" then
+        return ""
+    end
+    return path
+end
+
+function MangaBrowser:genItemTable()
+    local item_table = {}
+    local sort_order = self.store:sortOrder()
+    local ordered = self.chapters
+    if sort_order == "asc" then
+        ordered = {}
+        for i = #self.chapters, 1, -1 do
+            table.insert(ordered, self.chapters[i])
+        end
+    end
+    for _idx, chapter in ipairs(ordered) do
+        local mandatory_parts = {}
+        if self.store:isChapterRead(self.source_key, self.manga.Key, chapter.Key) then
+            table.insert(mandatory_parts, _("Read"))
+        end
+        if self:downloadedPath(chapter.Key) ~= "" then
+            table.insert(mandatory_parts, "✓")
+        end
+        table.insert(item_table, {
+            text = chapterLabel(chapter),
+            mandatory = table.concat(mandatory_parts, " "),
+            chapter = chapter,
+        })
+    end
+    return item_table
+end
+
+function MangaBrowser:refresh()
+    self.item_table = self:genItemTable()
+    self:updateItems()
+end
+
+-- reloadDownloadedKeys fetches the full downloads index (unless a
+-- previously-fetched list is passed in, to avoid a second index.db query
+-- when reload() already has one) and keeps just this manga's entries, so
+-- per-row downloadedPath() lookups are local table reads instead of one
+-- SQLite query each -- see the note on this in downloadedPath(). Returns
+-- the full (unfiltered) list, for callers that also need it (reload()'s
+-- offline chapter-list fallback).
+function MangaBrowser:reloadDownloadedKeys(all)
+    all = all or self.downloads_engine:list()
+    self.downloaded_keys = {}
+    if not all then
+        return all
+    end
+    for _idx, entry in ipairs(all) do
+        if entry.sourceKey == self.source_key and entry.mangaKey == self.manga.Key then
+            self.downloaded_keys[entry.chapterKey] = entry.path
+        end
+    end
+    return all
+end
+
+-- reload() always shows what's already downloaded first, straight from the
+-- local downloads index, so this manga stays browsable offline. It then
+-- opportunistically refreshes from ChapterCache or, on a miss, the network
+-- -- but only if already connected, skipping past otherwise rather than
+-- popping a "connect to network?" prompt.
+--
+-- Every exit path ends with promptResume() so that prompt appears once
+-- chapter data is ready, whichever path supplied it.
+function MangaBrowser:reload()
+    Trapper:wrap(function()
+        local all = self:reloadDownloadedKeys()
+        if #self.chapters == 0 then
+            self.chapters = ChapterOrder.fromEntries(all, self.source_key, self.manga.Key)
+        end
+        self:refresh()
+
+        local updated = ChapterCache.get(self.source_key, self.manga.Key)
+        if not updated then
+            if not NetworkMgr:isConnected() then
+                self:promptResume()
+                return
+            end
+
+            local err
+            updated, err = self.engine:mangaUpdate(self.source_path, self.manga.Key)
+            if not updated then
+                if #self.chapters == 0 then
+                    UIManager:show(InfoMessage:new{ text = T(_("Could not load chapters:\n%1"), err) })
+                end
+                self:promptResume()
+                return
+            end
+            ChapterCache.set(self.source_key, self.manga.Key, updated)
+        end
+        self.manga = updated
+        self.chapters = type(updated.Chapters) == "table" and updated.Chapters or {}
+        self:reloadDownloadedKeys()
+        self:refresh()
+        self:promptResume()
+    end)
+end
+
+-- resumeChapter returns the chapter to offer resuming into: the one right
+-- after the last chapter marked read (see findLastReadChapter above), same
+-- resume point "Download next chapters…" already uses. nil if nothing's
+-- been read yet (nothing to "continue") or the reader is already caught up
+-- -- both cases mean promptResume() below shows nothing.
+function MangaBrowser:resumeChapter()
+    local ordered = ChapterOrder.orderedByReading(self.chapters)
+    if #ordered == 0 then
+        return nil
+    end
+    local last_key = self:findLastReadChapter(ordered)
+    if not last_key then
+        return nil
+    end
+    local upcoming = ChapterOrder.after(self.chapters, last_key, 1, function(c)
+        return self:downloadedPath(c.Key) ~= ""
+    end)
+    return upcoming[1]
+end
+
+-- promptResume shows a "Resume reading from <chapter>?" confirmation once
+-- reload() has finished loading chapter data (see the note there). Accepting
+-- runs the exact same open path as tapping that chapter's row would
+-- (onMenuSelect) -- download-if-needed, open, prefetch-ahead -- so there's
+-- no separate open logic to keep in sync.
+function MangaBrowser:promptResume()
+    local chapter = self:resumeChapter()
+    if not chapter then
+        return
+    end
+    UIManager:show(ConfirmBox:new{
+        text = T(_("Resume reading from %1?"), chapterLabel(chapter)),
+        ok_text = _("Resume"),
+        cancel_text = _("Not now"),
+        ok_callback = function()
+            self:onMenuSelect({ chapter = chapter })
+        end,
+    })
+end
+
+-- prefetchAhead silently downloads up to store:bufferChapters() upcoming
+-- chapters (in reading order, not display sort order) after chapter, so
+-- they're likely already local by the time the reader reaches them. See
+-- prefetch.lua -- shared with nextchapter.lua's end-of-book auto-advance,
+-- so the buffer keeps refilling as the user reads through, not just on the
+-- first chapter opened from this list.
+function MangaBrowser:prefetchAhead(chapter)
+    Prefetch.ahead({
+        engine = self.engine,
+        downloads_engine = self.downloads_engine,
+        store = self.store,
+        downloads_dir = self.downloads_dir,
+        source_path = self.source_path,
+        source_key = self.source_key,
+        manga = self.manga,
+    }, self.chapters, chapter.Key,
+    function(c, path)
+        self.downloaded_keys[c.Key] = path
+    end,
+    function(any_new)
+        -- openLocal (the common caller into this, via downloadAndOpen/
+        -- onMenuHold below) closes this screen and switches to the reader
+        -- before this prefetch -- a real network download, taking real
+        -- time -- has a chance to finish. self.closed (set in
+        -- onCloseWidget) catches that: refreshing an already-closed Menu
+        -- widget is at best wasted work on something nobody can see.
+        if any_new and not self.closed then
+            self:refresh()
+        end
+    end)
+end
+
+-- findLastReadChapter returns the Key of the last chapter (in ordered,
+-- ascending reading order) marked read via store:markChapterRead (set on
+-- end-of-book or manually -- see the note on this in store.lua), or nil if none of
+-- them are. There's no direct "last read chapter" pointer in store.lua
+-- (only this per-chapter boolean and a separate manga-level lastReadAt
+-- timestamp used for library sorting) -- this is how downloadNext() finds
+-- where to resume.
+function MangaBrowser:findLastReadChapter(ordered)
+    local last_key
+    for _idx, c in ipairs(ordered) do
+        if self.store:isChapterRead(self.source_key, self.manga.Key, c.Key) then
+            last_key = c.Key
+        end
+    end
+    return last_key
+end
+
+-- downloadNext downloads up to n chapters in reading order, resuming from
+-- just after the last chapter marked read (or from the very first chapter
+-- if none are). Chapters already downloaded within that range are skipped
+-- (not re-downloaded) but still counted as part of the batch. Unlike
+-- prefetchAhead's silent background buffer, this is a visible,
+-- user-initiated action -- each chapter gets Engine:download's normal
+-- progress popup (dismissable/cancellable -- see the note on this in
+-- engine.lua), shown with the batch's position via progress_text_override,
+-- and cancelling one stops the whole batch rather than skipping to the
+-- next chapter.
+function MangaBrowser:downloadNext(n)
+    local ordered = ChapterOrder.orderedByReading(self.chapters)
+    if #ordered == 0 then
+        UIManager:show(InfoMessage:new{ text = _("No chapters to download."), timeout = 2 })
+        return
+    end
+
+    local last_key = self:findLastReadChapter(ordered)
+    local function is_local(c)
+        return self:downloadedPath(c.Key) ~= ""
+    end
+    local upcoming
+    if last_key then
+        upcoming = ChapterOrder.after(self.chapters, last_key, n, is_local)
+    else
+        -- ChapterOrder.after returns {} for a nil current_key rather than
+        -- falling back to the start (it only ever looks for a match) --
+        -- "nothing read yet" has to be handled here instead: the first
+        -- chapter, then after() from it, so this also gets one release per
+        -- chapter number.
+        upcoming = { ordered[1] }
+        for _idx, c in ipairs(ChapterOrder.after(self.chapters, ordered[1].Key, n - 1, is_local)) do
+            table.insert(upcoming, c)
+        end
+    end
+    if #upcoming == 0 then
+        UIManager:show(InfoMessage:new{ text = _("No next chapter yet."), timeout = 2 })
+        return
+    end
+
+    local needs_download = false
+    for _idx, c in ipairs(upcoming) do
+        if self:downloadedPath(c.Key) == "" then
+            needs_download = true
+            break
+        end
+    end
+    if not needs_download then
+        -- The whole requested range is already local -- skip the network
+        -- gate below entirely rather than prompting to connect for a batch
+        -- that turns out to be a no-op.
+        UIManager:show(InfoMessage:new{ text = _("Already downloaded."), timeout = 2 })
+        return
+    end
+
+    NetworkMgr:runWhenConnected(function()
+        Trapper:wrap(function()
+            local downloaded_any = false
+            local batch = {} -- path set: this batch is what the user reads next
+            for i, c in ipairs(upcoming) do
+                local existing = self:downloadedPath(c.Key)
+                if existing ~= "" then
+                    downloaded_any = true
+                    batch[existing] = true
+                else
+                    local chapter_filename = util.getSafeFilename(chapterLabel(c) .. ".cbz", self.downloads_dir)
+                    local out_path = self.downloads_dir .. "/" .. chapter_filename
+                    local manga_dir_name = mangaLabel(self.manga) .. " [" .. self.source_key .. "]"
+                    local progress = T(_("Downloading %1/%2: %3"), i, #upcoming, chapterLabel(c))
+                    local path, err = self.engine:download(
+                        self.source_path, self.manga.Key, c.Key, out_path, self.downloads_dir, false, progress, manga_dir_name)
+                    if not path then
+                        if err == _("Cancelled") then
+                            -- Distinct from the "Download failed" every
+                            -- other caller shows on cancel -- cancelling a
+                            -- bulk action isn't an error, it's the user
+                            -- stopping partway through on purpose.
+                            UIManager:show(InfoMessage:new{
+                                text = T(_("Cancelled after %1 of %2 chapters."), i - 1, #upcoming),
+                            })
+                        else
+                            UIManager:show(InfoMessage:new{ text = T(_("Download failed:\n%1"), err) })
+                        end
+                        break
+                    end
+                    self.downloaded_keys[c.Key] = path
+                    batch[path] = true
+                    downloaded_any = true
+                end
+            end
+            -- Storage-limit prune is a persistent-storage concept -- skip
+            -- it under Ephemeral Mode, same guard as downloadAndOpen below
+            -- (this bulk path has no removeAllExcept() bounding residency,
+            -- but an unguarded prune could still delete a chapter this
+            -- same batch just downloaded before the user opens it -- so the
+            -- whole batch is passed as keep_path, even if it alone is over
+            -- the limit: the user asked for exactly these chapters).
+            if downloaded_any and not self.store:isEphemeralMode() then
+                self.downloads_engine:prune(self.store:downloadLimitBytes(), batch)
+            end
+            self:refresh()
+        end)
+    end)
+end
+
+-- promptBulkDownload asks how many upcoming chapters to download (see
+-- downloadNext()), reusing settingsbrowser.lua's numeric InputDialog shape.
+function MangaBrowser:promptBulkDownload()
+    if #self.chapters == 0 then
+        -- reload() populates self.chapters asynchronously (deferred via
+        -- UIManager:nextTick past init()) -- the hamburger menu can in
+        -- principle be opened before that's landed.
+        UIManager:show(InfoMessage:new{ text = _("Chapters still loading. Try again shortly."), timeout = 2 })
+        return
+    end
+    local dialog
+    dialog = InputDialog:new{
+        title = _("Download next chapters"),
+        description = _("Chapters to download, starting after the last one read."),
+        input = "5",
+        input_type = "number",
+        buttons = {{
+            {
+                text = _("Cancel"),
+                id = "close",
+                callback = function() UIManager:close(dialog) end,
+            },
+            {
+                text = _("Download"),
+                is_enter_default = true,
+                callback = function()
+                    local n = tonumber(dialog:getInputText())
+                    UIManager:close(dialog)
+                    if n and n >= 1 then
+                        self:downloadNext(math.floor(n))
+                    end
+                end,
+            },
+        }},
+    }
+    UIManager:show(dialog)
+    dialog:onShowKeyboard()
+end
+
+function MangaBrowser:openLocal(path)
+    self.store:markLastRead(self.source_key, self.manga.Key)
+    UIManager:close(self)
+    if self.ui.document then
+        self.ui:switchDocument(path)
+    else
+        self.ui:openFile(path)
+    end
+end
+
+-- redownload: see Engine:download.
+function MangaBrowser:downloadAndOpen(chapter, redownload)
+    NetworkMgr:runWhenConnected(function()
+        Trapper:wrap(function()
+            local chapter_filename = util.getSafeFilename(chapterLabel(chapter) .. ".cbz", self.downloads_dir)
+            local out_path = self.downloads_dir .. "/" .. chapter_filename
+            local manga_dir_name = mangaLabel(self.manga) .. " [" .. self.source_key .. "]"
+
+            local path, err = self.engine:download(
+                self.source_path, self.manga.Key, chapter.Key, out_path, self.downloads_dir, nil, nil, manga_dir_name, redownload)
+            if not path then
+                UIManager:show(InfoMessage:new{ text = T(_("Download failed:\n%1"), err) })
+                return
+            end
+            self.downloaded_keys[chapter.Key] = path
+            -- The storage-limit prune is a persistent-storage concept -- under
+            -- Ephemeral Mode, removeAllExcept() below already keeps at most
+            -- ~1-2 chapters resident, and running prune() on top of that risks
+            -- deleting the chapter just downloaded before it's even opened, if
+            -- the user's saved limit happens to be smaller than that. Passing
+            -- path as keep_path covers the remaining case even when Ephemeral
+            -- Mode is off: a limit smaller than this one chapter's own size.
+            if not self.store:isEphemeralMode() then
+                self.downloads_engine:prune(self.store:downloadLimitBytes(), path)
+            end
+            self:refresh()
+            self:openLocal(path)
+            if self.store:isEphemeralMode() then
+                self.downloads_engine:removeAllExcept(path)
+            end
+            -- Deferred so the reader's own widget/gesture setup finishes and
+            -- is topmost before prefetch's Trapper-wrapped subprocess calls
+            -- start stacking dismissablePopen widgets on top of it -- doing
+            -- this inline was swallowing the first several page-turn taps
+            -- after opening a freshly-downloaded chapter.
+            UIManager:nextTick(function() self:prefetchAhead(chapter) end)
+        end)
+    end)
+end
+
+function MangaBrowser:onMenuSelect(item)
+    local existing = self:downloadedPath(item.chapter.Key)
+    if existing ~= "" then
+        self:openLocal(existing)
+        -- Under Ephemeral Mode this chapter is commonly one Prefetch already
+        -- fetched ahead of time, so it's opened from here, not
+        -- downloadAndOpen() -- needs the same cleanup call, or a
+        -- prefetched-then-opened chapter would never get its predecessor
+        -- cleaned up at all.
+        if self.store:isEphemeralMode() then
+            self.downloads_engine:removeAllExcept(existing)
+        end
+        -- See the note on this in downloadAndOpen() -- deferred so it
+        -- doesn't steal early page-turn taps from the just-opened reader.
+        UIManager:nextTick(function() self:prefetchAhead(item.chapter) end)
+        return true
+    end
+
+    self:downloadAndOpen(item.chapter)
+    return true
+end
+
+-- onMenuHold offers a read/unread toggle for every chapter, plus
+-- re-download/remove for downloaded ones. Marking unread only touches the
+-- read flag, not the chapter's saved page position -- that's what
+-- promptResetProgress's whole-manga reset is for.
+function MangaBrowser:onMenuHold(item)
+    local chapter_key = item.chapter.Key
+    local is_read = self.store:isChapterRead(self.source_key, self.manga.Key, chapter_key)
+
+    local dialog
+    local buttons = {
+        {{
+            text = is_read and _("Mark as unread") or _("Mark as read"),
+            callback = function()
+                UIManager:close(dialog)
+                if is_read then
+                    self.store:markChapterUnread(self.source_key, self.manga.Key, chapter_key)
+                else
+                    self.store:markChapterRead(self.source_key, self.manga.Key, chapter_key)
+                end
+                self:refresh()
+            end,
+        }},
+    }
+    if self:downloadedPath(chapter_key) ~= "" then
+        table.insert(buttons, {{
+            text = _("Re-download"),
+            callback = function()
+                UIManager:close(dialog)
+                -- No remove() first: that lost the only copy whenever the
+                -- re-fetch failed or the user declined the Wi-Fi prompt.
+                self:downloadAndOpen(item.chapter, true)
+            end,
+        }})
+        table.insert(buttons, {{
+            text = _("Remove download"),
+            callback = function()
+                UIManager:close(dialog)
+                Trapper:wrap(function()
+                    self.downloads_engine:remove(self.source_key, self.manga.Key, chapter_key)
+                    self.downloaded_keys[chapter_key] = nil
+                    self:refresh()
+                end)
+            end,
+        }})
+    end
+    dialog = ButtonDialog:new{
+        title = chapterLabel(item.chapter),
+        buttons = buttons,
+    }
+    UIManager:show(dialog)
+    return true
+end
+
+return MangaBrowser

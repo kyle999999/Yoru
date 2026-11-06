@@ -81,13 +81,12 @@ class BrowseViewModel {
                     return sources
                 }
             }
-            var ids = Set<String>() // ensure external sources have unique ids
             var results: [ExternalSourceInfo] = []
             for await result in group {
                 guard let result = result else { continue }
-                results += result.filter { ids.insert($0.id).inserted }
+                results += result
             }
-            return results
+            return ExternalSourceInfo.preferred(results)
         }
 
         filterExternalSources()
@@ -128,13 +127,13 @@ class BrowseViewModel {
             // check version availability
             if let minAppVersion = info.minAppVersion {
                 let minAppVersion = SemanticVersion(minAppVersion)
-                if minAppVersion > appVersion {
+                if minAppVersion > (info.modernABI ? ModernSourceBridge.supportedSourceAPIVersion : appVersion) {
                     return nil
                 }
             }
             if let maxAppVersion = info.maxAppVersion {
                 let maxAppVersion = SemanticVersion(maxAppVersion)
-                if maxAppVersion < appVersion {
+                if maxAppVersion < (info.modernABI ? ModernSourceBridge.supportedSourceAPIVersion : appVersion) {
                     return nil
                 }
             }
@@ -177,7 +176,7 @@ class BrowseViewModel {
     private func sourceToInfo(source: Source) -> SourceInfo2 {
         SourceInfo2(
             sourceId: source.manifest.info.id,
-            iconUrl: source.url.appendingPathComponent("Icon.png"),
+            iconUrl: source.iconURL,
             name: source.manifest.info.name,
             lang: source.manifest.info.lang,
             version: source.manifest.info.version,
@@ -189,9 +188,7 @@ class BrowseViewModel {
     private func externalSourceToInfo(info: ExternalSourceInfo) -> SourceInfo2 {
         SourceInfo2(
             sourceId: info.id,
-            iconUrl: info.sourceUrl?
-                .appendingPathComponent("icons")
-                .appendingPathComponent(info.icon),
+            iconUrl: info.imageURL,
             name: info.name,
             lang: info.lang,
             version: info.version,

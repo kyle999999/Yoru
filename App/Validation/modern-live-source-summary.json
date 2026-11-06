@@ -1,0 +1,66 @@
+{
+  "date": "2026-11-06",
+  "repository": "https://aidoku-community.github.io/sources/",
+  "packageInstantiation": {
+    "passed": 146,
+    "total": 146
+  },
+  "nativeManifestDecoding": {
+    "passed": 146,
+    "total": 146
+  },
+  "liveSources": [
+    {
+      "id": "multi.webtoon",
+      "version": 5,
+      "browse": 615,
+      "search": 14,
+      "chapters": 95,
+      "pages": 99,
+      "decodedImage": true
+    },
+    {
+      "id": "multi.mangadex",
+      "version": 14,
+      "browse": 20,
+      "search": 20,
+      "chapters": 446,
+      "pages": 5,
+      "decodedImage": true
+    },
+    {
+      "id": "en.weebcentral",
+      "version": 8,
+      "browse": 32,
+      "search": 25,
+      "chapters": 6,
+      "pages": 168,
+      "decodedImage": true
+    },
+    {
+      "id": "multi.mangafire",
+      "version": 8,
+      "browse": 50,
+      "search": 50,
+      "chapters": 34,
+      "pages": 25,
+      "decodedImage": false,
+      "failure": "CDN TLS negotiation failed from this environment; independently reproduced outside app."
+    },
+    {
+      "id": "multi.mangaplus",
+      "version": 6,
+      "browse": 20,
+      "search": 1,
+      "chapters": 12,
+      "pages": 2,
+      "decodedImage": true,
+      "processing": "extension decrypted original page bytes using page context"
+    }
+  ],
+  "limits": [
+    "not every website was live tested",
+    "authenticated and region-limited access not verified",
+    "physical iPhone and Signulous signing not tested"
+  ]
+}

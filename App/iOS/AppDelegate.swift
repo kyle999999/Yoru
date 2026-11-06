@@ -128,6 +128,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             ]
         )
 
+        ModernSourceBridge.installHost()
         _ = CoreDataManager.shared.container // Initialize on the main thread before background work.
         DataLoader.sharedUrlCache.diskCapacity = 0
 

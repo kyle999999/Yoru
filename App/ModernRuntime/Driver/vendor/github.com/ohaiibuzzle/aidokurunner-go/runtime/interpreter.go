@@ -1,0 +1,539 @@
+// Package runtime implements AidokuRunner's Interpreter.swift: it loads a
+// compiled Aidoku source .wasm module with wazero, links every host
+// namespace (via the host subpackage), probes which optional entry points
+// the guest exports, and exposes typed Go methods mirroring Runner.swift's
+// protocol.
+package runtime
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"math"
+	"net/http"
+	"net/url"
+	"os"
+	"strings"
+	"sync"
+
+	"github.com/tetratelabs/wazero"
+	"github.com/tetratelabs/wazero/api"
+
+	"github.com/ohaiibuzzle/aidokurunner-go/models"
+	"github.com/ohaiibuzzle/aidokurunner-go/postcard"
+	"github.com/ohaiibuzzle/aidokurunner-go/runtime/host"
+)
+
+// Config mirrors AidokuRunner's InterpreterConfiguration.
+type Config struct {
+	NativeWebView func(wazero.HostModuleBuilder, *host.Store) wazero.HostModuleBuilder
+	PrintHandler  func(string)
+
+	// HTTPClient overrides the client used by the `net` namespace. Defaults
+	// to http.DefaultClient.
+	HTTPClient *http.Client
+
+	// Settings backs the `defaults` namespace. AidokuRunner uses a single
+	// process-wide SettingsStore.shared instance across every Interpreter;
+	// callers should likewise construct one settingsstore.Store and share
+	// it across every source they load. If nil, defaults.get/set becomes a
+	// no-op (reads return "no value", writes are dropped) rather than
+	// failing Interpreter construction. It also backs the persisted
+	// per-source FlareSolverr User-Agent (see host.Net.Settings).
+	Settings host.SettingsStore
+
+	// OnFlareSolverrCookies, if set, is called after FlareSolverr solves a
+	// Cloudflare challenge for a source's request, with the cookies it
+	// returned. The cookies are always injected into this Interpreter's
+	// cookie jar for the current process regardless; this hook lets the
+	// caller additionally persist them somewhere durable (e.g. a cookie
+	// store on disk) across process restarts.
+	OnFlareSolverrCookies func(u *url.URL, cookies []*http.Cookie)
+
+	// NetworkConcurrency bounds how many requests a guest's net.send_all
+	// call runs at once (see host.Net.MaxConcurrency). <= 0 (the default)
+	// falls back to the host package's own default.
+	NetworkConcurrency int
+
+	// CompilationCache, if set, lets wazero reuse compiled machine code
+	// across Runtimes -- with an on-disk cache (wazero.
+	// NewCompilationCacheWithDir), across processes, so a fresh aidoku-run
+	// per command doesn't recompile main.wasm every time. New never closes
+	// it; whoever constructed it owns its lifetime.
+	CompilationCache wazero.CompilationCache
+}
+
+// Interpreter loads and runs a single compiled Aidoku source .wasm module.
+// Guest calls are serialized with a mutex, mirroring the Swift
+// implementation's `actor Interpreter` isolation: wasm linear memory isn't
+// safe for concurrent guest entry.
+type Interpreter struct {
+	mu sync.Mutex
+
+	sourceKey string
+	rt        wazero.Runtime
+	module    api.Module
+	compiled  wazero.CompiledModule
+	store     *host.Store
+	env       *host.Env
+	net       *host.Net
+
+	// httpClient is the client wired into the net/webview namespaces, and
+	// cookieJar is the http.CookieJar backing it — by default the
+	// process-wide shared jar (matching AidokuRunner's URLSession.shared).
+	httpClient *http.Client
+	cookieJar  http.CookieJar
+
+	Features models.SourceFeatures
+}
+
+// noopSettingsStore is used when Config.Settings is left nil: reads report
+// "no value" and writes are silently dropped, rather than failing
+// Interpreter construction outright.
+type noopSettingsStore struct{}
+
+func (noopSettingsStore) Object(string) any          { return nil }
+func (noopSettingsStore) SetValue(string, any) error { return nil }
+
+// ErrCompile wraps a failure to compile the guest wasm (including a corrupt
+// compilation-cache entry), as opposed to linking or instantiating it.
+// aidoku-run wipes its on-disk cache only on this, not on every load error.
+var ErrCompile = errors.New("runtime: compiling guest module")
+
+// New loads bytes as a compiled Aidoku source and links the currently
+// implemented host namespaces (env, std; more are added as later phases
+// land) onto it.
+func New(ctx context.Context, sourceKey string, wasmBytes []byte, config Config) (*Interpreter, error) {
+	// Lets a ctx deadline/cancel interrupt a guest stuck in a loop, not just
+	// host calls that check ctx themselves.
+	rtConfig := wazero.NewRuntimeConfigInterpreter().WithCloseOnContextDone(true)
+	if config.CompilationCache != nil {
+		rtConfig = rtConfig.WithCompilationCache(config.CompilationCache)
+	}
+	rt := wazero.NewRuntimeWithConfig(ctx, rtConfig)
+
+	printHandler := config.PrintHandler
+	if printHandler == nil {
+		printHandler = func(s string) { fmt.Println(s) }
+	}
+
+	i := &Interpreter{
+		sourceKey: sourceKey,
+		rt:        rt,
+		store:     host.NewStore(),
+	}
+
+	i.env = &host.Env{
+		PrintHandler: printHandler,
+	}
+	if _, err := host.LinkEnv(rt.NewHostModuleBuilder("env"), i.env).Instantiate(ctx); err != nil {
+		rt.Close(ctx)
+		return nil, fmt.Errorf("runtime: linking env namespace: %w", err)
+	}
+
+	std := &host.Std{Store: i.store, PrintHandler: printHandler}
+	if _, err := host.LinkStd(rt.NewHostModuleBuilder("std"), std).Instantiate(ctx); err != nil {
+		rt.Close(ctx)
+		return nil, fmt.Errorf("runtime: linking std namespace: %w", err)
+	}
+
+	settings := config.Settings
+	if settings == nil {
+		settings = noopSettingsStore{}
+	}
+	defaults := &host.Defaults{Store: i.store, Settings: settings, DefaultNamespace: sourceKey}
+	if _, err := host.LinkDefaults(rt.NewHostModuleBuilder("defaults"), defaults).Instantiate(ctx); err != nil {
+		rt.Close(ctx)
+		return nil, fmt.Errorf("runtime: linking defaults namespace: %w", err)
+	}
+
+	httpClient := config.HTTPClient
+	if httpClient == nil {
+		// Shared across every Interpreter in the process, matching
+		// AidokuRunner's use of URLSession.shared — which is also how a
+		// webview-cleared cookie ends up visible to plain net.* calls.
+		httpClient = host.SharedHTTPClient()
+	}
+	i.httpClient = httpClient
+	i.cookieJar = httpClient.Jar
+
+	// Shared by both the net.* namespace and the webview's own fetches, so a
+	// Cloudflare challenge hit via either path gets solved and its
+	// User-Agent persisted consistently across both.
+	flareSolverr := host.NewFlareSolverrClient(host.FlareSolverrHostFromEnv())
+
+	i.net = &host.Net{
+		Store:                 i.store,
+		Client:                httpClient,
+		Settings:              settings,
+		SourceKey:             sourceKey,
+		FlareSolverr:          flareSolverr,
+		OnFlareSolverrCookies: config.OnFlareSolverrCookies,
+		MaxConcurrency:        config.NetworkConcurrency,
+	}
+
+	htmlLib := host.NewHtml(i.store)
+	i.net.ParseHTML = htmlLib.ParseHTML
+
+	canvasLib := &host.Canvas{Store: i.store, HTTPClient: httpClient}
+	i.net.DecodeImage = canvasLib.DecodeImage
+
+	if _, err := host.LinkNet(rt.NewHostModuleBuilder("net"), i.net).Instantiate(ctx); err != nil {
+		rt.Close(ctx)
+		return nil, fmt.Errorf("runtime: linking net namespace: %w", err)
+	}
+
+	if _, err := host.LinkHtml(rt.NewHostModuleBuilder("html"), htmlLib).Instantiate(ctx); err != nil {
+		rt.Close(ctx)
+		return nil, fmt.Errorf("runtime: linking html namespace: %w", err)
+	}
+
+	js := &host.JS{Store: i.store}
+	webview := &host.WebView{
+		Store:                 i.store,
+		Client:                httpClient,
+		PrintHandler:          printHandler,
+		Settings:              settings,
+		SourceKey:             sourceKey,
+		FlareSolverr:          flareSolverr,
+		OnFlareSolverrCookies: config.OnFlareSolverrCookies,
+		RateLimit:             i.net.RateLimit(),
+	}
+	jsBuilder := host.LinkJS(rt.NewHostModuleBuilder("js"), js)
+	if config.NativeWebView != nil {
+		jsBuilder = config.NativeWebView(jsBuilder, i.store)
+	} else {
+		jsBuilder = host.LinkWebView(jsBuilder, webview)
+	}
+	if _, err := jsBuilder.Instantiate(ctx); err != nil {
+		rt.Close(ctx)
+		return nil, fmt.Errorf("runtime: linking js namespace: %w", err)
+	}
+
+	if _, err := host.LinkCanvas(rt.NewHostModuleBuilder("canvas"), canvasLib).Instantiate(ctx); err != nil {
+		rt.Close(ctx)
+		return nil, fmt.Errorf("runtime: linking canvas namespace: %w", err)
+	}
+
+	compiled, err := rt.CompileModule(ctx, wasmBytes)
+	if err != nil {
+		rt.Close(ctx)
+		return nil, fmt.Errorf("%w: %w", ErrCompile, err)
+	}
+	i.compiled = compiled
+	module, err := rt.InstantiateModule(ctx, compiled, wazero.NewModuleConfig().WithName(sourceKey))
+	if err != nil {
+		rt.Close(ctx)
+		return nil, fmt.Errorf("runtime: instantiating guest module: %w", err)
+	}
+	i.module = module
+	i.Features = i.detectFeatures()
+
+	if fn := module.ExportedFunction("start"); fn != nil {
+		if _, err := fn.Call(ctx); err != nil {
+			// start() is the first point a guest can call back into host
+			// functions (js.new_runtime, webview.new, ...) that store a
+			// *quickjs.VM or similar item in i.store holding native,
+			// non-Go-GC-visible memory. rt.Close below frees the wasm side,
+			// but only i.store.Close() releases those -- without it, a
+			// trap here leaks that memory until something else happens to
+			// call Close() on this Interpreter later (which may never
+			// happen if the caller just discards it after this error).
+			_ = i.store.Close()
+			rt.Close(ctx)
+			return nil, fmt.Errorf("runtime: calling guest start(): %w", err)
+		}
+	}
+
+	return i, nil
+}
+
+func (i *Interpreter) hasExport(name string) bool {
+	return i.module.ExportedFunction(name) != nil
+}
+
+func (i *Interpreter) detectFeatures() models.SourceFeatures {
+	return models.SourceFeatures{
+		ProvidesListings:         i.hasExport("get_manga_list"),
+		ProvidesHome:             i.hasExport("get_home"),
+		DynamicFilters:           i.hasExport("get_filters"),
+		DynamicSettings:          i.hasExport("get_settings"),
+		DynamicListings:          i.hasExport("get_listings"),
+		ProcessesPages:           i.hasExport("process_page_image"),
+		ProcessesCovers:          i.hasExport("process_cover_image"),
+		ProvidesImageRequests:    i.hasExport("get_image_request"),
+		ProvidesPageDescriptions: i.hasExport("get_page_description"),
+		ProvidesAlternateCovers:  i.hasExport("get_alternate_covers"),
+		ProvidesBaseURL:          i.hasExport("get_base_url"),
+		HandlesNotifications:     i.hasExport("handle_notification"),
+		HandlesDeepLinks:         i.hasExport("handle_deep_link"),
+		HandlesBasicLogin:        i.hasExport("handle_basic_login"),
+		HandlesWebLogin:          i.hasExport("handle_web_login"),
+		HandlesMigration:         i.hasExport("handle_key_migration"),
+	}
+}
+
+// Restart mirrors AidokuRunner's Interpreter.restart()/Source.restart():
+// recovers a source after a WASM trap (e.g. a guest panic) by discarding
+// the trapped guest module instance and re-instantiating the same wasm
+// bytes fresh, without reloading the .aix or re-linking any host
+// namespace. Every previously issued store descriptor (parsed HTML nodes,
+// JS/webview contexts, decoded images, ...) is invalidated by this, since
+// it only had meaning for the module instance that just got discarded —
+// matching Swift's linkImports() being re-run with a fresh GlobalStore.
+func (i *Interpreter) Restart(ctx context.Context) error {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+
+	if i.module != nil {
+		_ = i.module.Close(ctx)
+	}
+	_ = i.store.Close()
+
+	module, err := i.rt.InstantiateModule(ctx, i.compiled, wazero.NewModuleConfig().WithName(i.sourceKey))
+	if err != nil {
+		return fmt.Errorf("runtime: restarting guest module: %w", err)
+	}
+	i.module = module
+	i.Features = i.detectFeatures()
+
+	if fn := module.ExportedFunction("start"); fn != nil {
+		if _, err := fn.Call(ctx); err != nil {
+			// Same leak as New()'s start() error path above: start() may
+			// have already stored a native-memory-backed item in i.store
+			// before trapping.
+			_ = i.store.Close()
+			return fmt.Errorf("runtime: calling guest start() after restart: %w", err)
+		}
+	}
+	return nil
+}
+
+// Close releases the wazero runtime and everything it instantiated,
+// including any store items (e.g. *quickjs.VM-backed JS/webview contexts)
+// holding native memory that a guest never explicitly freed via
+// std.destroy.
+func (i *Interpreter) Close(ctx context.Context) error {
+	_ = i.store.Close()
+	return i.rt.Close(ctx)
+}
+
+// --- Cookie injection ---
+//
+// These let the host application (or a CLI user) insert cookies into the
+// cookie jar backing this source's net.* and webview requests — e.g. a
+// Cloudflare cf_clearance/__cf_bm taken from a real browser, so requests to
+// a CF-protected domain carry it instead of bouncing off the challenge
+// page. Because the jar is shared process-wide (URLSession.shared semantics)
+// but scoped per-domain, injecting a cookie for a host only affects that
+// host, across every source that talks to it.
+
+// CookieJar returns the http.CookieJar backing this Interpreter's net/
+// webview requests. It is nil only when the caller supplied an HTTPClient
+// with no jar.
+func (i *Interpreter) CookieJar() http.CookieJar {
+	return i.cookieJar
+}
+
+// SetCookie adds a single name=value cookie scoped to u, applied to every
+// path on u's host (Path="/").
+func (i *Interpreter) SetCookie(u *url.URL, name, value string) {
+	i.setCookies(u, []*http.Cookie{{Name: name, Value: value, Path: "/"}})
+}
+
+// SetCookieHeader parses a raw "a=1; b=2" Cookie header and injects each
+// cookie into the jar for u, scoped to every path on u's host. This is the
+// convenient entry point for pasting cookies copied from another tool.
+func (i *Interpreter) SetCookieHeader(u *url.URL, header string) {
+	if u == nil || i.cookieJar == nil || header == "" {
+		return
+	}
+	req := &http.Request{Header: http.Header{"Cookie": {header}}}
+	if cookies := req.Cookies(); len(cookies) > 0 {
+		for _, c := range cookies {
+			c.Path = "/"
+		}
+		i.cookieJar.SetCookies(u, cookies)
+	}
+}
+
+// SetCookies injects the given cookies into the jar for u.
+func (i *Interpreter) SetCookies(u *url.URL, cookies []*http.Cookie) {
+	i.setCookies(u, cookies)
+}
+
+func (i *Interpreter) setCookies(u *url.URL, cookies []*http.Cookie) {
+	if u == nil || i.cookieJar == nil || len(cookies) == 0 {
+		return
+	}
+	i.cookieJar.SetCookies(u, cookies)
+}
+
+// Cookies returns the cookies the source's jar would send for u.
+func (i *Interpreter) Cookies(u *url.URL) []*http.Cookie {
+	if u == nil || i.cookieJar == nil {
+		return nil
+	}
+	return i.cookieJar.Cookies(u)
+}
+
+// LoadCookiesFile reads a Netscape cookies.txt file and injects every
+// non-expired cookie into this source's jar. It returns the number of cookies
+// injected.
+func (i *Interpreter) LoadCookiesFile(path string) (int, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return 0, err
+	}
+	return i.LoadNetscapeCookies(data)
+}
+
+// LoadNetscapeCookies parses Netscape cookies.txt bytes and injects every
+// non-expired cookie into this source's jar. Cookie domain/subdomain/path/
+// secure attributes are preserved (unlike SetCookieHeader, which only has the
+// raw name/value pairs). It returns the number of cookies injected.
+func (i *Interpreter) LoadNetscapeCookies(data []byte) (int, error) {
+	if i.cookieJar == nil {
+		return 0, nil
+	}
+	cookies, err := host.ParseNetscapeCookies(data)
+	if err != nil {
+		return 0, err
+	}
+	for _, c := range cookies {
+		hostName := strings.TrimPrefix(c.Domain, ".")
+		if hostName == "" {
+			continue
+		}
+		u := &url.URL{Scheme: "https", Host: hostName, Path: "/"}
+		i.cookieJar.SetCookies(u, host.ForJar(u, []*http.Cookie{c}))
+	}
+	return len(cookies), nil
+}
+
+// withPartialHandler temporarily installs fn as the env.send_partial_result
+// callback for the duration of a single guest call, matching the Swift
+// CallbackHandler's register/remove-per-call lifecycle. Since Interpreter
+// serializes all guest calls with mu, exactly one such handler is ever
+// active at a time.
+func (i *Interpreter) withPartialHandler(fn func(data []byte), body func() error) error {
+	i.env.OnPartialResult = fn
+	defer func() { i.env.OnPartialResult = nil }()
+	return body()
+}
+
+// --- Store passthroughs (Runner.store/remove) ---
+
+func (i *Interpreter) StoreValue(v any) int32       { return i.store.Store(v) }
+func (i *Interpreter) Fetch(descriptor int32) any   { return i.store.Fetch(descriptor) }
+func (i *Interpreter) RemoveValue(descriptor int32) { i.store.Remove(descriptor) }
+
+// storeString stores s so a guest read_string call (raw UTF-8, no framing)
+// can fetch it back -- only get_search_manga_list's query decodes a string
+// argument this way. Every other string-argument guest hook decodes via the
+// generic postcard read (see storeEncodedString).
+func (i *Interpreter) storeString(s string) int32 { return i.store.Store(s) }
+
+// storeEncodedString postcard-encodes s before storing it, for guest hooks
+// that decode a string argument via the generic postcard read (matching
+// Swift's store.storeEncoded(String)) rather than read_string.
+func (i *Interpreter) storeEncodedString(s string) int32 {
+	w := postcard.NewWriter()
+	w.WriteString(s)
+	return i.store.Store(w.Bytes())
+}
+
+func (i *Interpreter) storeBytes(b []byte) int32 { return i.store.Store(b) }
+
+// --- Guest call protocol ---
+
+// call invokes a guest export and decodes its result per the buffer
+// convention documented in Interpreter.swift's handleResult: negative i32
+// results are error codes, non-negative results are a pointer into guest
+// linear memory holding a [length:u32][pad:u32][payload] buffer (or, when
+// length==u32::MAX, an error message).
+func (i *Interpreter) call(ctx context.Context, name string, args ...uint64) ([]byte, error) {
+	fn := i.module.ExportedFunction(name)
+	if fn == nil {
+		return nil, models.ErrUnimplemented()
+	}
+	results, err := fn.Call(ctx, args...)
+	if err != nil {
+		return nil, err
+	}
+	if len(results) == 0 {
+		return nil, models.ErrMissingResult()
+	}
+	return i.handleResult(ctx, api.DecodeI32(results[0]))
+}
+
+func errorForCode(result int32) error {
+	switch result {
+	case -2:
+		return models.ErrUnimplemented()
+	case -3:
+		return models.ErrNetworkError()
+	case -4:
+		return models.ErrHTMLError()
+	case -5:
+		return models.ErrJSError()
+	case -6:
+		return models.ErrCanvasError()
+	case -7:
+		return models.ErrUTF8Error()
+	case -8:
+		return models.ErrJSONParseError()
+	case -9:
+		return models.ErrDeserializeError()
+	default:
+		return models.ErrMissingResult()
+	}
+}
+
+func (i *Interpreter) handleResult(ctx context.Context, result int32) ([]byte, error) {
+	if result < 0 {
+		return nil, errorForCode(result)
+	}
+	pointer := uint32(result)
+	mem := i.module.Memory()
+	length, ok := mem.ReadUint32Le(pointer)
+	if !ok {
+		return nil, models.ErrMissingResult()
+	}
+	if length == math.MaxUint32 {
+		strLenRaw, ok := mem.ReadUint32Le(pointer + 8)
+		if !ok {
+			return nil, models.ErrMissingResult()
+		}
+		if strLenRaw < 12 {
+			return nil, models.ErrMissingResult()
+		}
+		msgBytes, ok := mem.Read(pointer+12, strLenRaw-12)
+		if !ok {
+			return nil, models.ErrMissingResult()
+		}
+		message := string(msgBytes)
+		_ = i.freeResult(ctx, result)
+		return nil, models.ErrMessage(message)
+	}
+	if length < 8 {
+		return nil, models.ErrMissingResult()
+	}
+	data, ok := mem.Read(pointer+8, length-8)
+	if !ok {
+		return nil, models.ErrMissingResult()
+	}
+	cp := make([]byte, len(data))
+	copy(cp, data)
+	_ = i.freeResult(ctx, result)
+	return cp, nil
+}
+
+func (i *Interpreter) freeResult(ctx context.Context, pointer int32) error {
+	fn := i.module.ExportedFunction("free_result")
+	if fn == nil {
+		return nil
+	}
+	_, err := fn.Call(ctx, api.EncodeI32(pointer))
+	return err
+}

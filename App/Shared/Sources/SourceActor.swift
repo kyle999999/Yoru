@@ -24,11 +24,23 @@ actor SourceActor {
     private var initialized = false
     func initialize() throws {
         guard !initialized else { return }
+        if let modern = source.modern { try modern.initialize(); initialized = true; return }
         // Legacy SDK initialization is optional (e.g. Komga, WEBTOON, xkcd).
         if (try? source.globalStore.vm.function(named: "initialize")) != nil {
             try source.globalStore.vm.call("initialize")
         }
         initialized = true
+    }
+
+    func modernOperation(_ operation: String, parameters: [String: Any]) throws -> Any {
+        guard let modern = source.modern else { throw SourceError.vmNotLoaded }
+        return try modern.call(operation, parameters)
+    }
+
+    func loadModernMetadata() throws -> [FilterBase] {
+        guard let modern = source.modern else { return [] }
+        source.settingItems = try modern.settings()
+        return try modern.loadMetadata()
     }
 
     private func call(_ name: String, _ args: Int32...) throws -> Int32 {
@@ -50,6 +62,7 @@ actor SourceActor {
     }
 
     func getMangaList(filters: [FilterBase], page: Int = 1) throws -> MangaPageResult {
+        if let modern = source.modern { return try modern.browse(filters: filters, page: page) }
         let filterDescriptor = source.globalStore.storeStdValue(filters)
         defer { source.globalStore.removeStdValue(filterDescriptor) }
 
@@ -62,6 +75,7 @@ actor SourceActor {
     }
 
     func getMangaListing(listing: Listing, page: Int = 1) throws -> MangaPageResult {
+        if let modern = source.modern { return try modern.browse(filters: [], page: page, listing: listing) }
         let listingDescriptor = source.globalStore.storeStdValue(listing)
         defer { source.globalStore.removeStdValue(listingDescriptor) }
 
@@ -74,6 +88,7 @@ actor SourceActor {
     }
 
     func getMangaDetails(manga: Manga) throws -> Manga {
+        if let modern = source.modern { return try modern.update(manga) }
         let mangaDescriptor = source.globalStore.storeStdValue(manga)
         defer { source.globalStore.removeStdValue(mangaDescriptor) }
 
@@ -88,6 +103,7 @@ actor SourceActor {
     }
 
     func getChapterList(manga: Manga) throws -> [Chapter] {
+        if let modern = source.modern { return try modern.chapters(manga) }
         let mangaDescriptor = source.globalStore.storeStdValue(manga)
         defer { source.globalStore.removeStdValue(mangaDescriptor) }
 
@@ -109,6 +125,7 @@ actor SourceActor {
     }
 
     func getPageList(chapter: Chapter) throws -> [Page] {
+        if let modern = source.modern { return try modern.pages(chapter) }
         let chapterDescriptor = source.globalStore.storeStdValue(chapter)
         defer { source.globalStore.removeStdValue(chapterDescriptor) }
 
@@ -125,6 +142,17 @@ actor SourceActor {
     }
 
     func getImageRequest(url: String) async throws -> WasmRequestObject {
+        if let modern = source.modern {
+            var request = WasmRequestObject(id: 0); request.URL = url
+            if URL(string: url)?.scheme == "yoru-page" { return request }
+            let result = try modern.call("imageRequest", ["URL": url]) as? [String: Any] ?? [:]
+            request.URL = result["url"] as? String ?? url
+            request.headers = (result["headers"] as? [String: String] ?? [:]).mapValues { Optional($0) }
+            if let body = result["body"] as? String { request.body = Data(base64Encoded: body) }
+            let methods: [HttpMethod] = [.GET, .POST, .PUT, .HEAD, .DELETE, .PATCH, .OPTIONS, .CONNECT, .TRACE]
+            if let method = result["method"] as? Int, methods.indices.contains(method) { request.method = methods[method] }
+            return request
+        }
         source.globalStore.requestsPointer += 1
         var request = WasmRequestObject(id: source.globalStore.requestsPointer)
         guard !url.isEmpty else { return request }
@@ -149,6 +177,13 @@ actor SourceActor {
     }
 
     func handleUrl(url: String) throws -> DeepLink {
+        if let modern = source.modern {
+            let result = try modern.call("deepLink", ["URL": url]) as? [String: Any] ?? [:]
+            guard let key = result["MangaKey"] as? String else { throw SourceError.missingValue }
+            let manga = try modern.update(Manga(sourceId: source.id, id: key))
+            let chapters = try modern.chapters(manga)
+            return DeepLink(manga: manga, chapter: chapters.first { $0.id == result["ChapterKey"] as? String })
+        }
         let urlDescriptor = source.globalStore.storeStdValue(url)
         defer { source.globalStore.removeStdValue(urlDescriptor) }
 
@@ -167,6 +202,7 @@ actor SourceActor {
     }
 
     func handleNotification(notification: String) {
+        if let modern = source.modern { _ = try? modern.call("notify", ["Notification": notification]); return }
         let notificationDescriptor = source.globalStore.storeStdValue(notification)
 
         try? source.globalStore.vm.call("handle_notification", notificationDescriptor)

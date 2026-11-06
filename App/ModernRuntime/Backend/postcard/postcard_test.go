@@ -1,0 +1,208 @@
+package postcard
+
+import (
+	"bytes"
+	"math"
+	"runtime"
+	"testing"
+)
+
+func TestVarintRoundTrip(t *testing.T) {
+	values := []uint64{0, 1, 127, 128, 255, 300, 16384, 1 << 20, 1 << 40, math.MaxUint64}
+	for _, v := range values {
+		w := NewWriter()
+		w.WriteU64(v)
+		r := NewReader(w.Bytes())
+		got, err := r.ReadU64()
+		if err != nil {
+			t.Fatalf("ReadU64(%d): %v", v, err)
+		}
+		if got != v {
+			t.Fatalf("ReadU64: want %d got %d", v, got)
+		}
+		if r.Remaining() != 0 {
+			t.Fatalf("ReadU64(%d): %d bytes left over", v, r.Remaining())
+		}
+	}
+}
+
+func TestZigZagSignedRoundTrip(t *testing.T) {
+	values := []int64{0, 1, -1, 2, -2, math.MaxInt32, math.MinInt32, math.MaxInt64, math.MinInt64}
+	for _, v := range values {
+		w := NewWriter()
+		w.WriteI64(v)
+		r := NewReader(w.Bytes())
+		got, err := r.ReadI64()
+		if err != nil {
+			t.Fatalf("ReadI64(%d): %v", v, err)
+		}
+		if got != v {
+			t.Fatalf("ReadI64: want %d got %d", v, got)
+		}
+	}
+}
+
+// TestKnownEncodings pins the wire format against hand-computed bytes per
+// https://postcard.jamesmunns.com/wire-format, to guard against silent
+// drift from the Rust format.
+func TestKnownEncodings(t *testing.T) {
+	// u32(300) -> varint: 300 = 0b1_0010_1100 -> low7=0101100(0x2C)|cont,
+	// next7=0000010(0x02) => bytes [0xAC, 0x02]
+	w := NewWriter()
+	w.WriteU32(300)
+	if !bytes.Equal(w.Bytes(), []byte{0xAC, 0x02}) {
+		t.Fatalf("u32(300) = % x, want ac 02", w.Bytes())
+	}
+
+	// i32(-1) zigzags to 1 -> single byte 0x01
+	w = NewWriter()
+	w.WriteI32(-1)
+	if !bytes.Equal(w.Bytes(), []byte{0x01}) {
+		t.Fatalf("i32(-1) = % x, want 01", w.Bytes())
+	}
+
+	// i32(1) zigzags to 2 -> single byte 0x02
+	w = NewWriter()
+	w.WriteI32(1)
+	if !bytes.Equal(w.Bytes(), []byte{0x02}) {
+		t.Fatalf("i32(1) = % x, want 02", w.Bytes())
+	}
+
+	// bool
+	w = NewWriter()
+	w.WriteBool(true)
+	w.WriteBool(false)
+	if !bytes.Equal(w.Bytes(), []byte{0x01, 0x00}) {
+		t.Fatalf("bools = % x, want 01 00", w.Bytes())
+	}
+
+	// string "hi" -> len(2) varint + bytes
+	w = NewWriter()
+	w.WriteString("hi")
+	if !bytes.Equal(w.Bytes(), []byte{0x02, 'h', 'i'}) {
+		t.Fatalf("string(hi) = % x, want 02 68 69", w.Bytes())
+	}
+}
+
+func TestOptionRoundTrip(t *testing.T) {
+	w := NewWriter()
+	w.WriteNone()
+
+	w2 := NewWriter()
+	w2.WriteSome()
+	w2.WriteString("value")
+
+	r := NewReader(w.Bytes())
+	present, err := r.ReadOptionTag()
+	if err != nil || present {
+		t.Fatalf("expected absent option, got present=%v err=%v", present, err)
+	}
+
+	r2 := NewReader(w2.Bytes())
+	present2, err := r2.ReadOptionTag()
+	if err != nil || !present2 {
+		t.Fatalf("expected present option, got present=%v err=%v", present2, err)
+	}
+	s, err := r2.ReadString()
+	if err != nil || s != "value" {
+		t.Fatalf("expected \"value\", got %q err=%v", s, err)
+	}
+}
+
+func TestFloatRoundTrip(t *testing.T) {
+	w := NewWriter()
+	w.WriteF32(3.14159)
+	w.WriteF64(2.718281828459045)
+
+	r := NewReader(w.Bytes())
+	f32, err := r.ReadF32()
+	if err != nil || f32 != float32(3.14159) {
+		t.Fatalf("f32 round trip: %v err=%v", f32, err)
+	}
+	f64, err := r.ReadF64()
+	if err != nil || f64 != 2.718281828459045 {
+		t.Fatalf("f64 round trip: %v err=%v", f64, err)
+	}
+}
+
+// TestReadLenRejectsOversizedLength guards against a corrupt or hostile
+// length prefix reaching a downstream make([]T, n) with a wildly larger n
+// than the buffer could actually contain -- ReadLen must bound n against
+// Remaining() itself, not just leave it to ReadString/ReadBytes.
+func TestReadLenRejectsOversizedLength(t *testing.T) {
+	w := NewWriter()
+	w.WriteU64(1 << 32) // length prefix claiming ~4 billion elements
+	w.WriteU8(1)        // one real byte follows -- nowhere near enough
+	r := NewReader(w.Bytes())
+	if n, err := r.ReadLen(); err == nil {
+		t.Fatalf("ReadLen: expected error for oversized length, got n=%d", n)
+	}
+}
+
+func TestReadLenAcceptsLengthWithinRemaining(t *testing.T) {
+	w := NewWriter()
+	w.WriteU64(3)
+	w.WriteU8(1)
+	w.WriteU8(2)
+	w.WriteU8(3)
+	r := NewReader(w.Bytes())
+	n, err := r.ReadLen()
+	if err != nil || n != 3 {
+		t.Fatalf("ReadLen: want n=3 err=nil, got n=%d err=%v", n, err)
+	}
+}
+
+func TestSeqDoesNotPresizeFromLengthPrefix(t *testing.T) {
+	type big struct{ _ [1024]byte }
+	// Claims 1<<20 elements, fully covered by remaining bytes as far as
+	// ReadLen is concerned, but every decode fails on the first element.
+	w := NewWriter()
+	w.WriteU64(1 << 20)
+	r := NewReader(append(w.Bytes(), make([]byte, 1<<20)...))
+	n, err := r.ReadLen()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var ms runtime.MemStats
+	runtime.ReadMemStats(&ms)
+	before := ms.TotalAlloc
+	_, _ = Seq(r, n, func(*big, *Reader) error { return ErrUnexpectedEOF })
+	runtime.ReadMemStats(&ms)
+	if grew := ms.TotalAlloc - before; grew > 1<<20 {
+		t.Fatalf("Seq allocated %d bytes for a failing decode, want it bounded by actual elements", grew)
+	}
+	got, err := Seq(NewReader(nil), 0, ReadStringInto)
+	if err != nil || got == nil {
+		t.Fatalf("empty Seq = %v, %v; want non-nil empty slice", got, err)
+	}
+}
+
+// Narrowing readers must reject varints past their width instead of
+// truncating them (e.g. 65536 read as u16 0).
+func TestNarrowVarintRejectsOutOfRange(t *testing.T) {
+	enc := func(v uint64) []byte { w := NewWriter(); w.WriteU64(v); return w.Bytes() }
+	cases := []struct {
+		name string
+		read func(*Reader) error
+		ok   uint64
+		bad  uint64
+	}{
+		{"u16", func(r *Reader) error { _, err := r.ReadU16(); return err }, math.MaxUint16, math.MaxUint16 + 1},
+		{"i16", func(r *Reader) error { _, err := r.ReadI16(); return err }, math.MaxUint16, math.MaxUint16 + 1},
+		{"u32", func(r *Reader) error { _, err := r.ReadU32(); return err }, math.MaxUint32, math.MaxUint32 + 1},
+		{"i32", func(r *Reader) error { _, err := r.ReadI32(); return err }, math.MaxUint32, math.MaxUint32 + 1},
+	}
+	for _, c := range cases {
+		if err := c.read(NewReader(enc(c.ok))); err != nil {
+			t.Errorf("%s(%d): %v", c.name, c.ok, err)
+		}
+		if err := c.read(NewReader(enc(c.bad))); err != ErrVarintOverflow {
+			t.Errorf("%s(%d): want ErrVarintOverflow, got %v", c.name, c.bad, err)
+		}
+	}
+	// 10-byte varint whose last byte carries bits past 63.
+	tooBig := []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x02}
+	if _, err := NewReader(tooBig).ReadU64(); err != ErrVarintOverflow {
+		t.Errorf("u64 >64 bits: want ErrVarintOverflow, got %v", err)
+	}
+}

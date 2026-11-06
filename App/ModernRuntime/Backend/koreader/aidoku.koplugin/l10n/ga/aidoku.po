@@ -1,0 +1,762 @@
+# Irish translations for aidoku.koplugin package.
+# Copyright (C) 2026 THE aidoku.koplugin'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the aidoku.koplugin package.
+# Automatically generated, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: aidoku.koplugin\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-26 18:29+0700\n"
+"PO-Revision-Date: 2026-10-08 09:53+0700\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: ga\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : n==2 ? 1 : 2;\n"
+
+#: downloadsbrowser.lua:18 sourcesbrowser.lua:24
+msgid "Downloaded chapters"
+msgstr "Caibidlí íoslódáilte"
+
+#: downloadsbrowser.lua:46
+msgid "No downloaded chapters yet."
+msgstr "Níl caibidil íoslódáilte ann fós."
+
+#: downloadsbrowser.lua:58
+msgid ""
+"Could not load downloads:\n"
+"%1"
+msgstr ""
+"Níorbh fhéidir íoslódálacha a lódáil:\n"
+"%1"
+
+#: downloadsbrowser.lua:81
+msgid "Download no longer available."
+msgstr "Níl an íoslódáil ar fáil a thuilleadh."
+
+#: downloadsbrowser.lua:103
+msgid ""
+"Remove download?\n"
+"\n"
+"%1"
+msgstr ""
+"Bain an íoslódáil?\n"
+"\n"
+"%1"
+
+#: downloadsbrowser.lua:104 librarybrowser.lua:323 sourcesbrowser.lua:152
+msgid "Remove"
+msgstr "Bain"
+
+#: downloadsengine.lua:232
+msgid "Could not read the downloads index."
+msgstr "Ní féidir innéacs na n-íoslódálacha a léamh."
+
+#: engine.lua:46
+msgid "Fetching repository…"
+msgstr "Stóras á fháil…"
+
+#: engine.lua:50
+msgid "Installing…"
+msgstr "Á suiteáil…"
+
+#: engine.lua:59
+msgid "Loading cookies…"
+msgstr "Fianáin á lódáil…"
+
+#: engine.lua:72
+msgid "Checking for updates…"
+msgstr "Nuashonruithe á seiceáil…"
+
+#: engine.lua:76
+msgid "Downloading update…"
+msgstr "Nuashonrú á íoslódáil…"
+
+#: engine.lua:80
+msgid "Loading source…"
+msgstr "Foinse á lódáil…"
+
+#: engine.lua:134
+msgid "Could not write search filters"
+msgstr ""
+
+#: engine.lua:138
+msgid "Searching…"
+msgstr "Ag cuardach…"
+
+#: engine.lua:149
+msgid "Loading filters…"
+msgstr "Scagairí á lódáil…"
+
+#: engine.lua:156
+msgid "Loading settings…"
+msgstr "Socruithe á lódáil…"
+
+#: engine.lua:191
+msgid "Loading chapters…"
+msgstr "Caibidlí á lódáil…"
+
+#: engine.lua:222
+msgid "Downloading chapter…"
+msgstr "Caibidil á híoslódáil…"
+
+#: filterbrowser.lua:21
+msgid "Search filters"
+msgstr "Scagairí cuardaigh"
+
+#: filterbrowser.lua:73 filterbrowser.lua:142
+msgid "Sort: %1"
+msgstr "Sórtáil: %1"
+
+#: filterbrowser.lua:73
+msgid "default"
+msgstr "réamhshocraithe"
+
+#: filterbrowser.lua:76
+msgid "Sort: %1 (%2)"
+msgstr "Sórtáil: %1 (%2)"
+
+#: filterbrowser.lua:76
+msgid "ascending"
+msgstr "ag éirí"
+
+#: filterbrowser.lua:76
+msgid "descending"
+msgstr "ag laghdú"
+
+#: filterbrowser.lua:81 filterbrowser.lua:83 filterbrowser.lua:90
+#: filterbrowser.lua:98 filterbrowser.lua:100 sourcesettingsbrowser.lua:116
+msgid "%1: %2"
+msgstr "%1: %2"
+
+#: filterbrowser.lua:81 filterbrowser.lua:90
+msgid "any"
+msgstr "ar bith"
+
+#: filterbrowser.lua:92
+msgid "%1: %2 included, %3 excluded"
+msgstr "%1: %2 san áireamh, %3 eisiata"
+
+#: filterbrowser.lua:98
+msgid "unset"
+msgstr "gan socrú"
+
+#: filterbrowser.lua:100
+msgid "no"
+msgstr "níl"
+
+#: filterbrowser.lua:100
+msgid "yes"
+msgstr "tá"
+
+#: filterbrowser.lua:121
+msgid "Clear all filters"
+msgstr "Glan gach scagaire"
+
+#: filterbrowser.lua:122
+msgid "Search with these filters"
+msgstr "Cuardaigh leis na scagairí seo"
+
+#: filterbrowser.lua:169
+msgid "Any"
+msgstr "Ar bith"
+
+#: globalsearchbrowser.lua:24 globalsearchbrowser.lua:63 librarybrowser.lua:137
+msgid "Search all sources"
+msgstr "Cuardaigh gach foinse"
+
+#: globalsearchbrowser.lua:25 searchbrowser.lua:18
+msgid "Hold a result to add/remove from library"
+msgstr "Coinnigh toradh chun leabharlann a chur leis/bhaint as"
+
+#: globalsearchbrowser.lua:64 searchbrowser.lua:93
+msgid "Title…"
+msgstr "Teideal…"
+
+#: globalsearchbrowser.lua:67 mangabrowser.lua:453 searchbrowser.lua:96
+#: settingsbrowser.lua:150 settingsbrowser.lua:184 settingsbrowser.lua:219
+#: settingsbrowser.lua:249 settingsbrowser.lua:286 settingsbrowser.lua:424
+#: sourcesettingsbrowser.lua:235
+msgid "Cancel"
+msgstr "Cealaigh"
+
+#: globalsearchbrowser.lua:72 searchbrowser.lua:101
+msgid "Search"
+msgstr "Cuardaigh"
+
+#: globalsearchbrowser.lua:96
+msgid "No sources installed."
+msgstr "Níl foinse suiteáilte."
+
+#: globalsearchbrowser.lua:126
+msgid "No results from any source."
+msgstr "Níl torthaí ó aon fhoinse."
+
+#: globalsearchbrowser.lua:129
+msgid "Some sources failed: %1"
+msgstr "Theip ar roinnt foinsí: %1"
+
+#: globalsearchbrowser.lua:149 searchbrowser.lua:195
+msgid "Could not update library."
+msgstr ""
+
+#: globalsearchbrowser.lua:159 searchbrowser.lua:205
+msgid "Added '%1' to library"
+msgstr "Cuireadh '%1' leis an leabharlann"
+
+#: globalsearchbrowser.lua:159 searchbrowser.lua:205
+msgid "Removed '%1' from library"
+msgstr "Baineadh '%1' as an leabharlann"
+
+#: librarybrowser.lua:27
+msgid "Library"
+msgstr "Leabharlann"
+
+#: librarybrowser.lua:32 librarybrowser.lua:91 settingsbrowser.lua:114
+msgid "Ephemeral Mode"
+msgstr "Mód gearrshaoil"
+
+#. TRANSLATORS: KOReader mirrors the layout for RTL languages, so the menu button is top right there.
+#: librarybrowser.lua:77
+msgid "Library is empty. Use the menu (top left) to find manga."
+msgstr ""
+"Tá an leabharlann folamh. Úsáid an roghchlár (barr ar chlé) chun manga a "
+"aimsiú."
+
+#: librarybrowser.lua:108 settingsbrowser.lua:35
+msgid "Settings"
+msgstr "Socruithe"
+
+#: librarybrowser.lua:156
+msgid "Sort: Last read"
+msgstr "Sórtáil: An léitheoireacht is déanaí"
+
+#: librarybrowser.lua:156
+msgid "Sort: Name"
+msgstr "Sórtáil: Ainm"
+
+#: librarybrowser.lua:165
+msgid "Check for Updates"
+msgstr "Seiceáil le haghaidh nuashonruithe"
+
+#: librarybrowser.lua:207
+msgid ""
+"Could not check for updates:\n"
+"%1"
+msgstr ""
+"Níorbh fhéidir nuashonruithe a sheiceáil:\n"
+"%1"
+
+#: librarybrowser.lua:212
+msgid "Plugin is up to date (%1)."
+msgstr "Tá an breiseán cothrom le dáta (%1)."
+
+#: librarybrowser.lua:220
+msgid ""
+"Update available: %1\n"
+"Installed: %2"
+msgstr ""
+"Nuashonrú ar fáil: %1\n"
+"Suiteáilte: %2"
+
+#: librarybrowser.lua:222
+msgid "unknown"
+msgstr "anaithnid"
+
+#: librarybrowser.lua:226
+msgid ""
+"Latest: %1\n"
+"Installed version unknown."
+msgstr ""
+"Is déanaí: %1\n"
+"Leagan suiteáilte anaithnid."
+
+#: librarybrowser.lua:232
+msgid "Download & Install"
+msgstr "Íoslódáil & Suiteáil"
+
+#: librarybrowser.lua:244
+msgid ""
+"Update failed:\n"
+"%1"
+msgstr ""
+"Theip ar an nuashonrú:\n"
+"%1"
+
+#: librarybrowser.lua:248
+msgid "Updated to %1. Restart KOReader to apply."
+msgstr "Nuashonraithe go %1. Atosaigh KOReader chun é a chur i bhfeidhm."
+
+#: librarybrowser.lua:293
+msgid "'%1' is no longer installed. Hold to remove it."
+msgstr "Níl '%1' suiteáilte a thuilleadh. Coinnigh chun é a bhaint."
+
+#: librarybrowser.lua:322
+msgid "Remove '%1' from your library?"
+msgstr "An bhaint '%1' as do leabharlann?"
+
+#: main.lua:236
+msgid "Aidoku"
+msgstr "Aidoku"
+
+#: main.lua:244
+msgid "AidokuRunner for KOReader"
+msgstr "AidokuRunner do KOReader"
+
+#: main.lua:263
+msgid "aidoku-run binary not found. Rebuild the plugin with koreader/build.sh."
+msgstr ""
+"Comhad aidoku-run gan aimsiú. Atógáil an breiseán le koreader/build.sh."
+
+#: main.lua:269
+msgid "Could not open the downloads database. Is storage writable?"
+msgstr ""
+"Níorbh fhéidir bunachar sonraí na n-íoslódálacha a oscailt. An bhfuil an "
+"stóras inscríofa?"
+
+#: mangabrowser.lua:75
+msgid "Sort: Newest first"
+msgstr "Sórtáil: is nuaí ar dtús"
+
+#: mangabrowser.lua:75
+msgid "Sort: Oldest first"
+msgstr "Sórtáil: is sine ar dtús"
+
+#: mangabrowser.lua:90
+msgid "Download next chapters…"
+msgstr "Íoslódáil na caibidlí seo chugainn…"
+
+#: mangabrowser.lua:98
+msgid "Reset reading progress…"
+msgstr "Athshocraigh dul chun cinn léitheoireachta…"
+
+#: mangabrowser.lua:119
+msgid ""
+"Reset progress for %1?\n"
+"\n"
+"Clears read marks and page positions."
+msgstr ""
+"Athshocraigh dul chun cinn do %1?\n"
+"\n"
+"Glanfar marcanna léite agus suímh leathanaigh."
+
+#: mangabrowser.lua:121
+msgid "Reset"
+msgstr "Athshocraigh"
+
+#: mangabrowser.lua:159
+msgid "Read"
+msgstr "Léite"
+
+#: mangabrowser.lua:226
+msgid ""
+"Could not load chapters:\n"
+"%1"
+msgstr ""
+"Níorbh fhéidir caibidlí a lódáil:\n"
+"%1"
+
+#: mangabrowser.lua:272
+msgid "Resume reading from %1?"
+msgstr "Atosaigh an léitheoireacht ó %1?"
+
+#: mangabrowser.lua:273
+msgid "Resume"
+msgstr "Atosaigh"
+
+#: mangabrowser.lua:274
+msgid "Not now"
+msgstr "Ní anois"
+
+#: mangabrowser.lua:343
+msgid "No chapters to download."
+msgstr "Níl caibidlí le híoslódáil."
+
+#: mangabrowser.lua:366 nextchapter.lua:156
+msgid "No next chapter yet."
+msgstr "Níl an chéad chaibidil eile ann fós."
+
+#: mangabrowser.lua:381
+msgid "Already downloaded."
+msgstr "Íoslódáilte cheana."
+
+#: mangabrowser.lua:398
+msgid "Downloading %1/%2: %3"
+msgstr "Caibidil %1/%2 á híoslódáil: %3"
+
+#: mangabrowser.lua:402 subprocess.lua:138
+msgid "Cancelled"
+msgstr "Cealaithe"
+
+#: mangabrowser.lua:408
+msgid "Cancelled after %1 of %2 chapters."
+msgstr "Cealaithe tar éis %1 de %2 chaibidil."
+
+#: mangabrowser.lua:411 mangabrowser.lua:495 nextchapter.lua:214
+msgid ""
+"Download failed:\n"
+"%1"
+msgstr ""
+"Theip ar an íoslódáil:\n"
+"%1"
+
+#: mangabrowser.lua:442
+msgid "Chapters still loading. Try again shortly."
+msgstr "Caibidlí fós á lódáil. Bain triail eile as ar ball."
+
+#: mangabrowser.lua:447
+msgid "Download next chapters"
+msgstr "Íoslódáil na caibidlí seo chugainn"
+
+#: mangabrowser.lua:448
+msgid "Chapters to download, starting after the last one read."
+msgstr "Caibidlí le híoslódáil, ag tosú tar éis an chaibidil is déanaí léite."
+
+#: mangabrowser.lua:458
+msgid "Download"
+msgstr "Íoslódáil"
+
+#: mangabrowser.lua:557
+msgid "Mark as read"
+msgstr "Marcáil mar léite"
+
+#: mangabrowser.lua:557
+msgid "Mark as unread"
+msgstr "Marcáil mar gan léamh"
+
+#: mangabrowser.lua:571
+msgid "Re-download"
+msgstr "Athíoslódáil"
+
+#: mangabrowser.lua:580
+msgid "Remove download"
+msgstr "Bain an íoslódáil"
+
+#: nextchapter.lua:173 nextchapter.lua:232
+msgid "Continue to '%1'?"
+msgstr "Lean ar aghaidh go '%1'?"
+
+#: nextchapter.lua:174 nextchapter.lua:233
+msgid "Continue"
+msgstr "Lean ar aghaidh"
+
+#: nextchapter.lua:185
+msgid "Offline, and the next chapter isn't downloaded."
+msgstr "As líne, agus níl an chaibidil eile íoslódáilte."
+
+#: nextchapter.lua:189
+msgid "Source no longer installed."
+msgstr "Níl an fhoinse suiteáilte a thuilleadh."
+
+#: nextchapter.lua:194
+msgid ""
+"Could not check for next chapter:\n"
+"%1"
+msgstr ""
+"Níorbh fhéidir an chaibidil eile a sheiceáil:\n"
+"%1"
+
+#: prefetch.lua:33
+msgid "Chapter %1"
+msgstr "Caibidil %1"
+
+#: repobrowser.lua:24
+msgid "Source repository"
+msgstr "Stór foinsí"
+
+#: repobrowser.lua:51
+msgid ""
+"Could not load repository:\n"
+"%1"
+msgstr ""
+"Níorbh fhéidir an stór a lódáil:\n"
+"%1"
+
+#: repobrowser.lua:105
+msgid ""
+"Install failed:\n"
+"%1"
+msgstr ""
+"Theip ar an suiteáil:\n"
+"%1"
+
+#: repobrowser.lua:113
+msgid "Installed %1"
+msgstr "Suiteáilte: %1"
+
+#: searchbrowser.lua:92
+msgid "Search manga"
+msgstr "Cuardaigh manga"
+
+#: searchbrowser.lua:127
+msgid ""
+"Search failed:\n"
+"%1"
+msgstr ""
+"Theip ar an gcuardach:\n"
+"%1"
+
+#: searchbrowser.lua:134
+msgid "Filters (%1 set)…"
+msgstr "Scagairí (%1 socraithe)…"
+
+#: searchbrowser.lua:134
+msgid "Filters…"
+msgstr "Scagairí…"
+
+#: searchbrowser.lua:149
+msgid "No results."
+msgstr "Gan torthaí."
+
+#: settingsbrowser.lua:45
+msgid "Ask"
+msgstr "Fiafraigh"
+
+#: settingsbrowser.lua:45
+msgid "Auto"
+msgstr "Uathoibríoch"
+
+#: settingsbrowser.lua:45 settingsbrowser.lua:115 sourcesettingsbrowser.lua:92
+msgid "Off"
+msgstr "As"
+
+#: settingsbrowser.lua:71
+msgid "N/A"
+msgstr "N/B"
+
+#: settingsbrowser.lua:72 sourcesettingsbrowser.lua:97
+msgid "none"
+msgstr "dada"
+
+#: settingsbrowser.lua:74
+msgid " (using %1)"
+msgstr " (ag úsáid %1)"
+
+#: settingsbrowser.lua:78 sourcesettingsbrowser.lua:102
+msgid "not set"
+msgstr "gan socrú"
+
+#: settingsbrowser.lua:80
+msgid "Custom"
+msgstr "Saincheaptha"
+
+#: settingsbrowser.lua:80
+msgid "Default"
+msgstr "Réamhshocraithe"
+
+#: settingsbrowser.lua:83
+msgid "Default (8)"
+msgstr "Réamhshocraithe (8)"
+
+#: settingsbrowser.lua:89
+msgid "Sources"
+msgstr "Foinsí"
+
+#: settingsbrowser.lua:93 settingsbrowser.lua:144
+msgid "Prefetch next chapters"
+msgstr "Réamhíoslódáil na caibidlí seo chugainn"
+
+#: settingsbrowser.lua:100
+msgid "Auto-advance at chapter end"
+msgstr "Dul ar aghaidh go huathoibríoch ag deireadh caibidle"
+
+#: settingsbrowser.lua:105
+msgid "Storage limit"
+msgstr "Teorainn stórais"
+
+#: settingsbrowser.lua:108 settingsbrowser.lua:211
+msgid "Source repository URL"
+msgstr "URL an stóir fhoinsí"
+
+#: settingsbrowser.lua:109 settingsbrowser.lua:243
+msgid "Network concurrency"
+msgstr "Comhthreomharthacht líonra"
+
+#: settingsbrowser.lua:115 sourcesettingsbrowser.lua:92
+msgid "On"
+msgstr "Air"
+
+#: settingsbrowser.lua:119 settingsbrowser.lua:418
+msgid "Ephemeral storage path"
+msgstr "Cosán stórais ghearrshaoil"
+
+#: settingsbrowser.lua:123 settingsbrowser.lua:280
+msgid "FlareSolverr host"
+msgstr "Óstach FlareSolverr"
+
+#: settingsbrowser.lua:124
+msgid "Import cookies"
+msgstr "Allmhairigh fianáin"
+
+#: settingsbrowser.lua:125
+msgid "Clear stored cookies"
+msgstr "Glan fianáin stóráilte"
+
+#: settingsbrowser.lua:145
+msgid "Chapters to download ahead while reading. 0 turns it off."
+msgstr "Caibidlí le híoslódáil roimh ré agus tú ag léamh. 0 ga dúnadh air."
+
+#: settingsbrowser.lua:155 settingsbrowser.lua:189 settingsbrowser.lua:224
+#: settingsbrowser.lua:254 settingsbrowser.lua:291 settingsbrowser.lua:429
+#: sourcesettingsbrowser.lua:240
+msgid "Set"
+msgstr "Socraigh"
+
+#: settingsbrowser.lua:164 settingsbrowser.lua:267
+msgid "Enter a number from 0 to %1."
+msgstr ""
+
+#: settingsbrowser.lua:178
+msgid "Storage limit (MB)"
+msgstr "Teorainn stórais (MB)"
+
+#: settingsbrowser.lua:179
+msgid "Oldest chapters are deleted first. 0 means no limit."
+msgstr "Scriosfar na caibidlí is sine ar dtús. 0 ciallaíonn gan teorainn."
+
+#: settingsbrowser.lua:198
+msgid "Enter 0 or a positive number."
+msgstr ""
+
+#: settingsbrowser.lua:213
+msgid ""
+"Repository index URL. Leave blank for the default:\n"
+"%1"
+msgstr ""
+"URL innéacs an stóir. Fág folamh don réamhshocrú:\n"
+"%1"
+
+#: settingsbrowser.lua:244
+msgid ""
+"Parallel requests per source. Blank or 0 for default (8). Higher uses more "
+"memory."
+msgstr ""
+"Iarratais chomhthreomhara in aghaidh na foinse. Fág folamh nó 0 don "
+"réamhshocrú (8). Úsáideann níos mó níos mó cuimhne."
+
+#: settingsbrowser.lua:281
+msgid ""
+"Solves Cloudflare challenges, e.g. localhost:8191. Leave blank to disable."
+msgstr ""
+"Réitíonn dúshláin Cloudflare, m.sh. localhost:8191. Fág folamh chun "
+"díchumasú."
+
+#: settingsbrowser.lua:283
+msgid "host:port"
+msgstr "óstach:calafort"
+
+#: settingsbrowser.lua:309
+msgid "Long-press a cookies.txt to import it"
+msgstr "Coinnigh cookies.txt chun é a allmhairiú"
+
+#: settingsbrowser.lua:319
+msgid ""
+"Import failed:\n"
+"%1"
+msgstr ""
+"Theip ar an allmhairiú:\n"
+"%1"
+
+#: settingsbrowser.lua:329
+msgid "Clear cookies for all sources? This can't be undone."
+msgstr "Glan fianáin do gach foinse? Ní féidir é seo a chealú."
+
+#: settingsbrowser.lua:330
+msgid "Clear"
+msgstr "Glan"
+
+#: settingsbrowser.lua:335
+msgid "Cookies cleared."
+msgstr "Glanadh na fianáin."
+
+#: settingsbrowser.lua:337
+msgid ""
+"Could not clear cookies:\n"
+"%1"
+msgstr ""
+"Níorbh fhéidir na fianáin a ghlanadh:\n"
+"%1"
+
+#: settingsbrowser.lua:405
+msgid "%1 doesn't exist or isn't writable."
+msgstr "Níl %1 ann nó nach féidir scríobh air."
+
+#: settingsbrowser.lua:411
+msgid ""
+"The Ephemeral storage path can't be, contain, or be inside the normal "
+"downloads folder."
+msgstr ""
+
+#: settingsbrowser.lua:419
+msgid "Where chapters are stored in Ephemeral Mode."
+msgstr "Cá stórálfar caibidlí i Mód gearrshaoil."
+
+#: settingsbrowser.lua:497
+msgid "Ephemeral Mode limits prefetch to 1 chapter."
+msgstr "Teorannaíonn Mód gearrshaoil réamhíoslódáil go caibidil amháin."
+
+#: settingsbrowser.lua:507
+msgid "Storage limit is off in Ephemeral Mode."
+msgstr "Tá teorainn stórais as i Mód gearrshaoil."
+
+#: sourcesbrowser.lua:20
+msgid "Aidoku sources"
+msgstr "Foinsí Aidoku"
+
+#: sourcesbrowser.lua:100
+msgid "Couldn't read this source. Try again, or reinstall it."
+msgstr ""
+
+#: sourcesbrowser.lua:132
+msgid "Source settings"
+msgstr "Socruithe foinse"
+
+#: sourcesbrowser.lua:147
+msgid "Remove installed source"
+msgstr "Bain foinse shuiteáilte"
+
+#: sourcesbrowser.lua:151
+msgid "Remove source '%1'?"
+msgstr "An bhaint foinse '%1'?"
+
+#: sourcesettingsbrowser.lua:54
+msgid "%1 settings"
+msgstr "Socruithe %1"
+
+#: sourcesettingsbrowser.lua:75
+msgid ""
+"Could not load settings:\n"
+"%1"
+msgstr ""
+"Níorbh fhéidir na socruithe a lódáil:\n"
+"%1"
+
+#: sourcesettingsbrowser.lua:121
+msgid "This source has no configurable settings."
+msgstr "Níl socruithe inathraithe ag an bhfoinse seo."
+
+#: sourcesettingsbrowser.lua:131
+msgid ""
+"Could not save setting:\n"
+"%1"
+msgstr ""
+"Níorbh fhéidir an socrú a shábháil:\n"
+"%1"
+
+#: subprocess.lua:147
+#, fuzzy
+msgid "command failed"
+msgstr ""
+"Theip ar an íoslódáil:\n"
+"%1"
+
+#: subprocess.lua:153
+msgid "command produced no output"
+msgstr "ní tháinig aon aschur ón ordú"
+
+#: subprocess.lua:167
+msgid "Invalid response from aidoku-run"
+msgstr ""

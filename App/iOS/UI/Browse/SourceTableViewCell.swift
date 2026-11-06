@@ -201,14 +201,12 @@ class SourceTableViewCell: UITableViewCell {
     @objc func getPressed() {
         guard
             let externalInfo = info?.externalInfo,
-            let url = externalInfo.sourceUrl
+            let url = externalInfo.fileURL
         else { return }
         getButton.buttonState = .downloading
         Task {
             let installedSource = await SourceManager.shared.importSource(
                 from: url
-                    .appendingPathComponent("sources", isDirectory: true)
-                    .appendingPathComponent(externalInfo.file)
             )
             getButton.buttonState = installedSource == nil ? .fail : .get
         }

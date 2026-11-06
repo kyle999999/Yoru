@@ -1,15 +1,11 @@
-# Integration provenance and changes
+# Integration provenance
 
-Base: Aidoku v0.6.11, `0fd6ee2847f06bdc0354c91345cc2f976506cb16`, GPLv3. Yoru host: 3.1, combined version 4.0.1 build 6. This modified build is not distributed or endorsed by Aidoku’s original developer.
+Yoru host: original SwiftUI anime tracker, journals, collections and streaks. Retained native manga UI/reader and legacy engine: GPL Aidoku v0.6.11 (`0fd6ee2847f06bdc0354c91345cc2f976506cb16`). Current source runtime: GPL independent aidoku-backend-0.7 (`660e08724d78f7ab2d9921b2b1e8c76f71478fb6`), modified through the native bridge in Integration/ and ModernRuntime/Driver/. Combined version 4.1 build 7.
 
-Yoru lives in Yoru/. The original GPL Aidoku source remains in Shared/ and iOS/. Original artwork is retained in OriginalBrand/. The app product name, bundle identifier, icon, and localized display name remain Yoru. The upstream explicit Xcode source/resource lists are retained; two synchronized groups add the host and integration adapter. Restricted AidokuRunner code is excluded.
+The restricted Swift AidokuRunner implementation is not copied or linked. Original licenses, authorship, artwork, dependency notices and corresponding source are retained. The independent backend's upstream source and tests live in ModernRuntime/Backend; mobile dependencies are vendored in ModernRuntime/Driver/vendor.
 
-Host edits are limited to the aidoku tab, removing the second executable entry point, and splitting a journal-sort expression without changing its ordering. A UIKit scene-phase adapter preserves the original anime daily check-in behavior. No anime library schema/key changes or manga-to-anime migrations are introduced.
+Both sections share one installed app. A separate same-scene native window preserves the manga appearance and Back to Yoru behavior. Original navigation and reader layouts remain. Anime and manga defaults, network cookies/cache, SQLite paths, source files and backups remain isolated. No anime schema/key migration is introduced. Legacy packages remain installed; the current repository is added once alongside existing lists.
 
-Integration adapters establish a second same-app window for Aidoku’s actual native controllers, its own appearance, and a Back to Yoru control. iOS 26 tab/navigation APIs and reader progress controls modernize the UI; the original legacy WASM interpreter, database, library, source/settings controllers, download logic, and reader/page implementations do the work. No remote app/web wrapper is used.
+Modern manifests and model data are adapted to the existing controllers. Real WASM source execution is provided by interpreter-only Wazero. Native Foundation/WebKit supplies browser/network handling; JavaScript/canvas/source ABI functions are implemented by the independent backend and native adapter. Processed images enter the existing Nuke reader through a private URLProtocol. Runtime eviction limits live interpreters without installing a second app.
 
-Aidoku defaults, network session/cookies/cache, SQLite paths, files, backups, and source preferences are namespaced separately. Source import preserves local input archives. Compatibility/version checks use the legacy engine’s real version. Source Lists explains legacy compatibility and offers an explicit community-list setup button. No repository is auto-added to a clean production install.
-
-Device signing is disabled for export; private iCloud/push entitlements are omitted and CloudKit mirroring is disabled. Existing sideload warnings remain. Swift optimization is disabled for the validation/re-signable Release build. No API keys, account sessions, signing certificates, or physical-device data are distributed.
-
-For the 4.0.1 runtime/network/install changes and upstream ABI comparison, see [SOURCE_COMPATIBILITY.md](SOURCE_COMPATIBILITY.md).
+Device export is unsigned; original private iCloud/push entitlements remain omitted and CloudKit mirroring remains disabled. No source installations, account tokens, cookies or simulator data are distributed. [Exact compatibility tests and limits](SOURCE_COMPATIBILITY.md).
