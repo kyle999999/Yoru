@@ -5,6 +5,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let scene = scene as? UIWindowScene else { return }
+        #if targetEnvironment(macCatalyst)
+        scene.sizeRestrictions?.minimumSize = CGSize(width: 850, height: 650)
+        #endif
         let window = UIWindow(windowScene: scene)
         window.rootViewController = UIHostingController(rootView: YoruHostRoot())
         window.tintColor = UIColor(YoruTheme.violet)

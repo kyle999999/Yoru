@@ -54,8 +54,12 @@ class BrowseViewController: BaseTableViewController {
         tableView.sectionFooterHeight = 8
         tableView.separatorStyle = .none
         tableView.backgroundColor = .systemBackground
+        #if !targetEnvironment(macCatalyst)
         refreshControl.addTarget(self, action: #selector(refreshSourceLists(_:)), for: .valueChanged)
+        #endif
+        #if !targetEnvironment(macCatalyst)
         tableView.refreshControl = refreshControl
+        #endif
 
         // empty text
         emptyStackView.title = NSLocalizedString("BROWSE_NO_SOURCES", comment: "")
@@ -146,7 +150,9 @@ class BrowseViewController: BaseTableViewController {
         super.viewDidAppear(animated)
 
         // fix refresh control snapping height
+        #if !targetEnvironment(macCatalyst)
         refreshControl.didMoveToSuperview()
+        #endif
 
         // hack to show search bar on initial presentation
         if !navigationItem.hidesSearchBarWhenScrolling {

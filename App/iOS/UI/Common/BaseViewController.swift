@@ -40,7 +40,24 @@ class BaseViewController: ASDKViewController<ASDisplayNode> {
         super.viewDidLoad()
         configure()
         constrain()
+        #if targetEnvironment(macCatalyst)
+        if self is MacRefreshTarget {
+            addKeyCommand(UIKeyCommand(title: "Refresh", action: #selector(refreshMacView), input: "r", modifierFlags: .command))
+        }
+        #endif
     }
+
+    #if targetEnvironment(macCatalyst)
+    private lazy var macRefreshButton = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(refreshMacView))
+    @objc func refreshMacView() { (self as? MacRefreshTarget)?.refreshMacContent() }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if self is MacRefreshTarget {
+            var buttons = navigationItem.rightBarButtonItems ?? []
+            if !buttons.contains(macRefreshButton) { buttons.append(macRefreshButton); navigationItem.rightBarButtonItems = buttons }
+        }
+    }
+    #endif
 
     func configure() {}
     func constrain() {}

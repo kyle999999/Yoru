@@ -12,8 +12,8 @@ public final class EmbeddedNetwork: @unchecked Sendable {
 
     private init() {
         let manager = FileManager.default
-        let support = manager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Aidoku", isDirectory: true)
-        let cacheURL = manager.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("Aidoku/Network", isDirectory: true)
+        let support = AidokuStorage.directory(.applicationSupportDirectory)
+        let cacheURL = AidokuStorage.directory(.cachesDirectory).appendingPathComponent("Network", isDirectory: true)
         try? manager.createDirectory(at: support, withIntermediateDirectories: true)
         try? manager.createDirectory(at: cacheURL, withIntermediateDirectories: true)
         cookieFile = support.appendingPathComponent("NetworkCookies.plist")

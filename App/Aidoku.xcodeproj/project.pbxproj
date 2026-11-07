@@ -2108,15 +2108,27 @@
 				);
 				MARKETING_VERSION = 4.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = studio.yoru.Yoru;
-                LIBRARY_SEARCH_PATHS = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/$(PLATFORM_NAME)");
+                "LIBRARY_SEARCH_PATHS[sdk=iphone*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/$(PLATFORM_NAME)");
                 OTHER_LDFLAGS = ("$(inherited)", "-lYoruModern", "-framework", "Security", "-framework", "CoreFoundation", "-lresolv");
-				PRODUCT_NAME = Yoru;
+				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/maccatalyst");
+                PRODUCT_NAME = Yoru;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+                "TARGETED_DEVICE_FAMILY[sdk=macosx*]" = "2,6";
+                "ARCHS[sdk=macosx*]" = arm64;
+                "EXCLUDED_ARCHS[sdk=macosx*]" = x86_64;
+                "INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace[sdk=macosx*]" = YES;
+                "MARKETING_VERSION[sdk=macosx*]" = 4.2;
+                "CURRENT_PROJECT_VERSION[sdk=macosx*]" = 9;
+                "INFOPLIST_KEY_LSApplicationCategoryType[sdk=macosx*]" = "public.app-category.entertainment";
+                SUPPORTS_MACCATALYST = YES;
+                SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+                DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
+                MACOSX_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
 		};
@@ -2150,14 +2162,26 @@
 				);
 				MARKETING_VERSION = 4.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = studio.yoru.Yoru;
-                LIBRARY_SEARCH_PATHS = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/$(PLATFORM_NAME)");
+                "LIBRARY_SEARCH_PATHS[sdk=iphone*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/$(PLATFORM_NAME)");
                 OTHER_LDFLAGS = ("$(inherited)", "-lYoruModern", "-framework", "Security", "-framework", "CoreFoundation", "-lresolv");
-				PRODUCT_NAME = Yoru;
+				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/maccatalyst");
+                PRODUCT_NAME = Yoru;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+                "TARGETED_DEVICE_FAMILY[sdk=macosx*]" = "2,6";
+                "ARCHS[sdk=macosx*]" = arm64;
+                "EXCLUDED_ARCHS[sdk=macosx*]" = x86_64;
+                "INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace[sdk=macosx*]" = YES;
+                "MARKETING_VERSION[sdk=macosx*]" = 4.2;
+                "CURRENT_PROJECT_VERSION[sdk=macosx*]" = 9;
+                "INFOPLIST_KEY_LSApplicationCategoryType[sdk=macosx*]" = "public.app-category.entertainment";
+                SUPPORTS_MACCATALYST = YES;
+                SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+                DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
+                MACOSX_DEPLOYMENT_TARGET = 26.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -2186,7 +2210,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = xyz.skitty.Aidoku;
-				PRODUCT_NAME = Yoru;
+				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/maccatalyst");
+                PRODUCT_NAME = Yoru;
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -2218,7 +2243,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = xyz.skitty.Aidoku;
-				PRODUCT_NAME = Yoru;
+				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/maccatalyst");
+                PRODUCT_NAME = Yoru;
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -2290,14 +2316,10 @@
 				minimumVersion = 0.9.9;
 			};
 		};
-		FBE53F0A29CC015E00899601 /* XCRemoteSwiftPackageReference "Texture" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Skittyblock/Texture.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.1.1;
-			};
-		};
+        FBE53F0A29CC015E00899601 /* Texture */ = {
+            isa = XCLocalSwiftPackageReference;
+            relativePath = PlatformSupport/Texture;
+        };
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */

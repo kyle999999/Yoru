@@ -6,10 +6,16 @@ import UIKit
 // Opt-in live integration probe. Never runs in release builds or normal launches.
 enum SourceCompatibilityProbe {
     static func run() async {
+        #if targetEnvironment(macCatalyst)
+        let probeDirectory = AidokuStorage.directory(.cachesDirectory).appendingPathComponent("Validation", isDirectory: true)
+        try? FileManager.default.createDirectory(at: probeDirectory, withIntermediateDirectories: true)
+        #else
+        let probeDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        #endif
         var rows: [[String: Any]] = []
         func record(_ source: String, _ stage: String, _ result: String) {
             rows.append(["source": source, "stage": stage, "result": result])
-            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("source-probe.json")
+            let url = probeDirectory.appendingPathComponent("source-probe.json")
             if let data = try? JSONSerialization.data(withJSONObject: rows, options: [.prettyPrinted, .sortedKeys]) { try? data.write(to: url, options: .atomic) }
         }
         // Present the actual section so verification web views have their normal host.
@@ -27,7 +33,7 @@ enum SourceCompatibilityProbe {
         let base = URL(string: "https://aidoku-community.github.io/sources/")!
         guard let list = await manager.loadSourceList(url: base) else { record("repository", "load", "failed"); return }
         record("repository", "load", "\(list.count) entries")
-        let manifestsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("source-manifests.json")
+        let manifestsURL = probeDirectory.appendingPathComponent("source-manifests.json")
         if let data = try? Data(contentsOf: manifestsURL), let records = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
             let scratch = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("SourceManifestProbe")
             try? FileManager.default.createDirectory(at: scratch, withIntermediateDirectories: true)
@@ -102,8 +108,8 @@ enum SourceCompatibilityProbe {
                 }
             } catch { record(id, "error", String(describing: error)) }
         }
-        _ = LogManager.export(to: FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("source-probe-log.txt"))
-        _ = LogManager.export(to: FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("source-probe-log.txt"))
+        _ = LogManager.export(to: probeDirectory.appendingPathComponent("source-probe-log.txt"))
+        _ = LogManager.export(to: probeDirectory.appendingPathComponent("source-probe-log.txt"))
         record("probe", "complete", "finished")
     }
 }

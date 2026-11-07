@@ -1,5 +1,5 @@
 {
-  "originHash" : "add92b052d51a8944df0320b7e22c8c1bbab7632fecc92d14cc3f0bd6b2a9241",
+  "originHash" : "5fd9595f14b22bd08d392af2a1ef4bb52141bcaab04f1ac161b455a39216eafc",
   "pins" : [
     {
       "identity" : "nuke",
@@ -26,15 +26,6 @@
       "state" : {
         "revision" : "85653e23270ec88ae19f8d494157769487e34aed",
         "version" : "4.0.1"
-      }
-    },
-    {
-      "identity" : "texture",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Skittyblock/Texture.git",
-      "state" : {
-        "revision" : "6a6475db9bf9f7e04731ab60053c3ca4934c1ac6",
-        "version" : "3.1.1"
       }
     },
     {

@@ -70,7 +70,9 @@ class MangaViewController: BaseTableViewController {
         tableView.allowsSelectionDuringEditing = true
         tableView.allowsMultipleSelectionDuringEditing = true
         tableView.backgroundColor = .systemBackground
+        #if !targetEnvironment(macCatalyst)
         refreshControl.addTarget(self, action: #selector(refresh(_:)), for: .valueChanged)
+        #endif
 
         headerView.configure(with: manga)
         headerView.delegate = self
@@ -79,14 +81,18 @@ class MangaViewController: BaseTableViewController {
         if UIDevice.current.userInterfaceIdiom == .pad {
             splitScrollView.addSubview(headerView)
 
+            #if !targetEnvironment(macCatalyst)
             splitScrollView.refreshControl = refreshControl
+            #endif
             splitScrollView.delaysContentTouches = false
             splitScrollView.backgroundColor = .systemBackground
             splitScrollView.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(splitScrollView)
         } else {
             headerView.sizeChangeListener = self
+            #if !targetEnvironment(macCatalyst)
             tableView.refreshControl = refreshControl
+            #endif
             tableView.tableHeaderView = UIView()
             tableView.tableHeaderView!.translatesAutoresizingMaskIntoConstraints = false
             tableView.tableHeaderView!.addSubview(headerView)

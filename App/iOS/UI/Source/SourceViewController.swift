@@ -57,8 +57,12 @@ class SourceViewController: MangaCollectionViewController {
             navigationItem.searchController = searchController
         }
 
+        #if !targetEnvironment(macCatalyst)
         refreshControl.addTarget(self, action: #selector(refresh(_:)), for: .valueChanged)
+        #endif
+        #if !targetEnvironment(macCatalyst)
         collectionView.refreshControl = refreshControl
+        #endif
 
         // header view
         let registration = UICollectionView.SupplementaryRegistration<MangaListSelectionHeader>(

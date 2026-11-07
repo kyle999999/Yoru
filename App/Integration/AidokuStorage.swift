@@ -10,8 +10,13 @@ enum AidokuStorage {
     #endif
     static let defaults = UserDefaults(suiteName: domain)!
     static func directory(_ kind: FileManager.SearchPathDirectory) -> URL {
+        #if targetEnvironment(macCatalyst)
+        let folder = "Yoru/Aidoku"
+        #else
+        let folder = "Aidoku"
+        #endif
         let directory = FileManager.default.urls(for: kind, in: .userDomainMask)[0]
-            .appendingPathComponent("Aidoku", isDirectory: true)
+            .appendingPathComponent(folder, isDirectory: true)
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         return directory
     }

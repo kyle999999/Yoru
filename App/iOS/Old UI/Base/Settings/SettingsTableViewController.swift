@@ -145,7 +145,11 @@ extension SettingsTableViewController {
 
         cell.detailTextLabel?.text = String(AidokuStorage.defaults.integer(forKey: item.key ?? ""))
         cell.detailTextLabel?.textColor = .secondaryLabel
+        #if targetEnvironment(macCatalyst)
+        let stepperView = MacSettingsStepper()
+        #else
         let stepperView = UIStepper()
+        #endif
         if let max = item.maximumValue {
             stepperView.maximumValue = max
         }

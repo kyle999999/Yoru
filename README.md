@@ -1,3 +1,5 @@
+Mac version: [Yoru 4.2 release](https://github.com/kyle999999/Yoru/releases/tag/v4.2.0), Apple Silicon/macOS 26+. Includes the anime tracker and separate Aidoku section. [Mac build and validation](App/MAC_BUILD.md). The iPhone IPA remains available under [4.1.1](https://github.com/kyle999999/Yoru/releases/tag/v4.1.1).
+
 # Yoru — anime tracker + separate aidoku section
 
 Yoru 4.1.1 adds a native runtime for the **current [Aidoku community repository](https://aidoku-community.github.io/sources/)** while retaining the existing anime tracker, separate manga data, native layouts and Liquid Glass reader.

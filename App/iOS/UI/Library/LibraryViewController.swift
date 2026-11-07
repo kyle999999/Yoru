@@ -57,7 +57,9 @@ class LibraryViewController: MangaCollectionViewController {
         super.viewDidAppear(animated)
 
         // fix refresh control snapping height
+        #if !targetEnvironment(macCatalyst)
         refreshControl.didMoveToSuperview()
+        #endif
 
         // hack to show search bar on initial presentation
         if !navigationItem.hidesSearchBarWhenScrolling {
@@ -130,8 +132,12 @@ class LibraryViewController: MangaCollectionViewController {
         ]
 
         // pull to refresh
+        #if !targetEnvironment(macCatalyst)
         refreshControl.addTarget(self, action: #selector(updateLibraryRefresh(refreshControl:)), for: .valueChanged)
+        #endif
+        #if !targetEnvironment(macCatalyst)
         collectionView.refreshControl = refreshControl
+        #endif
 
         collectionView.allowsMultipleSelection = true
         collectionView.allowsSelectionDuringEditing = true
@@ -627,7 +633,9 @@ extension LibraryViewController {
             emptyStackView.isHidden = !snapshot.itemIdentifiers.isEmpty
         }
         collectionView.isScrollEnabled = emptyStackView.isHidden && lockedStackView.isHidden
+        #if !targetEnvironment(macCatalyst)
         collectionView.refreshControl = collectionView.isScrollEnabled ? refreshControl : nil
+        #endif
     }
 
     func reloadItems() {

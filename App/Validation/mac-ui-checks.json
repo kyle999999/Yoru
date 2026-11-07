@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-07",
+  "platform": "Mac Catalyst arm64",
+  "hostDataPreserved": true,
+  "verified": [
+    "Yoru anime home displayed",
+    "Aidoku navigation selector visible",
+    "Settings opens without UIStepper exception",
+    "Source Lists displays current repository",
+    "Add Source List URL field opens",
+    "Back to Yoru restores anime content"
+  ],
+  "sourceProbe": "mac-source-probe.json"
+}
