@@ -59,8 +59,8 @@ class BackupManager {
             }
         }
         do {
+            guard Backup.load(from: url) != nil else { return false }
             try FileManager.default.copyItem(at: url, to: targetLocation)
-            try? FileManager.default.removeItem(at: url)
             NotificationCenter.default.post(name: Notification.Name("updateBackupList"), object: nil)
             return true
         } catch {

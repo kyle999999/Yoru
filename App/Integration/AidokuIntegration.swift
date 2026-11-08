@@ -23,6 +23,7 @@ struct YoruHostRoot: View {
     static var activeWindow: UIWindow? { isOpen ? window : hostWindow }
     static func present(url: URL? = nil) {
         guard let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first else { return }
+        let previous = (hostWindow ?? scene.keyWindow)?.snapshotView(afterScreenUpdates: false)
         wantsOpen = true
         HostLifecycle.shared.phase = .inactive
         #if targetEnvironment(macCatalyst)
@@ -43,9 +44,11 @@ struct YoruHostRoot: View {
         #endif
         window?.overrideUserInterfaceStyle = AidokuStorage.defaults.bool(forKey: "General.useSystemAppearance") ? .unspecified : AidokuStorage.defaults.integer(forKey: "General.appearance") == 0 ? .light : .dark
         window?.makeKeyAndVisible()
+        crossfade(previous, into: window)
         if let url { (UIApplication.shared.delegate as? AppDelegate)?.handleUrl(url: url) }
     }
     static func dismiss() {
+        let previous = window?.snapshotView(afterScreenUpdates: false)
         EmbeddedNetwork.shared.saveCookies()
         wantsOpen = false
         #if targetEnvironment(macCatalyst)
@@ -58,6 +61,19 @@ struct YoruHostRoot: View {
         #endif
         HostLifecycle.shared.phase = .active
         hostWindow?.makeKeyAndVisible()
+        crossfade(previous, into: hostWindow)
+    }
+    private static func crossfade(_ snapshot: UIView?, into destination: UIWindow?) {
+        guard let snapshot, let destination else { return }
+        snapshot.frame = destination.bounds
+        snapshot.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        snapshot.isUserInteractionEnabled = false
+        destination.addSubview(snapshot)
+        destination.layoutIfNeeded()
+        UIView.animate(withDuration: UIAccessibility.isReduceMotionEnabled ? 0 : 0.3,
+                       delay: 0, options: [.curveEaseInOut, .beginFromCurrentState]) {
+            snapshot.alpha = 0
+        } completion: { _ in snapshot.removeFromSuperview() }
     }
 }
 
@@ -84,7 +100,7 @@ private final class AidokuModernTabs: UITabBarController {
         browse.tabBarItem.badgeValue = count > 0 ? String(count) : nil
         additionalSafeAreaInsets.top = 34
         let back = UIButton(type: .system)
-        var configuration = UIButton.Configuration.plain()
+        var configuration = UIButton.Configuration.glass()
         configuration.title = "Back to Yoru"
         configuration.image = UIImage(systemName: "chevron.left")
         configuration.imagePadding = 6
@@ -124,7 +140,7 @@ private final class MacAidokuTabs: UITabBarController {
         selector.accessibilityLabel = "Aidoku navigation"
         selector.addTarget(self, action: #selector(selectSection), for: .valueChanged)
         let back = UIButton(type: .system)
-        var config = UIButton.Configuration.plain()
+        var config = UIButton.Configuration.glass()
         config.title = "Back to Yoru"; config.image = UIImage(systemName: "chevron.left"); config.imagePadding = 6
         back.configuration = config
         back.accessibilityIdentifier = "aidoku.backToYoru"

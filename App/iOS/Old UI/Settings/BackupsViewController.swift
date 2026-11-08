@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreData
+import UniformTypeIdentifiers
 
 class BackupsViewController: UITableViewController {
 
@@ -35,7 +36,10 @@ class BackupsViewController: UITableViewController {
 
         title = NSLocalizedString("BACKUPS", comment: "")
 
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(createBackup))
+        navigationItem.rightBarButtonItems = [
+            UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(createBackup)),
+            UIBarButtonItem(title: "Import", image: UIImage(systemName: "square.and.arrow.down"), target: self, action: #selector(importBackup))
+        ]
 
         if #available(iOS 15.0, *) {
             tableView.sectionHeaderTopPadding = 0
@@ -84,6 +88,12 @@ class BackupsViewController: UITableViewController {
             loadingAlert?.view.addSubview(loadingIndicator)
         }
         present(loadingAlert!, animated: true)
+    }
+
+    @objc private func importBackup() {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.json, UTType(filenameExtension: "aib") ?? .data], asCopy: true)
+        picker.delegate = self
+        present(picker, animated: true)
     }
 
     @objc func createBackup() {
@@ -238,5 +248,21 @@ extension BackupsViewController {
 
     override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         NSLocalizedString("BACKUP_INFO", comment: "")
+    }
+}
+
+// Importing adds a validated backup to this section; restoration remains explicit.
+extension BackupsViewController: UIDocumentPickerDelegate {
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        guard let url = urls.first else { return }
+        let success = BackupManager.shared.importBackup(from: url)
+        let alert = UIAlertController(
+            title: NSLocalizedString(success ? "BACKUP_IMPORT_SUCCESS" : "BACKUP_IMPORT_FAIL", comment: ""),
+            message: NSLocalizedString(success ? "BACKUP_IMPORT_SUCCESS_TEXT" : "BACKUP_IMPORT_FAIL_TEXT", comment: ""),
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        controller.dismiss(animated: true) { [weak self] in
+            self?.present(alert, animated: true)
+        }
     }
 }
