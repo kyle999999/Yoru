@@ -41,6 +41,26 @@ class BackupsViewController: UITableViewController {
             UIBarButtonItem(title: "Import", image: UIImage(systemName: "square.and.arrow.down"), target: self, action: #selector(importBackup))
         ]
 
+        // Keep importing visible in the content: Catalyst can move navigation
+        // bar actions into the window toolbar, where the host can hide them.
+        let importButton = UIButton(type: .system)
+        var configuration = UIButton.Configuration.glass()
+        configuration.title = "Import Backup…"
+        configuration.image = UIImage(systemName: "square.and.arrow.down")
+        configuration.imagePadding = 8
+        importButton.configuration = configuration
+        importButton.accessibilityIdentifier = "aidoku.importBackup"
+        importButton.addTarget(self, action: #selector(importBackup), for: .touchUpInside)
+        let header = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 72))
+        importButton.translatesAutoresizingMaskIntoConstraints = false
+        header.addSubview(importButton)
+        NSLayoutConstraint.activate([
+            importButton.leadingAnchor.constraint(equalTo: header.leadingAnchor, constant: 20),
+            importButton.trailingAnchor.constraint(equalTo: header.trailingAnchor, constant: -20),
+            importButton.centerYAnchor.constraint(equalTo: header.centerYAnchor),
+            importButton.heightAnchor.constraint(equalToConstant: 44)
+        ])
+        tableView.tableHeaderView = header
         if #available(iOS 15.0, *) {
             tableView.sectionHeaderTopPadding = 0
         }

@@ -2087,7 +2087,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -2106,7 +2106,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.2.1;
+				MARKETING_VERSION = 4.2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = studio.yoru.Yoru;
                 "LIBRARY_SEARCH_PATHS[sdk=iphone*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/$(PLATFORM_NAME)");
                 OTHER_LDFLAGS = ("$(inherited)", "-lYoruModern", "-framework", "Security", "-framework", "CoreFoundation", "-lresolv");
@@ -2122,8 +2122,8 @@
                 "ARCHS[sdk=macosx*]" = arm64;
                 "EXCLUDED_ARCHS[sdk=macosx*]" = x86_64;
                 "INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace[sdk=macosx*]" = YES;
-                "MARKETING_VERSION[sdk=macosx*]" = 4.2.1;
-                "CURRENT_PROJECT_VERSION[sdk=macosx*]" = 10;
+                "MARKETING_VERSION[sdk=macosx*]" = 4.2.2;
+                "CURRENT_PROJECT_VERSION[sdk=macosx*]" = 11;
                 "INFOPLIST_KEY_LSApplicationCategoryType[sdk=macosx*]" = "public.app-category.entertainment";
                 SUPPORTS_MACCATALYST = YES;
                 SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -2141,7 +2141,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -2160,7 +2160,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.2.1;
+				MARKETING_VERSION = 4.2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = studio.yoru.Yoru;
                 "LIBRARY_SEARCH_PATHS[sdk=iphone*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/$(PLATFORM_NAME)");
                 OTHER_LDFLAGS = ("$(inherited)", "-lYoruModern", "-framework", "Security", "-framework", "CoreFoundation", "-lresolv");
@@ -2175,8 +2175,8 @@
                 "ARCHS[sdk=macosx*]" = arm64;
                 "EXCLUDED_ARCHS[sdk=macosx*]" = x86_64;
                 "INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace[sdk=macosx*]" = YES;
-                "MARKETING_VERSION[sdk=macosx*]" = 4.2.1;
-                "CURRENT_PROJECT_VERSION[sdk=macosx*]" = 10;
+                "MARKETING_VERSION[sdk=macosx*]" = 4.2.2;
+                "CURRENT_PROJECT_VERSION[sdk=macosx*]" = 11;
                 "INFOPLIST_KEY_LSApplicationCategoryType[sdk=macosx*]" = "public.app-category.entertainment";
                 SUPPORTS_MACCATALYST = YES;
                 SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -2196,7 +2196,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 7T4TYRQ8MT;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -2229,7 +2229,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 7T4TYRQ8MT;
 				ENABLE_HARDENED_RUNTIME = YES;
