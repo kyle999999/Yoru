@@ -6,7 +6,7 @@ enum AidokuStorage {
     #if AIDOKU_ISOLATION_CHECKS
     static let domain = "yoru.aidoku.isolation-checks." + UUID().uuidString
     #else
-    static let domain = "studio.yoru.embedded-aidoku"
+    static let domain = "studio.yoru.rust-experiment.embedded-aidoku"
     #endif
     static let defaults = UserDefaults(suiteName: domain)!
     static func directory(_ kind: FileManager.SearchPathDirectory) -> URL {

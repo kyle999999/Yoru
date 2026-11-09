@@ -83,19 +83,12 @@ struct StreakSnapshot {
     }
     static func calculate(_ events: [ActivityEvent], now: Date = .now, calendar: Calendar = localCalendar) -> StreakSnapshot {
         let today = calendar.startOfDay(for: now)
-        let todayKey = dayKey(today, calendar: calendar)
         let dates = Set(events.filter { $0.count > 0 }.compactMap { date($0.dayKey, calendar: calendar) }).filter { $0 <= today }.sorted()
         let keys = Set(dates.map { dayKey($0, calendar: calendar) })
-        var result = StreakSnapshot(); result.activeToday = keys.contains(todayKey); result.totalDays = keys.count
-        var cursor = result.activeToday ? today : calendar.date(byAdding: .day, value: -1, to: today)!
-        while keys.contains(dayKey(cursor, calendar: calendar)) {
-            result.current += 1; cursor = calendar.date(byAdding: .day, value: -1, to: cursor)!
-        }
-        var run = 0; var previous: Date?
-        for value in dates {
-            if let previous, calendar.dateComponents([.day], from: previous, to: value).day == 1 { run += 1 } else { run = 1 }
-            result.longest = max(result.longest, run); previous = value
-        }
+        let metrics = RustCore.streak(Array(dates), today: today, calendar: calendar)
+        var result = StreakSnapshot()
+        result.current = Int(metrics[0]); result.longest = Int(metrics[1])
+        result.totalDays = Int(metrics[2]); result.activeToday = metrics[3] != 0
         func days(_ count: Int) -> [ActivityDay] {
             (0..<count).reversed().map { offset in
                 let date = calendar.date(byAdding: .day, value: -offset, to: today)!

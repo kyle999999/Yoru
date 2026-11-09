@@ -1,6 +1,7 @@
+/build/
+/rust-core/target/
+/artifacts/*.ipa
+/artifacts/*.log
 .DS_Store
-DerivedData/
-build/
-*.xcuserstate
-xcuserdata/
-*.xcarchive
+**/xcuserdata/
+/artifacts/*.zip

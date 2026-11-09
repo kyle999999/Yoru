@@ -2106,10 +2106,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.2.2;
-				PRODUCT_BUNDLE_IDENTIFIER = studio.yoru.Yoru;
-                "LIBRARY_SEARCH_PATHS[sdk=iphone*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/$(PLATFORM_NAME)");
-                OTHER_LDFLAGS = ("$(inherited)", "-lYoruModern", "-framework", "Security", "-framework", "CoreFoundation", "-lresolv");
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = studio.yoru.RustExperiment;
+                "LIBRARY_SEARCH_PATHS[sdk=iphone*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/$(PLATFORM_NAME)", "$(SRCROOT)/../rust-core/target/aarch64-apple-ios/release");
+                OTHER_LDFLAGS = ("$(inherited)", "-lYoruModern", "-lyoru_rust_core", "-framework", "Security", "-framework", "CoreFoundation", "-lresolv");
 				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/maccatalyst");
                 PRODUCT_NAME = Yoru;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2160,10 +2160,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.2.2;
-				PRODUCT_BUNDLE_IDENTIFIER = studio.yoru.Yoru;
-                "LIBRARY_SEARCH_PATHS[sdk=iphone*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/$(PLATFORM_NAME)");
-                OTHER_LDFLAGS = ("$(inherited)", "-lYoruModern", "-framework", "Security", "-framework", "CoreFoundation", "-lresolv");
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = studio.yoru.RustExperiment;
+                "LIBRARY_SEARCH_PATHS[sdk=iphone*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/$(PLATFORM_NAME)", "$(SRCROOT)/../rust-core/target/aarch64-apple-ios/release");
+                OTHER_LDFLAGS = ("$(inherited)", "-lYoruModern", "-lyoru_rust_core", "-framework", "Security", "-framework", "CoreFoundation", "-lresolv");
 				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = ("$(inherited)", "$(SRCROOT)/ModernRuntime/Libraries/maccatalyst");
                 PRODUCT_NAME = Yoru;
 				PROVISIONING_PROFILE_SPECIFIER = "";

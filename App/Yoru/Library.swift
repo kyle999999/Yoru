@@ -69,9 +69,8 @@ import Observation
     }
     func log(_ anime: Anime, delta: Int = 1, now: Date = .now, calendar: Calendar = StreakSnapshot.localCalendar) {
         var entry = entries[anime.id] ?? Entry(anime: anime, watched: 0, saved: true)
-        let next = max(0, entry.watched + delta)
         let oldCount = entry.watched
-        entry.watched = anime.episodes.map { min($0, next) } ?? next
+        entry.watched = RustCore.progress(entry.watched, delta: delta, total: anime.episodes)
         let change = entry.watched - oldCount
         if change > 0 {
             if entry.firstWatched == nil { entry.firstWatched = now }
@@ -100,10 +99,7 @@ import Observation
         entry.saved = true; entry.anime = anime; entries[anime.id] = entry; persist()
     }
     func saveJournal(_ draft: JournalEntry, for anime: Anime, now: Date = .now, calendar: Calendar = StreakSnapshot.localCalendar) throws {
-        guard !draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !draft.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw LibraryValidation.emptyEntry }
-        guard calendar.startOfDay(for: draft.watchedOn) <= calendar.startOfDay(for: now) else { throw LibraryValidation.futureDate }
-        if let rating = draft.rating, !(1...10).contains(rating) { throw LibraryValidation.invalidRating }
-        if let number = draft.episode, number < 1 || anime.episodes.map({ number > $0 }) == true { throw LibraryValidation.invalidEpisode }
+        try RustCore.validate(draft, total: anime.episodes, now: now, calendar: calendar)
         var entry = entries[anime.id] ?? Entry(anime: anime, watched: 0, saved: true)
         var notes = entry.journal ?? []; var note = draft; note.updatedAt = now
         if let index = notes.firstIndex(where: { $0.id == draft.id }) {

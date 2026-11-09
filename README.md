@@ -1,13 +1,41 @@
-Mac version: [Yoru 4.2 release](https://github.com/kyle999999/Yoru/releases/tag/v4.2.0), Apple Silicon/macOS 26+. Includes the anime tracker and separate Aidoku section. [Mac build and validation](App/MAC_BUILD.md). The iPhone IPA remains available under [4.1.1](https://github.com/kyle999999/Yoru/releases/tag/v4.1.1).
+# Yoru Rust experiment — iPhone only
 
-# Yoru — anime tracker + separate aidoku section
+Separate copy of Yoru 4.2.2. This is a working, incremental Rust-core experiment,
+not a complete rewrite of Yoru or Aidoku in Rust.
 
-Yoru 4.1.1 adds a native runtime for the **current [Aidoku community repository](https://aidoku-community.github.io/sources/)** while retaining the existing anime tracker, separate manga data, native layouts and Liquid Glass reader.
+The existing SwiftUI/UIKit screens, navigation, reader, resources and animations
+are retained. `rust-core` has no third-party dependencies and implements streak
+aggregation, bounded episode progress and ordered journal validation. A small
+Swift C-ABI bridge passes borrowed integer buffers; local-calendar conversion,
+Codable storage, networking, Aidoku's Swift/Go/WebAssembly runtime and platform
+services remain native. Existing storage formats are unchanged.
 
-Download the unsigned iPhone/iPad IPA and complete corresponding source from [v4.1.1 releases](https://github.com/kyle999999/Yoru/releases/tag/v4.1.1). Requires iOS 26+ and signing, such as Signulous. Update with the same app identifier/signing setup without uninstalling to preserve data. Physical-device installation/signing were not tested here.
+The experimental iPhone bundle identifier is `studio.yoru.RustExperiment`, with a
+separate Aidoku defaults domain. It installs alongside the production app and
+starts with separate data. It does not copy or modify your production library.
+Keep that identifier when signing; replacing it with production Yoru's identifier
+would remove the isolation. The on-screen app and UI remain named Yoru.
 
-**146/146 current source packages instantiated**, and all 146 native manifests decoded. Current WEBTOON v5, MangaDex v14, WeebCentral v8 and MangaPlus v6 passed browsing/search/chapters/page-image tests. MangaPlus also visibly rendered through the existing native reader. MangaFire v8 loaded its catalog and chapters but its CDN images failed TLS negotiation from this environment. Other websites and authenticated access were not exhaustively tested. [Full evidence and limitations](App/SOURCE_COMPATIBILITY.md).
+## Build and check
 
-The newer source ABI is executed by an independent GPL Go backend with native Foundation/WebKit integration and interpreter-only Wazero. Existing legacy packages retain the GPL Aidoku 0.6.11 engine. The restricted Swift AidokuRunner package is not included. Licenses and attribution are retained; this is an unofficial modified integration.
+Requires Xcode/iPhoneOS SDK, Cargo and the `aarch64-apple-ios` target (already
+installed on this Mac). From this folder:
 
-Source project: [App/](App/README.md). Open App/Aidoku.xcodeproj and build the Aidoku (iOS) scheme, which produces Yoru. [Runtime provenance/build steps](App/ModernRuntime/UPSTREAM.md). Previous release archives remain historical and do not describe 4.1 source compatibility.
+```sh
+cargo test --manifest-path rust-core/Cargo.toml
+cargo build --manifest-path rust-core/Cargo.toml --release
+python3 App/Validation/run_checks.py
+./build-ipa.sh
+```
+
+The check runner links the host Rust library and exercises existing model,
+journal, collection, migration, schedule and DST scenarios through the bridge.
+The IPA is unsigned and must be signed (e.g. Signulous) before installing on an
+iPhone. No physical-device or reader interaction is claimed by these checks.
+No Mac app/DMG is built by this experiment.
+
+All original license and attribution files remain under App. This derivative
+retains GPL-3.0-only requirements. Upstream dependency corresponding-source
+snapshots are also available in the local original release source archives;
+keep them when distributing a binary. The restricted Swift AidokuRunner is not
+added or used here.

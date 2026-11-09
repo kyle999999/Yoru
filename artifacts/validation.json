@@ -1,0 +1,22 @@
+{
+  "base": "Yoru 4.2.2",
+  "rust_unit_tests": 6,
+  "native_integration_checks": 63,
+  "unchanged_ui_sources": true,
+  "ported": [
+    "streak aggregation",
+    "episode progress bounds",
+    "journal validation"
+  ],
+  "retained": [
+    "SwiftUI/UIKit UI",
+    "native calendar normalization",
+    "native storage and networking",
+    "Aidoku Swift/Go runtime"
+  ],
+  "iphone_device_tested": false,
+  "production_app_modified": false,
+  "iphone_release_build": "passed",
+  "ipa_integrity": "passed",
+  "rust_symbols_in_iphone_binary": true
+}
