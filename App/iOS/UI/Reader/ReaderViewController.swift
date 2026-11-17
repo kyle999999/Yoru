@@ -24,6 +24,7 @@ class ReaderViewController: BaseObservingViewController {
     private let mangaMetadata: Manga?
     private var progressSaveTask: Task<Void, Never>?
     private var lastQueuedProgress: String?
+    private var previousIdleTimerDisabled: Bool?
 
     weak var reader: ReaderReaderDelegate?
 
@@ -163,6 +164,7 @@ class ReaderViewController: BaseObservingViewController {
     }
 
     override func observe() {
+        addObserver(forName: "Reader.keepScreenAwake") { [weak self] _ in self?.updateScreenAwake() }
         addObserver(forName: "Reader.readingMode.\(chapter.mangaId)") { [weak self] _ in
             guard let self = self else { return }
             self.setReadingMode(AidokuStorage.defaults.string(forKey: "Reader.readingMode.\(self.chapter.mangaId)"))
@@ -187,8 +189,23 @@ class ReaderViewController: BaseObservingViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        if let previousIdleTimerDisabled {
+            UIApplication.shared.isIdleTimerDisabled = previousIdleTimerDisabled
+            self.previousIdleTimerDisabled = nil
+        }
         guard currentPage >= 1 else { return }
         updateReadPosition()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if previousIdleTimerDisabled == nil { previousIdleTimerDisabled = UIApplication.shared.isIdleTimerDisabled }
+        updateScreenAwake()
+    }
+
+    private func updateScreenAwake() {
+        guard let previousIdleTimerDisabled else { return }
+        UIApplication.shared.isIdleTimerDisabled = previousIdleTimerDisabled || AidokuStorage.defaults.bool(forKey: "Reader.keepScreenAwake")
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {

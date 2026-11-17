@@ -31,6 +31,7 @@ class ReaderSettingsViewController: SettingsTableViewController {
                 key: "Reader.skipDuplicateChapters",
                 title: NSLocalizedString("SKIP_DUPLICATE_CHAPTERS", comment: "")
             ),
+            SettingItem(type: "switch", key: "Reader.keepScreenAwake", title: "Keep screen awake", notification: "Reader.keepScreenAwake"),
             SettingItem(type: "switch", key: "Reader.downsampleImages", title: NSLocalizedString("DOWNSAMPLE_IMAGES", comment: "")),
             SettingItem(type: "switch", key: "Reader.cropBorders", title: NSLocalizedString("CROP_BORDERS", comment: "")),
             SettingItem(type: "switch", key: "Reader.saveImageOption", title: NSLocalizedString("SAVE_IMAGE_OPTION", comment: "")),

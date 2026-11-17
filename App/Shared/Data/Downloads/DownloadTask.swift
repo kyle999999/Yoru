@@ -109,7 +109,7 @@ actor DownloadTask: Identifiable {
             downloads[downloadIndex].total = pages.count
         }
         while !pages.isEmpty && currentPage < pages.count && running {
-            downloads[downloadIndex].progress = currentPage + 1
+            downloads[downloadIndex].progress = currentPage
             let page = pages[currentPage]
             await delegate?.downloadProgressChanged(download: getDownload(downloadIndex)!)
             let pageNumber = String(format: "%03d", currentPage + 1) // XXX.png
@@ -126,13 +126,17 @@ actor DownloadTask: Identifiable {
                     // See if we can guess the file extension
                     let fileExtention = self.guessFileExtension(response: res, defaultValue: "png")
                     try? data.write(to: tmpDirectory.appendingPathComponent(pageNumber).appendingPathExtension(fileExtention))
+                    NotificationCenter.default.post(name: NSNotification.Name("yoruDownloadBytes"), object: data.count)
                 }
             } else if let base64 = page.base64, let data = Data(base64Encoded: base64) {
                 try? data.write(to: tmpDirectory.appendingPathComponent(pageNumber).appendingPathExtension("png"))
+                NotificationCenter.default.post(name: NSNotification.Name("yoruDownloadBytes"), object: data.count)
             } else if let text = page.text, let data = text.data(using: .utf8) {
                 try? data.write(to: tmpDirectory.appendingPathComponent(pageNumber).appendingPathExtension("txt"))
             }
             currentPage += 1
+            downloads[downloadIndex].progress = currentPage
+            await delegate?.downloadProgressChanged(download: getDownload(downloadIndex)!)
         }
 
         if currentPage == pages.count {
