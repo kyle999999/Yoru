@@ -149,9 +149,10 @@ final class ModernSourceBridge {
             return result
         }
     }
-    func browse(filters: [FilterBase], page: Int, listing: Listing? = nil) throws -> MangaPageResult {
+    func browse(filters: [FilterBase], page: Int, listing: Listing? = nil, requestID: String? = nil) throws -> MangaPageResult {
         let query = (filters.first { $0 is TitleFilter } as? TitleFilter)?.value
         var args: [String: Any] = ["Page": page, "Filters": encodeFilters(filters)]
+        if let requestID { args["RequestID"] = requestID }
         if let query, !query.isEmpty { args["Query"] = query }
         if let listing { args["Listing"] = ["ID": listingIDs[listing.name] ?? listing.name, "Name": listing.name] }
         let result = try call(query?.isEmpty == false ? "search" : "browse", args) as? [String: Any] ?? [:]

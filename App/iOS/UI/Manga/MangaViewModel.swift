@@ -103,9 +103,15 @@ class MangaViewModel {
             }
         case .chapter:
             if ascending {
-                filteredChapterList.sort { $0.chapterNum ?? 0 > $1.chapterNum ?? 0 }
+                filteredChapterList.sort {
+                    let left = $0.chapterNum ?? 0, right = $1.chapterNum ?? 0
+                    return left == right ? $0.sourceOrder < $1.sourceOrder : left > right
+                }
             } else {
-                filteredChapterList.sort { $0.chapterNum ?? 0 < $1.chapterNum ?? 0 }
+                filteredChapterList.sort {
+                    let left = $0.chapterNum ?? 0, right = $1.chapterNum ?? 0
+                    return left == right ? $0.sourceOrder > $1.sourceOrder : left < right
+                }
             }
         case .uploadDate:
             let now = Date()
@@ -125,7 +131,7 @@ class MangaViewModel {
         if langFilter != nil || !scanlatorFilter.isEmpty {
             filteredChapterList = filteredChapterList.filter {
                 let cond1 = if let langFilter {
-                    $0.lang == langFilter
+                    $0.matchesReadingLanguage(of: $0, preferredLanguage: langFilter, availableChapters: fullChapterList)
                 } else {
                     true
                 }
@@ -229,7 +235,7 @@ class MangaViewModel {
     func getNextChapter() -> ChapterResult {
         guard !filteredChapterList.isEmpty else { return .none }
         // get first chapter not completed
-        let chapter = getOrderedChapterList().reversed().first(where: { readingHistory[$0.id]?.page ?? 0 != -1 })
+        let chapter = Chapter.nextReadingChapter(newestFirst: getOrderedChapterList(), history: readingHistory)
         if let chapter = chapter {
             return .chapter(chapter)
         }

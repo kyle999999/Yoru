@@ -48,6 +48,8 @@ struct YoruHostRoot: View {
         if let url { (UIApplication.shared.delegate as? AppDelegate)?.handleUrl(url: url) }
     }
     static func dismiss() {
+        NotificationCenter.default.post(name: Notification.Name("Yoru.flushReadingProgress"), object: nil)
+        CoreDataManager.shared.saveIfNeeded()
         let previous = window?.snapshotView(afterScreenUpdates: false)
         EmbeddedNetwork.shared.saveCookies()
         wantsOpen = false

@@ -38,6 +38,7 @@ class ReaderWebtoonViewController: ZoomableCollectionViewController {
 
     // Stores the last calculated page number
     private var previousPage = 0
+    private var loadGeneration = UUID()
 
     convenience init() {
         self.init(layout: VerticalContentOffsetPreservingLayout())
@@ -371,6 +372,7 @@ extension ReaderWebtoonViewController {
             let pages = pages[safe: chapterIndex - 1]
         else { return }
         self.chapter = chapter
+        previousPage = 0
         delegate?.setChapter(chapter)
         delegate?.setTotalPages(pages.filter({ $0.type == .imagePage }).count)
         viewModel.setPages(chapter: chapter, pages: pages)
@@ -385,6 +387,7 @@ extension ReaderWebtoonViewController {
             let pages = pages[safe: chapterIndex + 1]
         else { return }
         self.chapter = chapter
+        previousPage = 0
         delegate?.setChapter(chapter)
         delegate?.setTotalPages(pages.filter({ $0.type == .imagePage }).count)
         viewModel.setPages(chapter: chapter, pages: pages)
@@ -458,10 +461,15 @@ extension ReaderWebtoonViewController: ReaderReaderDelegate {
 
     func setChapter(_ chapter: Chapter, startPage: Int) {
         self.chapter = chapter
+        previousPage = 0
+        let generation = UUID()
+        loadGeneration = generation
         chapters = [chapter]
 
         Task {
+            guard generation == loadGeneration, self.chapter == chapter else { return }
             await viewModel.loadPages(chapter: chapter)
+            guard generation == loadGeneration, self.chapter == chapter, viewModel.chapter == chapter else { return }
             delegate?.setTotalPages(viewModel.pages.count)
             if viewModel.pages.isEmpty {
                 pages = []

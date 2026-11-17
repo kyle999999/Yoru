@@ -22,7 +22,7 @@ public class ChapterObject: NSManagedObject {
         self.chapter = chapter.chapterNum != nil ? NSNumber(value: chapter.chapterNum ?? -1) : nil
         volume = chapter.volumeNum != nil ? NSNumber(value: chapter.volumeNum ?? -1) : nil
         dateUploaded = chapter.dateUploaded
-        sourceOrder = Int16(chapter.sourceOrder)
+        sourceOrder = Int16(clamping: chapter.sourceOrder)
     }
 
     func toChapter() -> Chapter {

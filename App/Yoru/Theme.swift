@@ -35,7 +35,10 @@ struct PageHeader: View {
                     Text("yoru").font(.system(size: 26, weight: .semibold, design: .rounded)).tracking(-1.3)
                 }
                 Spacer()
-                Text("夜 / ANIME JOURNAL").font(.system(size: 8, weight: .medium, design: .monospaced)).tracking(1.2).foregroundStyle(YoruTheme.muted)
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("夜 / ANIME JOURNAL").font(.system(size: 8, weight: .medium, design: .monospaced)).tracking(1.2).foregroundStyle(YoruTheme.muted)
+                    Text("made by: v0rx").font(.system(size: 9, weight: .semibold, design: .monospaced)).foregroundStyle(YoruTheme.mint)
+                }
             }.padding(.bottom, 16)
             Eyebrow(text: eyebrow)
             Text(title).font(.system(size: 42, weight: .semibold, design: .rounded)).tracking(-2).fixedSize(horizontal: false, vertical: true)
@@ -48,17 +51,34 @@ struct Poster: View {
     let anime: Anime
     var body: some View {
         GeometryReader { geometry in
-            AsyncImage(url: anime.posterURL) { phase in
-                if let image = phase.image {
-                    image.resizable().scaledToFill()
-                } else {
-                    ZStack {
-                        LinearGradient(colors: [.indigo.opacity(0.65), .purple.opacity(0.25), YoruTheme.ink], startPoint: .topLeading, endPoint: .bottomTrailing)
-                        Image(systemName: "moon.stars").font(.system(size: 35, weight: .ultraLight)).foregroundStyle(.white.opacity(0.35))
-                    }
-                }
-            }.frame(width: geometry.size.width, height: geometry.size.height).clipped()
+            PosterArtwork(primary: anime.posterURL, fallback: anime.fallbackPosterURL)
+                .frame(width: geometry.size.width, height: geometry.size.height).clipped()
         }.accessibilityHidden(true)
+    }
+}
+
+private struct PosterArtwork: View {
+    let primary: URL?
+    let fallback: URL?
+    var body: some View {
+        AsyncImage(url: primary) { phase in
+            if let image = phase.image {
+                image.resizable().scaledToFill()
+            } else if phase.error != nil, let fallback, fallback != primary {
+                AsyncImage(url: fallback) { fallbackPhase in
+                    if let image = fallbackPhase.image { image.resizable().scaledToFill() }
+                    else { placeholder }
+                }
+            } else {
+                placeholder
+            }
+        }
+    }
+    private var placeholder: some View {
+        ZStack {
+            LinearGradient(colors: [.indigo.opacity(0.65), .purple.opacity(0.25), YoruTheme.ink], startPoint: .topLeading, endPoint: .bottomTrailing)
+            Image(systemName: "moon.stars").font(.system(size: 35, weight: .ultraLight)).foregroundStyle(.white.opacity(0.35))
+        }
     }
 }
 

@@ -15,6 +15,8 @@ class ReaderPagedViewModel {
 
     var preloadedChapter: Chapter?
     var preloadedPages: [Page] = []
+    private var loadGeneration = UUID()
+    private var preloadGeneration = UUID()
 
     class var settings: SettingItem {
         SettingItem(type: "group", title: NSLocalizedString("PAGED", comment: ""), items: [
@@ -40,24 +42,35 @@ class ReaderPagedViewModel {
     }
 
     func loadPages(chapter: Chapter) async {
+        let generation = UUID()
+        loadGeneration = generation
+        preloadGeneration = UUID()
         if preloadedChapter == chapter {
-            pages = preloadedPages
-            preloadedPages = []
-            preloadedChapter = nil
-        } else {
-            if !pages.isEmpty {
-                preloadedChapter = chapter
-                preloadedPages = pages
-            }
+            let previousChapter = self.chapter
+            let previousPages = pages
             self.chapter = chapter
-            pages = (try? await SourceManager.shared.source(for: chapter.sourceId)?.getPageListWithoutContents(chapter: chapter)) ?? []
+            pages = preloadedPages
+            preloadedChapter = previousChapter
+            preloadedPages = previousPages
+        } else {
+            let loaded = (try? await SourceManager.shared.source(for: chapter.sourceId)?.getPageListWithoutContents(chapter: chapter)) ?? []
+            guard loadGeneration == generation, !Task.isCancelled else { return }
+            let previousChapter = self.chapter
+            let previousPages = pages
+            self.chapter = chapter
+            pages = loaded
+            preloadedChapter = previousChapter
+            preloadedPages = previousPages
         }
     }
 
     func preload(chapter: Chapter) async {
         guard preloadedChapter != chapter else { return }
-        preloadedChapter = nil
-        preloadedPages = (try? await SourceManager.shared.source(for: chapter.sourceId)?.getPageListWithoutContents(chapter: chapter)) ?? []
+        let generation = UUID()
+        preloadGeneration = generation
+        let loaded = (try? await SourceManager.shared.source(for: chapter.sourceId)?.getPageListWithoutContents(chapter: chapter)) ?? []
+        guard preloadGeneration == generation, self.chapter != chapter, !Task.isCancelled else { return }
+        preloadedPages = loaded
         preloadedChapter = chapter
     }
 }

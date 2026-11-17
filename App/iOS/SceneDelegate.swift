@@ -24,5 +24,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         HostLifecycle.shared.phase = AidokuIntegration.wantsOpen ? .inactive : .active
     }
     func sceneWillResignActive(_ scene: UIScene) { HostLifecycle.shared.phase = .inactive }
-    func sceneDidEnterBackground(_ scene: UIScene) { HostLifecycle.shared.phase = .background; EmbeddedNetwork.shared.saveCookies() }
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        NotificationCenter.default.post(name: Notification.Name("Yoru.flushReadingProgress"), object: nil)
+        CoreDataManager.shared.saveIfNeeded()
+        HostLifecycle.shared.phase = .background
+        EmbeddedNetwork.shared.saveCookies()
+    }
 }

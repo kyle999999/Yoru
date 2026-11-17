@@ -109,9 +109,10 @@ struct StreakSnapshot {
 }
 
 enum LibraryValidation: LocalizedError {
-    case emptyEntry, futureDate, invalidRating, invalidEpisode, invalidDates, emptyName, duplicateName
+    case emptyEntry, futureDate, invalidRating, invalidEpisode, invalidDates, emptyName, duplicateName, storageUnavailable
     var errorDescription: String? {
         switch self {
+        case .storageUnavailable: "Your saved library couldn’t be opened. Existing data has been kept unchanged; new changes can’t be saved yet."
         case .emptyEntry: "Add a title or a few words before saving."
         case .futureDate: "Choose today or an earlier date."
         case .invalidRating: "Ratings must be between 1 and 10."

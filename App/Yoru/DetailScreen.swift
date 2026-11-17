@@ -11,6 +11,7 @@ struct DetailScreen: View {
     @State private var stale = false
     @State private var showSources = false
     @State private var organizing = false
+    @State private var writingEpisode = false
     private var anime: Anime { detail ?? initial }
     var body: some View {
         NavigationStack {
@@ -64,6 +65,7 @@ struct DetailScreen: View {
                 ToolbarItem(placement: .topBarLeading) { Button { organizing = true } label: { Image(systemName: "folder.badge.plus") }.accessibilityLabel("Organize into collections") }
                 ToolbarItem(placement: .topBarTrailing) { Button { dismiss() } label: { Image(systemName: "xmark") }.accessibilityLabel("Close anime details") }
             }.task { await load() }
+                .sheet(isPresented: $writingEpisode) { JournalEditor(anime: anime, library: library) }
                 .sheet(isPresented: $showSources) { SourcesScreen() }
                 .sheet(isPresented: $organizing) { CollectionMembershipScreen(anime: anime, library: library) }
         }.presentationDragIndicator(.visible).preferredColorScheme(.dark)
@@ -88,6 +90,8 @@ struct DetailScreen: View {
                 Spacer()
                 Text("\(library.watched(anime)) / \(anime.episodes.map(String.init) ?? "?")").font(.system(size: 13, weight: .medium, design: .monospaced))
             }
+            Button { writingEpisode = true } label: { Label("Add an episode note", systemImage: "square.and.pencil") }
+                .font(.system(size: 12, weight: .medium)).buttonStyle(.glass)
             if let count = anime.episodes, count > 0 {
                 ProgressView(value: Double(library.watched(anime)), total: Double(count)).tint(YoruTheme.violet)
             }

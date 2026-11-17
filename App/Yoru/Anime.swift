@@ -24,7 +24,19 @@ struct Anime: Codable, Identifiable, Hashable, Sendable {
     var nextRelease: Date?
     var id: Int { malId }
     var displayTitle: String { titleEnglish.flatMap { $0.isEmpty ? nil : $0 } ?? title }
-    var posterURL: URL? { URL(string: images?.jpg?.largeImageUrl ?? images?.jpg?.imageUrl ?? "") }
+    var posterURL: URL? { validPosterURL(images?.jpg?.largeImageUrl) ?? validPosterURL(images?.jpg?.imageUrl) }
+    var fallbackPosterURL: URL? {
+        guard images?.jpg?.imageUrl != images?.jpg?.largeImageUrl else { return nil }
+        return validPosterURL(images?.jpg?.imageUrl)
+    }
+    private func validPosterURL(_ value: String?) -> URL? {
+        guard var value = value?.trimmingCharacters(in: .whitespacesAndNewlines), !value.isEmpty else { return nil }
+        if value.hasPrefix("//") { value = "https:" + value }
+        guard let url = URL(string: value),
+              let scheme = url.scheme?.lowercased(), ["https", "http"].contains(scheme),
+              url.host != nil else { return nil }
+        return url
+    }
     var episodeLabel: String { episodes.map { "\($0) \($0 == 1 ? "episode" : "episodes")" } ?? "Episodes TBA" }
     var statusLabel: String {
         switch status { case "Currently Airing": "Airing now"; case "Finished Airing": "Completed"; case "Not yet aired": "Upcoming"; default: "Status unknown" }
@@ -91,8 +103,8 @@ enum BroadcastDay: String, CaseIterable, Identifiable {
     case monday, tuesday, wednesday, thursday, friday, saturday, sunday, unknown, other
     var id: String { rawValue }
     var label: String { rawValue == "unknown" ? "TBA" : rawValue == "other" ? "All" : String(rawValue.prefix(3)).capitalized }
-    static var todayInJapan: BroadcastDay {
-        var c = Calendar(identifier: .gregorian); c.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+    static var today: BroadcastDay {
+        var c = Calendar(identifier: .gregorian); c.timeZone = .current
         return [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday][c.component(.weekday, from: .now) - 1]
     }
 }

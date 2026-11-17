@@ -15,11 +15,18 @@ struct WeeklySchedule: Codable, Sendable {
             (try? NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators]).matches(in: text, range: NSRange(text.startIndex..., in: text))) ?? []
         }
         func capture(_ pattern: String, _ text: String, group: Int = 1) -> String? {
-            guard let match = matches(pattern, text).first, let range = Range(match.range(at: group), in: text) else { return nil }
+            // A pattern without the requested group makes range(at:) throw an
+            // Objective-C exception (and terminates the app). Keep malformed or
+            // intentionally whole-match patterns safe on iOS.
+            guard let match = matches(pattern, text).first,
+                  group >= 0, group < match.numberOfRanges,
+                  match.range(at: group).location != NSNotFound,
+                  let range = Range(match.range(at: group), in: text) else { return nil }
             return String(text[range])
         }
         let markers = matches(#"<div class="anime-header">(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Other|Unknown)</div>|<div class="js-anime-category-producer seasonal-anime[^>]*>"#, html)
         var day: String?; var days: [String: [Anime]] = [:]; var parsedCards = 0
+        var assignedAnime = Set<Int>()
         for (index, marker) in markers.enumerated() {
             let start = marker.range.location
             let end = index + 1 < markers.count ? markers[index + 1].range.location : (html as NSString).length
@@ -33,10 +40,24 @@ struct WeeklySchedule: Codable, Sendable {
             guard let idText = capture(#"class="genres js-genre" id="(\d+)""#, block), let id = Int(idText),
                   let title = capture(#"class="link-title">(.*?)</a>"#, block) else { throw ScheduleError.changedFormat }
             parsedCards += 1
-            let image = capture(#"<img[^>]*data-src="([^"]+)""#, block)
+            // MAL currently serves regular `src` attributes, but some cached or
+            // lazy-loaded responses use data-src/data-original instead.
+            // Provider icons precede the poster in current schedule cards.
+            // Only accept an image whose URL points to MAL anime artwork.
+            let imageTag = matches(#"<img\b[^>]*>"#, block).compactMap { match -> String? in
+                guard let range = Range(match.range, in: block) else { return nil }
+                let tag = String(block[range])
+                return tag.contains("myanimelist.net/images/anime/") ? tag : nil
+            }.first ?? ""
+            let image = capture(#"data-src="([^"]+)""#, imageTag)
+                ?? capture(#"data-original="([^"]+)""#, imageTag)
+                ?? capture(#"src="([^"]+)""#, imageTag)
+                ?? capture(#"srcset="([^"]+)""#, imageTag)?.split(separator: ",").first.map { String($0.split(separator: " ").first ?? "") }
             let episodes = capture(#"<span>(\d+) eps</span>"#, block).flatMap(Int.init)
             let score = capture(#"class="js-score">([\d.]+)</span>"#, block).flatMap(Double.init)
             let broadcast = day == "unknown" || day == "other" ? nil : Broadcast(day: day.capitalized + "s", time: nil, timezone: "Asia/Tokyo", string: day.capitalized + " · time not supplied")
+            // Keep one canonical weekday per title if upstream repeats a card.
+            guard assignedAnime.insert(id).inserted else { continue }
             days[day, default: []].append(Anime(malId: id, title: decodeEntities(title), images: .init(jpg: .init(imageUrl: image, largeImageUrl: image)), episodes: episodes, status: "Currently Airing", airing: true, score: score, broadcast: broadcast, url: "https://myanimelist.net/anime/\(id)", sourceName: "MyAnimeList"))
         }
         guard parsedCards > 0, ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].allSatisfy({ days[$0] != nil }) else { throw ScheduleError.changedFormat }
@@ -67,7 +88,7 @@ actor ScheduleAPI {
     private let cacheFile: URL
     init(session: URLSession = .shared, cacheFile: URL? = nil) {
         self.session = session
-        self.cacheFile = cacheFile ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("yoru-weekly-schedule-v1.json")
+        self.cacheFile = cacheFile ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("yoru-weekly-schedule-v3.json")
     }
     func week(refresh: Bool = false) async throws -> APIResponse<WeeklySchedule> {
         let cached = (try? Data(contentsOf: cacheFile)).flatMap { try? JSONDecoder().decode(WeeklySchedule.self, from: $0) }

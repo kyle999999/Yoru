@@ -79,11 +79,12 @@ extension CoreDataManager {
 
     /// Set LibraryManga last read date to current date.
     func setRead(sourceId: String, mangaId: String, context: NSManagedObjectContext? = nil) {
+        let context = context ?? self.context
         let request = LibraryMangaObject.fetchRequest()
         request.predicate = NSPredicate(format: "manga.sourceId == %@ AND manga.id == %@", sourceId, mangaId)
         request.fetchLimit = 1
         do {
-            if let object = (try context?.fetch(request))?.first {
+            if let object = (try context.fetch(request)).first {
                 object.lastRead = Date()
             }
         } catch {
