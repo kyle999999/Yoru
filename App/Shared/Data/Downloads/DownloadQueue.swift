@@ -155,7 +155,7 @@ actor DownloadQueue {
 extension DownloadQueue {
 
     func hasQueuedDownloads() -> Bool {
-        !queue.isEmpty
+        queue.values.contains { !$0.isEmpty }
     }
 
     func getDownloadStatus(for chapter: Chapter) -> DownloadStatus {

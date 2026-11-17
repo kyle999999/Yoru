@@ -38,14 +38,31 @@ private struct DownloadStatusBar: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("downloadProgressed")).receive(on: RunLoop.main)) { note in
             guard let next = note.object as? Download else { return }
-            if download != next { bytes = 0; started = Date() }
-            download = next; paused = false; visible = true
+            Task { @MainActor in
+                let queue = await DownloadManager.shared.getDownloadQueue()
+                guard queue[next.sourceId]?.contains(next) == true else { return }
+                if download != next { bytes = 0; started = Date() }
+                download = next; paused = DownloadManager.shared.downloadsPaused; visible = true
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("yoruDownloadBytes")).receive(on: RunLoop.main)) { note in bytes += note.object as? Int ?? 0 }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("downloadsPaused")).receive(on: RunLoop.main)) { _ in paused = true }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("downloadsResumed")).receive(on: RunLoop.main)) { _ in paused = false; started = Date(); bytes = 0 }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("downloadFinished")).receive(on: RunLoop.main)) { _ in
             Task { try? await Task.sleep(for: .seconds(1)); if !(await DownloadManager.shared.hasQueuedDownloads()) { visible = false } }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("downloadsCancelled")).receive(on: RunLoop.main)) { _ in
+            Task { await refreshAfterCancellation() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("downloadCancelled")).receive(on: RunLoop.main)) { _ in
+            Task { await refreshAfterCancellation() }
+        }
+    }
+    @MainActor private func refreshAfterCancellation() async {
+        let remaining = await DownloadManager.shared.getDownloadQueue().values.flatMap { $0 }
+        guard let current = download, remaining.contains(current) else {
+            visible = false; download = nil; bytes = 0
+            return
         }
     }
 }
