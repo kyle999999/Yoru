@@ -21,6 +21,10 @@ class ReaderViewController: BaseObservingViewController {
 
     var chapterList: [Chapter] = []
     var currentPage = 1
+    private let mangaMetadata: Manga?
+    private var progressSaveTask: Task<Void, Never>?
+    private var lastQueuedProgress: String?
+    private var previousIdleTimerDisabled: Bool?
 
     weak var reader: ReaderReaderDelegate?
 
@@ -53,8 +57,9 @@ class ReaderViewController: BaseObservingViewController {
         statusBarHidden
     }
 
-    init(chapter: Chapter, chapterList: [Chapter] = [], defaultReadingMode: ReadingMode? = nil) {
+    init(chapter: Chapter, chapterList: [Chapter] = [], defaultReadingMode: ReadingMode? = nil, manga: Manga? = nil) {
         self.chapter = chapter
+        self.mangaMetadata = manga
         self.chapterList = chapterList
         self.defaultReadingMode = defaultReadingMode
         super.init()
@@ -159,6 +164,7 @@ class ReaderViewController: BaseObservingViewController {
     }
 
     override func observe() {
+        addObserver(forName: "Reader.keepScreenAwake") { [weak self] _ in self?.updateScreenAwake() }
         addObserver(forName: "Reader.readingMode.\(chapter.mangaId)") { [weak self] _ in
             guard let self = self else { return }
             self.setReadingMode(AidokuStorage.defaults.string(forKey: "Reader.readingMode.\(self.chapter.mangaId)"))
@@ -176,12 +182,30 @@ class ReaderViewController: BaseObservingViewController {
             guard let self = self else { return }
             self.updateReadPosition()
         }
+        addObserver(forName: "Yoru.flushReadingProgress") { [weak self] _ in
+            self?.updateReadPosition()
+        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        if let previousIdleTimerDisabled {
+            UIApplication.shared.isIdleTimerDisabled = previousIdleTimerDisabled
+            self.previousIdleTimerDisabled = nil
+        }
         guard currentPage >= 1 else { return }
         updateReadPosition()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if previousIdleTimerDisabled == nil { previousIdleTimerDisabled = UIApplication.shared.isIdleTimerDisabled }
+        updateScreenAwake()
+    }
+
+    private func updateScreenAwake() {
+        guard let previousIdleTimerDisabled else { return }
+        UIApplication.shared.isIdleTimerDisabled = previousIdleTimerDisabled || AidokuStorage.defaults.bool(forKey: "Reader.keepScreenAwake")
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -192,31 +216,26 @@ class ReaderViewController: BaseObservingViewController {
         }
     }
 
-    func updateReadPosition() {
-        guard !AidokuStorage.defaults.bool(forKey: "General.incognitoMode") else { return }
-        Task {
-            // don't add history if there is none and we're at the first page
-            if currentPage == 1 {
-                let sourceId = chapter.sourceId
-                let mangaId = chapter.mangaId
-                let chapterId = chapter.id
-                let hasHistory = await CoreDataManager.shared.container.performBackgroundTask { @Sendable context in
-                    !CoreDataManager.shared.hasHistory(
-                        sourceId: sourceId,
-                        mangaId: mangaId,
-                        chapterId: chapterId,
-                        context: context
-                    )
-                }
-                if hasHistory {
-                    return
-                }
-            }
-            await HistoryManager.shared.setProgress(
-                chapter: chapter,
-                progress: currentPage,
-                totalPages: toolbarView.totalPages
+    func updateReadPosition(completed: Bool = false) {
+        guard !AidokuStorage.defaults.bool(forKey: "General.incognitoMode"),
+              let total = toolbarView.totalPages, total > 0, currentPage >= 1, currentPage <= total else { return }
+        // Snapshot before suspending: the reader can switch chapters meanwhile.
+        let chapter = chapter
+        let page = currentPage
+        let manga = mangaMetadata
+        let isCompleted = completed || page == total
+        let key = "\(chapter.sourceId)|\(chapter.mangaId)|\(chapter.id)|\(page)|\(total)|\(isCompleted)"
+        guard key != lastQueuedProgress else { return }
+        lastQueuedProgress = key
+        let previous = progressSaveTask
+        let backgroundSave = ReadingSaveBackgroundTask()
+        progressSaveTask = Task { @MainActor [weak self] in
+            defer { backgroundSave.finish() }
+            await previous?.value
+            let saved = await HistoryManager.shared.setProgress(
+                chapter: chapter, progress: page, totalPages: total, completed: isCompleted, manga: manga
             )
+            if !saved, self?.lastQueuedProgress == key { self?.lastQueuedProgress = nil }
         }
     }
 
@@ -248,7 +267,7 @@ class ReaderViewController: BaseObservingViewController {
     func loadNavbarTitle() {
         navigationItem.setTitle(
             upper: chapter.volumeNum ?? 0 != 0 ? String(format: NSLocalizedString("VOLUME_X", comment: ""), chapter.volumeNum!) : nil,
-            lower: chapter.chapterNum.map { String(format: NSLocalizedString("CHAPTER_X", comment: ""), $0) } ?? chapter.title ?? NSLocalizedString("CHAPTER", comment: "")
+            lower: chapter.title ?? chapter.chapterNum.map { String(format: NSLocalizedString("CHAPTER_X", comment: ""), $0) } ?? NSLocalizedString("CHAPTER", comment: "")
         )
     }
 
@@ -387,10 +406,14 @@ extension ReaderViewController: ReaderHoldingDelegate {
             return nil
         }
         let skipDuplicates = AidokuStorage.defaults.bool(forKey: "Reader.skipDuplicateChapters")
+        let language = CoreDataManager.shared.getMangaChapterFilters(
+            sourceId: chapter.sourceId, mangaId: chapter.mangaId
+        ).language
         index -= 1
         while index >= 0 {
             let new = chapterList[index]
-            if !skipDuplicates || (new.chapterNum != chapter.chapterNum || new.volumeNum != chapter.volumeNum) {
+            if new.matchesReadingLanguage(of: chapter, preferredLanguage: language, availableChapters: chapterList)
+                && (!skipDuplicates || !new.isDuplicateRelease(of: chapter)) {
                 return new
             }
             index -= 1
@@ -404,11 +427,15 @@ extension ReaderViewController: ReaderHoldingDelegate {
         else {
             return nil
         }
-        // find previous non-duplicate chapter
+        let skipDuplicates = AidokuStorage.defaults.bool(forKey: "Reader.skipDuplicateChapters")
+        let language = CoreDataManager.shared.getMangaChapterFilters(
+            sourceId: chapter.sourceId, mangaId: chapter.mangaId
+        ).language
         index += 1
         while index < chapterList.count {
             let new = chapterList[index]
-            if new.chapterNum != chapter.chapterNum || new.volumeNum != chapter.volumeNum {
+            if new.matchesReadingLanguage(of: chapter, preferredLanguage: language, availableChapters: chapterList)
+                && (!skipDuplicates || !new.isDuplicateRelease(of: chapter)) {
                 return new
             }
             index += 1
@@ -417,7 +444,12 @@ extension ReaderViewController: ReaderHoldingDelegate {
     }
 
     func setChapter(_ chapter: Chapter) {
+        guard self.chapter != chapter else { return }
+        updateReadPosition()
         self.chapter = chapter
+        currentPage = 0
+        toolbarView.currentPage = nil
+        toolbarView.totalPages = nil
         loadNavbarTitle()
     }
 
@@ -428,12 +460,20 @@ extension ReaderViewController: ReaderHoldingDelegate {
         toolbarView.updateSliderPosition()
         if page == toolbarView.totalPages {
             setCompleted()
+        } else {
+            updateReadPosition()
         }
     }
 
     func setTotalPages(_ pages: Int) {
         toolbarView.totalPages = pages
         activityIndicator.stopAnimating()
+        // Page controllers do not consistently emit a scroll/page-change
+        // callback for their initial position. Persist that first visible page
+        // once the page count is known so opening a chapter (including a
+        // one-page chapter or an automatic chapter transition) creates history.
+        guard pages > 0 else { return }
+        setCurrentPage(min(max(currentPage, 1), pages))
     }
 
     func displayPage(_ page: Int) {
@@ -441,11 +481,7 @@ extension ReaderViewController: ReaderHoldingDelegate {
     }
 
     func setCompleted() {
-        if !AidokuStorage.defaults.bool(forKey: "General.incognitoMode") {
-            Task {
-                await HistoryManager.shared.addHistory(chapters: [chapter])
-            }
-        }
+        updateReadPosition(completed: true)
         if AidokuStorage.defaults.bool(forKey: "Library.deleteDownloadAfterReading") {
             DownloadManager.shared.delete(chapters: [chapter])
         }

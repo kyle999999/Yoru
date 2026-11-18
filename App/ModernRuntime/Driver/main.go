@@ -35,25 +35,25 @@ import (
 )
 
 type command struct {
-	Op, ID, Path, Query, URL, Key, Notification, Username, Password string
-	Page                                                            int
-	Manga                                                           models.Manga
-	Chapter                                                         models.Chapter
-	Listing                                                         models.Listing
-	Filters                                                         []models.FilterValue
-	Context                                                         *models.PageContext
-	Cookies                                                         map[string]string
-	Cover                                                           bool
+	Op, ID, Path, Query, URL, Key, Notification, Username, Password, RequestID string
+	Page                                                                       int
+	Manga                                                                      models.Manga
+	Chapter                                                                    models.Chapter
+	Listing                                                                    models.Listing
+	Filters                                                                    []models.FilterValue
+	Context                                                                    *models.PageContext
+	Cookies                                                                    map[string]string
+	Cover                                                                      bool
 }
 type answer struct {
 	Value any    `json:"value,omitempty"`
 	Error string `json:"error,omitempty"`
 }
 
-var mu sync.Mutex
-var loaded = map[string]*source.Source{}
-var paths = map[string]string{}
-var used = map[string]time.Time{}
+var runtimes = newSourcePool[*source.Source](3, func(s *source.Source) { s.Runner.Close(context.Background()) })
+
+// Keep thumbnail traffic from occupying every runtime worker.
+var imageWorkers = make(chan struct{}, 1)
 
 func ptrString(s string) *string { return &s }
 func native(v any) (map[string]any, bool) {
@@ -70,7 +70,10 @@ func native(v any) (map[string]any, bool) {
 	return r, true
 }
 
-type settings struct{ values map[string]any }
+type settings struct {
+	mu     sync.RWMutex
+	values map[string]any
+}
 
 func settingValue(v any, kind string) any {
 	switch kind {
@@ -118,16 +121,22 @@ func (s *settings) Object(k string) any {
 			return settingValue(v, kind)
 		}
 	}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	return s.values[k]
 }
 func (s *settings) SetValue(k string, v any) error {
+	s.mu.Lock()
 	s.values[k] = v
+	s.mu.Unlock()
 	native(settingMessage("setSetting", k, v))
 	return nil
 }
 func (s *settings) RegisterDefault(k string, v any) {
 	if s.Object(k) == nil {
+		s.mu.Lock()
 		s.values[k] = v
+		s.mu.Unlock()
 		native(settingMessage("registerSetting", k, v))
 	}
 }
@@ -177,50 +186,47 @@ func nativeViewLink() func(wazero.HostModuleBuilder, *host.Store) wazero.HostMod
 	}
 	return nil
 }
-func acquire(ctx context.Context, c command) (*source.Source, error) {
-	if s := loaded[c.ID]; s != nil && paths[c.ID] == c.Path {
-		used[c.ID] = time.Now()
-		return s, nil
-	}
-	if s := loaded[c.ID]; s != nil {
-		s.Runner.Close(context.Background())
-		delete(loaded, c.ID)
-	}
-	if len(loaded) >= 3 {
-		var oldest string
-		for k := range loaded {
-			if oldest == "" || used[k].Before(used[oldest]) {
-				oldest = k
-			}
-		}
-		loaded[oldest].Runner.Close(context.Background())
-		delete(loaded, oldest)
-	}
-	s, e := source.LoadPath(ctx, c.Path, engine.Config{NativeWebView: nativeViewLink(), Settings: prefs, HTTPClient: &http.Client{Transport: transport{}, Timeout: 45 * time.Second}, NetworkConcurrency: 4, PrintHandler: func(m string) { native(map[string]any{"op": "log", "id": c.ID, "message": m}) }}, prefs)
-	if e != nil {
-		return nil, e
-	}
-	loaded[c.ID] = s
-	paths[c.ID] = c.Path
-	used[c.ID] = time.Now()
-	return s, nil
-}
 func execute(c command) (any, error) {
-	mu.Lock()
-	defer mu.Unlock()
+	if c.Op == "beginSearch" || c.Op == "cancelSearch" || c.Op == "endSearch" {
+		return true, requestControl(c.Op, c.RequestID)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
-	if c.Op == "close" {
-		if s := loaded[c.ID]; s != nil {
-			s.Runner.Close(ctx)
-			delete(loaded, c.ID)
+	if c.RequestID != "" {
+		var err error
+		ctx, err = searchContext(c.RequestID)
+		if err != nil {
+			return nil, err
 		}
+	}
+	if c.Op == "image" {
+		if err := waitSlot(ctx, imageWorkers); err != nil {
+			return nil, err
+		}
+		defer func() { <-imageWorkers }()
+	}
+	var loader func(context.Context) (*source.Source, error)
+	if c.Op != "close" {
+		loader = func(ctx context.Context) (*source.Source, error) {
+			return source.LoadPath(ctx, c.Path, engine.Config{NativeWebView: nativeViewLink(), Settings: prefs,
+				HTTPClient: &http.Client{Transport: transport{}, Timeout: 45 * time.Second}, NetworkConcurrency: 4,
+				PrintHandler: func(m string) { native(map[string]any{"op": "log", "id": c.ID, "message": m}) }}, prefs)
+		}
+	}
+	s, release, err := runtimes.acquire(ctx, c.ID, c.Path, loader)
+	if err != nil {
+		return nil, err
+	}
+	defer release()
+	defer func() {
+		if ctx.Err() != nil {
+			runtimes.discard(c.ID)
+		}
+	}()
+	if c.Op == "close" {
 		return true, nil
 	}
-	s, e := acquire(ctx, c)
-	if e != nil {
-		return nil, e
-	}
+	var e error
 	switch c.Op {
 	case "load":
 		return map[string]any{"features": s.Runner.Features, "key": s.Key, "version": s.Version}, nil

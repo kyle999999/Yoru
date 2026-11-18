@@ -55,6 +55,7 @@ class ReaderWebtoonViewModel: ReaderPagedViewModel {
         self.chapter = chapter
         self.pages = pages
         if preloadedChapter == chapter {
+            preloadedChapter = nil
             preloadedPages = []
         }
     }

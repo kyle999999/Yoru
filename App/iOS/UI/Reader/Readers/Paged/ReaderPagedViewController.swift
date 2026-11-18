@@ -36,6 +36,7 @@ class ReaderPagedViewController: BaseObservingViewController {
 
     private var previousChapter: Chapter?
     private var nextChapter: Chapter?
+    private var loadGeneration = UUID()
 
     private lazy var pageViewController = makePageViewController()
 
@@ -266,13 +267,17 @@ extension ReaderPagedViewController: ReaderReaderDelegate {
     func setChapter(_ chapter: Chapter, startPage: Int) {
         self.chapter = chapter
         Task {
+            guard self.chapter == chapter else { return }
             await loadChapter(startPage: startPage)
         }
     }
 
     func loadChapter(startPage: Int) async {
         guard let chapter = chapter else { return }
+        let generation = UUID()
+        loadGeneration = generation
         await viewModel.loadPages(chapter: chapter)
+        guard generation == loadGeneration, self.chapter == chapter, viewModel.chapter == chapter else { return }
         delegate?.setTotalPages(viewModel.pages.count)
         if viewModel.pages.isEmpty {
             let alert = UIAlertController(
@@ -321,8 +326,7 @@ extension ReaderPagedViewController: UIPageViewControllerDelegate {
         guard
             completed,
             let viewController = pageViewController.viewControllers?.first,
-            let currentIndex = getIndex(of: viewController, pos: .first),
-            pagesToPreload > 0
+            let currentIndex = getIndex(of: viewController, pos: .first)
         else {
             return
         }

@@ -15,11 +15,18 @@ struct WeeklySchedule: Codable, Sendable {
             (try? NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators]).matches(in: text, range: NSRange(text.startIndex..., in: text))) ?? []
         }
         func capture(_ pattern: String, _ text: String, group: Int = 1) -> String? {
-            guard let match = matches(pattern, text).first, let range = Range(match.range(at: group), in: text) else { return nil }
+            // A pattern without the requested group makes range(at:) throw an
+            // Objective-C exception (and terminates the app). Keep malformed or
+            // intentionally whole-match patterns safe on iOS.
+            guard let match = matches(pattern, text).first,
+                  group >= 0, group < match.numberOfRanges,
+                  match.range(at: group).location != NSNotFound,
+                  let range = Range(match.range(at: group), in: text) else { return nil }
             return String(text[range])
         }
         let markers = matches(#"<div class="anime-header">(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Other|Unknown)</div>|<div class="js-anime-category-producer seasonal-anime[^>]*>"#, html)
         var day: String?; var days: [String: [Anime]] = [:]; var parsedCards = 0
+        var assignedAnime = Set<Int>()
         for (index, marker) in markers.enumerated() {
             let start = marker.range.location
             let end = index + 1 < markers.count ? markers[index + 1].range.location : (html as NSString).length
@@ -33,10 +40,24 @@ struct WeeklySchedule: Codable, Sendable {
             guard let idText = capture(#"class="genres js-genre" id="(\d+)""#, block), let id = Int(idText),
                   let title = capture(#"class="link-title">(.*?)</a>"#, block) else { throw ScheduleError.changedFormat }
             parsedCards += 1
-            let image = capture(#"<img[^>]*data-src="([^"]+)""#, block)
+            // MAL currently serves regular `src` attributes, but some cached or
+            // lazy-loaded responses use data-src/data-original instead.
+            // Provider icons precede the poster in current schedule cards.
+            // Only accept an image whose URL points to MAL anime artwork.
+            let imageTag = matches(#"<img\b[^>]*>"#, block).compactMap { match -> String? in
+                guard let range = Range(match.range, in: block) else { return nil }
+                let tag = String(block[range])
+                return tag.contains("myanimelist.net/images/anime/") ? tag : nil
+            }.first ?? ""
+            let image = capture(#"data-src="([^"]+)""#, imageTag)
+                ?? capture(#"data-original="([^"]+)""#, imageTag)
+                ?? capture(#"src="([^"]+)""#, imageTag)
+                ?? capture(#"srcset="([^"]+)""#, imageTag)?.split(separator: ",").first.map { String($0.split(separator: " ").first ?? "") }
             let episodes = capture(#"<span>(\d+) eps</span>"#, block).flatMap(Int.init)
             let score = capture(#"class="js-score">([\d.]+)</span>"#, block).flatMap(Double.init)
             let broadcast = day == "unknown" || day == "other" ? nil : Broadcast(day: day.capitalized + "s", time: nil, timezone: "Asia/Tokyo", string: day.capitalized + " · time not supplied")
+            // Keep one canonical weekday per title if upstream repeats a card.
+            guard assignedAnime.insert(id).inserted else { continue }
             days[day, default: []].append(Anime(malId: id, title: decodeEntities(title), images: .init(jpg: .init(imageUrl: image, largeImageUrl: image)), episodes: episodes, status: "Currently Airing", airing: true, score: score, broadcast: broadcast, url: "https://myanimelist.net/anime/\(id)", sourceName: "MyAnimeList"))
         }
         guard parsedCards > 0, ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].allSatisfy({ days[$0] != nil }) else { throw ScheduleError.changedFormat }
@@ -67,7 +88,7 @@ actor ScheduleAPI {
     private let cacheFile: URL
     init(session: URLSession = .shared, cacheFile: URL? = nil) {
         self.session = session
-        self.cacheFile = cacheFile ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("yoru-weekly-schedule-v1.json")
+        self.cacheFile = cacheFile ?? FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("yoru-weekly-schedule-v3.json")
     }
     func week(refresh: Bool = false) async throws -> APIResponse<WeeklySchedule> {
         let cached = (try? Data(contentsOf: cacheFile)).flatMap { try? JSONDecoder().decode(WeeklySchedule.self, from: $0) }
@@ -105,5 +126,94 @@ actor ScheduleAPI {
             let result = try await ScheduleAPI.shared.week(refresh: refresh)
             week = result.value; isStale = result.isStale
         } catch is CancellationError {} catch { self.error = error.localizedDescription }
+    }
+}
+
+// Jikan exposes MAL's broadcast metadata, including the clock time omitted
+// from the public weekly HTML. Keep this supplemental lookup independent.
+actor BroadcastTimeAPI {
+    static let shared = BroadcastTimeAPI()
+    private struct Page: Decodable {
+        struct Item: Decodable { let mal_id: Int; let broadcast: Broadcast? }
+        struct Pagination: Decodable { let has_next_page: Bool }
+        let data: [Item]
+        let pagination: Pagination
+    }
+    private var cache: [String: (Date, [Int: Broadcast])] = [:]
+    private var nextSlot = Date.distantPast
+    private struct SavedTimes: Codable { let fetchedAt: Date; let times: [Int: Broadcast] }
+    private func cacheURL(_ day: BroadcastDay) -> URL {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("yoru-broadcast-times-\(day.rawValue).json")
+    }
+    func times(for day: BroadcastDay) async -> [Int: Broadcast] {
+        guard day != .other, day != .unknown else { return [:] }
+        if let cached = cache[day.rawValue], Date().timeIntervalSince(cached.0) < 21600 { return cached.1 }
+        let disk = (try? Data(contentsOf: cacheURL(day))).flatMap { try? JSONDecoder().decode(SavedTimes.self, from: $0) }
+        if let disk, Date().timeIntervalSince(disk.fetchedAt) < 21600 { return disk.times }
+        let fallback = disk?.times ?? cache[day.rawValue]?.1 ?? [:]
+        var result: [Int: Broadcast] = [:]
+        do {
+            for page in 1...10 {
+                try Task.checkCancellation()
+                let slot = max(Date(), nextSlot); nextSlot = slot.addingTimeInterval(1.1)
+                if slot > Date() { try await Task.sleep(for: .seconds(slot.timeIntervalSinceNow)) }
+                let url = URL(string: "https://api.jikan.moe/v4/schedules?filter=\(day.rawValue)&sfw=true&limit=25&page=\(page)")!
+                var request = URLRequest(url: url); request.timeoutInterval = 15
+                let (data, response) = try await URLSession.shared.data(for: request)
+                guard let response = response as? HTTPURLResponse, response.statusCode == 200 else { return result.isEmpty ? fallback : result }
+                let decoded = try JSONDecoder().decode(Page.self, from: data)
+                for item in decoded.data {
+                    if let broadcast = item.broadcast, broadcast.nextDate() != nil { result[item.mal_id] = broadcast }
+                }
+                if !decoded.pagination.has_next_page {
+                    cache[day.rawValue] = (Date(), result)
+                    let saved = SavedTimes(fetchedAt: Date(), times: result)
+                    if let encoded = try? JSONEncoder().encode(saved) { try? encoded.write(to: cacheURL(day), options: .atomic) }
+                    return result
+                }
+            }
+        } catch { return result.isEmpty ? fallback : result }
+        return result.isEmpty ? fallback : result
+    }
+}
+
+actor TitleMetadataAPI {
+    static let shared = TitleMetadataAPI()
+    struct Metadata: Codable, Sendable { var broadcast: Broadcast?; var synopsis: String? }
+    private var cache: [Int: Metadata] = [:]
+    private var nextRequest = Date.distantPast
+    func metadata(for id: Int) async -> Metadata? {
+        guard id > 0 else { return nil }
+        if let value = cache[id] { return value }
+        do {
+            let slot = max(Date(), nextRequest); nextRequest = slot.addingTimeInterval(1)
+            if slot > Date() { try await Task.sleep(for: .seconds(slot.timeIntervalSinceNow)) }
+            try Task.checkCancellation()
+            var request = URLRequest(url: URL(string: "https://myanimelist.net/anime/\(id)")!)
+            request.timeoutInterval = 12
+            request.setValue("Mozilla/5.0 Yoru", forHTTPHeaderField: "User-Agent")
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard (response as? HTTPURLResponse)?.statusCode == 200, let html = String(data: data, encoding: .utf8) else { return nil }
+            let value = Self.parse(html)
+            cache[id] = value
+            return value
+        } catch { return nil }
+    }
+    static func parse(_ html: String) -> Metadata {
+        func groups(_ pattern: String) -> [String]? {
+            guard let regex = try? NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators]),
+                  let match = regex.firstMatch(in: html, range: NSRange(html.startIndex..., in: html)) else { return nil }
+            return (1..<match.numberOfRanges).map { i in Range(match.range(at: i), in: html).map { String(html[$0]) } ?? "" }
+        }
+        var broadcast: Broadcast?
+        if let values = groups(#"Broadcast:</span>\s*(\w+) at (\d{2}:\d{2}) \(JST\)"#) {
+            let candidate = Broadcast(day: values[0], time: values[1], timezone: "Asia/Tokyo", string: "\(values[0]) at \(values[1]) JST")
+            if candidate.nextDate() != nil { broadcast = candidate }
+        }
+        let synopsis = groups(#"<p\b[^>]*itemprop="description"[^>]*>(.*?)</p>"#)?.first.map {
+            WeeklySchedule.decodeEntities($0.replacingOccurrences(of: #"<br\s*/?>"#, with: "\n", options: .regularExpression).replacingOccurrences(of: #"<[^>]+>"#, with: "", options: .regularExpression))
+        }
+        return Metadata(broadcast: broadcast, synopsis: synopsis)
     }
 }

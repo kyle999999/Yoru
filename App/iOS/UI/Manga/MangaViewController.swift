@@ -201,7 +201,10 @@ class MangaViewController: BaseTableViewController {
         }
         addObserver(forName: "historyAdded") { [weak self] notification in
             guard let self = self, let chapters = notification.object as? [Chapter] else { return }
-            Task {
+            let matching = chapters.filter { $0.sourceId == self.manga.sourceId && $0.mangaId == self.manga.id }
+            guard !matching.isEmpty else { return }
+            Task { @MainActor in
+                let chapters = matching
                 self.viewModel.addHistory(for: chapters)
                 self.reloadCells(for: chapters)
                 self.updateReadButton()
@@ -211,6 +214,8 @@ class MangaViewController: BaseTableViewController {
             guard let self = self else { return }
             Task {
                 if let chapters = notification.object as? [Chapter] {
+                    let chapters = chapters.filter { $0.sourceId == self.manga.sourceId && $0.mangaId == self.manga.id }
+                    guard !chapters.isEmpty else { return }
                     self.viewModel.removeHistory(for: chapters)
                     self.reloadCells(for: chapters)
                 } else if
@@ -224,13 +229,14 @@ class MangaViewController: BaseTableViewController {
             }
         }
         addObserver(forName: "historySet") { [weak self] notification in
-            guard
-                let self = self,
-                let item = notification.object as? (chapter: Chapter, page: Int),
-                self.viewModel.readingHistory[item.chapter.id]?.page != -1
-            else { return }
-            Task {
-                self.viewModel.readingHistory[item.chapter.id] = (page: item.page, date: Int(Date().timeIntervalSince1970))
+            guard let self, let item = notification.object as? (chapter: Chapter, page: Int),
+                  item.chapter.sourceId == self.manga.sourceId, item.chapter.mangaId == self.manga.id else { return }
+            Task { @MainActor in
+                if item.page == -1 {
+                    self.viewModel.addHistory(for: [item.chapter])
+                } else if self.viewModel.readingHistory[item.chapter.id]?.page != -1 {
+                    self.viewModel.readingHistory[item.chapter.id] = (page: item.page, date: Int(Date().timeIntervalSince1970))
+                }
                 self.reloadCells(for: [item.chapter])
                 self.updateReadButton()
             }
@@ -430,7 +436,8 @@ class MangaViewController: BaseTableViewController {
         let readerController = ReaderViewController(
             chapter: chapter,
             chapterList: viewModel.getOrderedChapterList(),
-            defaultReadingMode: ReadingMode(rawValue: manga.viewer.rawValue)
+            defaultReadingMode: ReadingMode(rawValue: manga.viewer.rawValue),
+            manga: manga
         )
         let navigationController = ReaderNavigationController(rootViewController: readerController)
         navigationController.modalPresentationStyle = .fullScreen

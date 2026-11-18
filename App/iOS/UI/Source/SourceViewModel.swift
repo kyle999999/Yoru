@@ -65,6 +65,7 @@ actor SourceViewModel {
             // load regular manga list
             result = try? await source.getMangaList(filters: selectedFilters.filters, page: page)
         }
+        guard !Task.isCancelled else { return }
         let mangaInfo = result?.manga.map { $0.toInfo() } ?? []
         currentPage = page
         hasMore = result?.hasNextPage ?? false

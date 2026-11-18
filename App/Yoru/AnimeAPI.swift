@@ -52,6 +52,40 @@ actor AnimeAPI {
         return APIResponse(value: AnimeDetail(data: full), fetchedAt: response.fetchedAt, isStale: response.isStale)
     }
 
+    /// Resolve a Calendar day's MyAnimeList ids to Kitsu poster artwork in one
+    /// cached request. Unmatched ids remain on their existing MAL artwork.
+    func posterURLs(for malIds: [Int]) async -> [Int: String] {
+        let ids = Array(Set(malIds.filter { $0 > 0 })).sorted()
+        guard !ids.isEmpty else { return [:] }
+        do {
+            let response: APIResponse<KitsuDocument> = try await request(
+                path: "mappings",
+                parameters: [
+                    "filter[externalSite]": "myanimelist/anime",
+                    "filter[externalId]": ids.map(String.init).joined(separator: ","),
+                    "include": "item",
+                    "page[limit]": String(min(ids.count, 100))
+                ],
+                refresh: false
+            )
+            let animeById = Dictionary(
+                (response.value.included ?? []).filter { $0.type == "anime" }.map { ($0.id, $0) },
+                uniquingKeysWith: { first, _ in first }
+            )
+            var posters: [Int: String] = [:]
+            for mapping in response.value.data where mapping.attributes?.externalSite == "myanimelist/anime" {
+                guard let malId = mapping.attributes?.externalId.flatMap(Int.init),
+                      let animeId = mapping.relationships?["item"]?.refs.first(where: { $0.type == "anime" })?.id,
+                      let attributes = animeById[animeId]?.attributes,
+                      let url = attributes.posterImage?.large ?? attributes.posterImage?.original ?? attributes.posterImage?.medium else { continue }
+                posters[malId] = url
+            }
+            return posters
+        } catch {
+            return [:]
+        }
+    }
+
     private func request<T: Decodable & Sendable>(path: String, parameters: [String: String], refresh: Bool) async throws -> APIResponse<T> {
         var components = URLComponents(string: "https://kitsu.io/api/edge/\(path)")!
         components.queryItems = parameters.sorted { $0.key < $1.key }.map { URLQueryItem(name: $0.key, value: $0.value) }

@@ -1,4 +1,48 @@
 import SwiftUI
+import UserNotifications
+
+@MainActor enum ReleaseReminders {
+    static let prefix = "yoru.release."
+    static func clear() async {
+        let center = UNUserNotificationCenter.current()
+        let requests = await center.pendingNotificationRequests()
+        center.removePendingNotificationRequests(withIdentifiers: requests.map(\.identifier).filter { $0.hasPrefix(prefix) || $0 == "yoru.daily.watch.reminder" })
+    }
+    static func refresh(library: Library) async {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: ["yoru.daily.watch.reminder"])
+        guard UserDefaults.standard.bool(forKey: "yoru.reminders.enabled") else { await clear(); return }
+        let saved = library.saved
+        let savedIDs = Set(saved.map(\.id))
+        let pending = await center.pendingNotificationRequests()
+        center.removePendingNotificationRequests(withIdentifiers: pending.map(\.identifier).filter { id in
+            guard id.hasPrefix(prefix) else { return false }
+            return Int(id.dropFirst(prefix.count)).map { !savedIDs.contains($0) } ?? true
+        })
+        for anime in saved {
+            guard !Task.isCancelled, UserDefaults.standard.bool(forKey: "yoru.reminders.enabled") else { return }
+            do {
+                let result = try await AnimeAPI.shared.detail(anime: anime, refresh: true)
+                guard !Task.isCancelled, UserDefaults.standard.bool(forKey: "yoru.reminders.enabled"), library.isSaved(anime) else { continue }
+                let updated = result.value.data
+                let id = prefix + String(anime.id)
+                guard !result.isStale, updated.airing == true, let date = updated.nextRelease, date > Date() else {
+                    if !result.isStale { center.removePendingNotificationRequests(withIdentifiers: [id]) }
+                    continue
+                }
+                let content = UNMutableNotificationContent()
+                content.title = "New episode expected"
+                content.body = "A new episode of \(updated.displayTitle) is listed for now. Streaming availability may vary."
+                content.sound = .default
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, date.timeIntervalSinceNow), repeats: false)
+                try await center.add(UNNotificationRequest(identifier: id, content: content, trigger: trigger))
+                if !UserDefaults.standard.bool(forKey: "yoru.reminders.enabled") || !library.isSaved(anime) {
+                    center.removePendingNotificationRequests(withIdentifiers: [id])
+                }
+            } catch { continue }
+        }
+    }
+}
 
 extension LibraryCollection {
     var tint: Color {
@@ -23,6 +67,8 @@ struct LibraryScreen: View {
     @State private var pendingWrite: Anime?
     @State private var showingStreak = false
     @State private var writeAfterStreak = false
+    @AppStorage("yoru.reminders.enabled") private var remindersEnabled = false
+    @State private var reminderMessage: String?
     private var selectedCollection: LibraryCollection? { library.collections.first { $0.id == collectionID } }
     private var shows: [Anime] {
         (selectedCollection.map { library.collectionAnime($0) } ?? library.saved).filter {
@@ -37,6 +83,28 @@ struct LibraryScreen: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 25) {
                         PageHeader(eyebrow: "COLLECT STORIES. KEEP THE FEELING.", title: "A world\nof your own.", subtitle: "Your shows, your shelves, your little midnight journal.")
+                        VStack(alignment: .leading, spacing: 8) {
+                            Toggle(isOn: Binding(get: { remindersEnabled }, set: { enabled in
+                                if !enabled {
+                                    remindersEnabled = false
+                                    Task { await ReleaseReminders.clear() }
+                                    reminderMessage = nil
+                                } else {
+                                    Task {
+                                        do {
+                                            let center = UNUserNotificationCenter.current()
+                                            guard try await center.requestAuthorization(options: [.alert, .sound]) else {
+                                                reminderMessage = "Enable notifications for Yoru in Settings to use reminders."
+                                                return
+                                            }
+                                            remindersEnabled = true; reminderMessage = nil
+                                            await ReleaseReminders.refresh(library: library)
+                                        } catch { reminderMessage = "Couldn’t set the reminder. Please try again." }
+                                    }
+                                }
+                            })) { Label("New episode notifications", systemImage: "bell") }
+                            Text(reminderMessage ?? "For saved shows with a listed next episode time. Open Yoru regularly to update release dates; streaming times can differ.").font(.caption).foregroundStyle(YoruTheme.muted)
+                        }.font(.system(size: 13, weight: .medium)).padding(16).background(.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 20))
                         TimelineView(.periodic(from: .now, by: 60)) { context in
                             let streak = library.streak(now: context.date)
                             Button { showingStreak = true } label: {

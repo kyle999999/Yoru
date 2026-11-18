@@ -54,6 +54,8 @@ class SearchViewController: UIViewController {
     var collectionView: UICollectionView?
 
     var query: String?
+    private var searchTask: Task<Void, Never>?
+    private var searchGeneration = UUID()
 
     var hoveredCell: MangaCoverCell?
     var hovering = false
@@ -61,6 +63,7 @@ class SearchViewController: UIViewController {
     var observers: [NSObjectProtocol] = []
 
     deinit {
+        searchTask?.cancel()
         for observer in observers {
             NotificationCenter.default.removeObserver(observer)
         }
@@ -175,21 +178,50 @@ class SearchViewController: UIViewController {
         }
     }
 
-    func fetchData() async {
-        guard let query = query, !query.isEmpty else { return }
-
-        for (i, source) in sources.enumerated() {
-            Task {
-                let search = try? await source.fetchSearchManga(query: query, page: 1)
-                self.updateResults(for: source.id, atIndex: i, result: search)
+    func fetchData() {
+        searchTask?.cancel()
+        searchGeneration = UUID()
+        let generation = searchGeneration
+        results = [:]
+        reloadData()
+        guard let query, !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        let searchSources = sources
+        searchTask = Task { @MainActor [weak self] in
+            await withTaskGroup(of: (String, MangaPageResult?).self) { group in
+                var pending = searchSources.makeIterator()
+                func enqueue(_ source: Source) {
+                    group.addTask {
+                        guard !Task.isCancelled else { return (source.id, nil) }
+                        let result = try? await source.fetchSearchManga(query: query, page: 1)
+                        return (source.id, result)
+                    }
+                }
+                // Avoid blocking an executor thread for every installed source.
+                for _ in 0..<3 { if let source = pending.next() { enqueue(source) } }
+                for await (id, result) in group {
+                    guard !Task.isCancelled, let self, self.searchGeneration == generation else {
+                        group.cancelAll()
+                        break
+                    }
+                    // Source installation/removal can change section indexes.
+                    if let index = self.sources.firstIndex(where: { $0.id == id }) {
+                        self.results[id] = result
+                        self.collectionView?.reloadSections(IndexSet(integer: index))
+                    }
+                    if let source = pending.next() { enqueue(source) }
+                }
             }
         }
     }
 
-    func updateResults(for id: String, atIndex i: Int, result: MangaPageResult?) {
-        results[id] = result
-        collectionView?.reloadSections(IndexSet(integer: i))
+    private func cancelSearch() {
+        searchTask?.cancel()
+        searchTask = nil
+        searchGeneration = UUID()
+        results = [:]
+        reloadData()
     }
+
 }
 
 // MARK: - Collection View Data Source
@@ -304,22 +336,18 @@ extension SearchViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard searchBar.text != query else { return }
         query = searchBar.text
-        Task {
-            await fetchData()
-        }
+        fetchData()
     }
 
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         query = nil
-        results = [:]
-        reloadData()
+        cancelSearch()
     }
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
             query = nil
-            results = [:]
-            reloadData()
+            cancelSearch()
         }
     }
 }

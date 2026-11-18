@@ -157,6 +157,10 @@ class HistoryViewController: UIViewController {
         ) { [weak self] _ in
             Task { @MainActor in
                 self?.queueRefresh = true
+                if self?.viewIfLoaded?.window?.isHidden == false {
+                    self?.queueRefresh = false
+                    self?.reloadHistory()
+                }
             }
         })
         observers.append(NotificationCenter.default.addObserver(
@@ -164,6 +168,10 @@ class HistoryViewController: UIViewController {
         ) { [weak self] _ in
             Task { @MainActor in
                 self?.queueRefresh = true
+                if self?.viewIfLoaded?.window?.isHidden == false {
+                    self?.queueRefresh = false
+                    self?.reloadHistory()
+                }
             }
         })
         observers.append(NotificationCenter.default.addObserver(
@@ -171,6 +179,10 @@ class HistoryViewController: UIViewController {
         ) { [weak self] _ in
             Task { @MainActor in
                 self?.queueRefresh = true
+                if self?.viewIfLoaded?.window?.isHidden == false {
+                    self?.queueRefresh = false
+                    self?.reloadHistory()
+                }
             }
         })
         observers.append(NotificationCenter.default.addObserver(

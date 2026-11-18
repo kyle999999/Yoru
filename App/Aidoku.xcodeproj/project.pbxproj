@@ -1399,6 +1399,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FB1B484A277CE1920056D02C /* Build configuration list for PBXNativeTarget "Aidoku (iOS)" */;
 			buildPhases = (
+                ABC200000000000000000001 /* Rebuild Yoru Source Runtime */,
 				FB1B4831277CE1920056D02C /* Sources */,
 				FB1B4832277CE1920056D02C /* Frameworks */,
 				FB1B4833277CE1920056D02C /* Resources */,
@@ -1551,6 +1552,18 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+        ABC200000000000000000001 /* Rebuild Yoru Source Runtime */ = {
+            isa = PBXShellScriptBuildPhase;
+            alwaysOutOfDate = 1;
+            buildActionMask = 2147483647;
+            files = ();
+            inputPaths = ();
+            outputPaths = ();
+            runOnlyForDeploymentPostprocessing = 0;
+            shellPath = /bin/zsh;
+            shellScript = "set -eu\npython3 \"${SRCROOT}/Validation/run_regressions.py\"\ncase \"${PLATFORM_NAME}\" in\n  iphoneos|iphonesimulator) platform=\"${PLATFORM_NAME}\" ;;\n  macosx) platform=maccatalyst ;;\n  *) exit 0 ;;\nesac\n/bin/zsh \"${SRCROOT}/ModernRuntime/build.sh\" \"$platform\"\n";
+        };
+
 		FBED233627C3C4D70095D0C0 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -2087,7 +2100,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -2123,7 +2136,7 @@
                 "EXCLUDED_ARCHS[sdk=macosx*]" = x86_64;
                 "INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace[sdk=macosx*]" = YES;
                 "MARKETING_VERSION[sdk=macosx*]" = 4.2.2;
-                "CURRENT_PROJECT_VERSION[sdk=macosx*]" = 11;
+                "CURRENT_PROJECT_VERSION[sdk=macosx*]" = 12;
                 "INFOPLIST_KEY_LSApplicationCategoryType[sdk=macosx*]" = "public.app-category.entertainment";
                 SUPPORTS_MACCATALYST = YES;
                 SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -2141,7 +2154,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -2176,7 +2189,7 @@
                 "EXCLUDED_ARCHS[sdk=macosx*]" = x86_64;
                 "INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace[sdk=macosx*]" = YES;
                 "MARKETING_VERSION[sdk=macosx*]" = 4.2.2;
-                "CURRENT_PROJECT_VERSION[sdk=macosx*]" = 11;
+                "CURRENT_PROJECT_VERSION[sdk=macosx*]" = 12;
                 "INFOPLIST_KEY_LSApplicationCategoryType[sdk=macosx*]" = "public.app-category.entertainment";
                 SUPPORTS_MACCATALYST = YES;
                 SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -2196,7 +2209,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 7T4TYRQ8MT;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -2229,7 +2242,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 7T4TYRQ8MT;
 				ENABLE_HARDENED_RUNTIME = YES;

@@ -64,10 +64,12 @@ import Observation
     func isSaved(_ anime: Anime) -> Bool { entries[anime.id]?.saved ?? false }
     func watched(_ anime: Anime) -> Int { entries[anime.id]?.watched ?? 0 }
     func toggle(_ anime: Anime) {
+        guard !persistenceBlocked else { return }
         var entry = entries[anime.id] ?? Entry(anime: anime, watched: 0, saved: false)
         entry.saved.toggle(); entry.anime = anime; entries[anime.id] = entry; persist()
     }
     func log(_ anime: Anime, delta: Int = 1, now: Date = .now, calendar: Calendar = StreakSnapshot.localCalendar) {
+        guard !persistenceBlocked else { return }
         var entry = entries[anime.id] ?? Entry(anime: anime, watched: 0, saved: true)
         let next = max(0, entry.watched + delta)
         let oldCount = entry.watched
@@ -90,6 +92,7 @@ import Observation
         entry.saved = true; entry.anime = anime; entries[anime.id] = entry; persist()
     }
     func setMetadata(_ anime: Anime, first: Date?, finished: Date?, rating: Int?, status: WatchStatus?, now: Date = .now) throws {
+        guard !persistenceBlocked else { throw LibraryValidation.storageUnavailable }
         let calendar = StreakSnapshot.localCalendar
         let today = calendar.startOfDay(for: now)
         guard first.map({ calendar.startOfDay(for: $0) <= today }) ?? true, finished.map({ calendar.startOfDay(for: $0) <= today }) ?? true else { throw LibraryValidation.futureDate }
@@ -100,6 +103,7 @@ import Observation
         entry.saved = true; entry.anime = anime; entries[anime.id] = entry; persist()
     }
     func saveJournal(_ draft: JournalEntry, for anime: Anime, now: Date = .now, calendar: Calendar = StreakSnapshot.localCalendar) throws {
+        guard !persistenceBlocked else { throw LibraryValidation.storageUnavailable }
         guard !draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !draft.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw LibraryValidation.emptyEntry }
         guard calendar.startOfDay(for: draft.watchedOn) <= calendar.startOfDay(for: now) else { throw LibraryValidation.futureDate }
         if let rating = draft.rating, !(1...10).contains(rating) { throw LibraryValidation.invalidRating }
@@ -119,11 +123,13 @@ import Observation
         persist()
     }
     func deleteJournal(_ id: UUID, animeID: Int) {
+        guard !persistenceBlocked else { return }
         guard var entry = entries[animeID] else { return }
         entry.journal?.removeAll { $0.id == id }; entries[animeID] = entry
         activity.removeAll { $0.kind == .journal && $0.journalID == id }; persist()
     }
     func saveCollection(_ collection: LibraryCollection) throws {
+        guard !persistenceBlocked else { throw LibraryValidation.storageUnavailable }
         let name = collection.name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else { throw LibraryValidation.emptyName }
         guard !collections.contains(where: { $0.id != collection.id && $0.name.compare(name, options: [.caseInsensitive, .diacriticInsensitive]) == .orderedSame }) else { throw LibraryValidation.duplicateName }
@@ -134,6 +140,7 @@ import Observation
         persist()
     }
     func setMembership(_ anime: Anime, collectionID: UUID, included: Bool) {
+        guard !persistenceBlocked else { return }
         guard let index = collections.firstIndex(where: { $0.id == collectionID }) else { return }
         if included {
             collections[index].animeIDs.insert(anime.id)
@@ -142,8 +149,9 @@ import Observation
         } else { collections[index].animeIDs.remove(anime.id) }
         persist()
     }
-    func deleteCollection(_ id: UUID) { collections.removeAll { $0.id == id }; persist() }
+    func deleteCollection(_ id: UUID) { guard !persistenceBlocked else { return }; collections.removeAll { $0.id == id }; persist() }
     func update(_ anime: Anime) {
+        guard !persistenceBlocked else { return }
         guard var entry = entries[anime.id] else { return }
         entry.anime = anime; entries[anime.id] = entry; persist()
     }

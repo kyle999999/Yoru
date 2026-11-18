@@ -2,6 +2,71 @@
 import SwiftUI
 import UIKit
 
+private struct DownloadStatusBar: View {
+    @State private var minimized = false
+    @State private var download: Download?
+    @State private var bytes = 0
+    @State private var started = Date()
+    @State private var paused = false
+    @State private var visible = false
+    private var elapsed: TimeInterval { max(0.1, Date().timeIntervalSince(started)) }
+    private var speed: Double { Double(bytes) / elapsed }
+    private var estimate: String {
+        guard let download, download.progress > 0, download.total > download.progress, !paused else { return "ETA —" }
+        let seconds = Int(elapsed * Double(download.total - download.progress) / Double(download.progress))
+        return seconds >= 60 ? "~\(seconds / 60)m \(seconds % 60)s" : "~\(seconds)s"
+    }
+    var body: some View {
+        Group {
+            if visible, let download {
+                HStack(spacing: 10) {
+                    if !minimized {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(paused ? "Downloads paused" : "Downloading · \(download.progress)/\(download.total) pages")
+                                .font(.system(size: 11, weight: .semibold)).lineLimit(1)
+                            ProgressView(value: Double(download.progress), total: Double(max(1, download.total))).tint(.green)
+                            Text("\(ByteCountFormatter.string(fromByteCount: Int64(bytes), countStyle: .file)) · \(String(format: "%.2f", paused ? 0 : speed / 1_000_000)) MB/s · \(estimate)")
+                                .font(.system(size: 10, design: .monospaced)).foregroundStyle(.secondary).lineLimit(1)
+                        }
+                    } else { Image(systemName: "arrow.down.circle.fill").foregroundStyle(.green) }
+                    Button { UIImpactFeedbackGenerator(style: .light).impactOccurred(); withAnimation(.easeInOut(duration: 0.2)) { minimized.toggle() } } label: {
+                        Image(systemName: minimized ? "chevron.up" : "chevron.down").font(.system(size: 12, weight: .bold)).padding(8)
+                    }.accessibilityLabel(minimized ? "Expand download progress" : "Minimize download progress")
+                }.padding(.horizontal, 15).padding(.vertical, 10).frame(maxWidth: minimized ? 65 : 340)
+                    .glassEffect(.regular, in: .capsule).padding(.bottom, 8)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("downloadProgressed")).receive(on: RunLoop.main)) { note in
+            guard let next = note.object as? Download else { return }
+            Task { @MainActor in
+                let queue = await DownloadManager.shared.getDownloadQueue()
+                guard queue[next.sourceId]?.contains(next) == true else { return }
+                if download != next { bytes = 0; started = Date() }
+                download = next; paused = DownloadManager.shared.downloadsPaused; visible = true
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("yoruDownloadBytes")).receive(on: RunLoop.main)) { note in bytes += note.object as? Int ?? 0 }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("downloadsPaused")).receive(on: RunLoop.main)) { _ in paused = true }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("downloadsResumed")).receive(on: RunLoop.main)) { _ in paused = false; started = Date(); bytes = 0 }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("downloadFinished")).receive(on: RunLoop.main)) { _ in
+            Task { try? await Task.sleep(for: .seconds(1)); if !(await DownloadManager.shared.hasQueuedDownloads()) { visible = false } }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("downloadsCancelled")).receive(on: RunLoop.main)) { _ in
+            Task { await refreshAfterCancellation() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("downloadCancelled")).receive(on: RunLoop.main)) { _ in
+            Task { await refreshAfterCancellation() }
+        }
+    }
+    @MainActor private func refreshAfterCancellation() async {
+        let remaining = await DownloadManager.shared.getDownloadQueue().values.flatMap { $0 }
+        guard let current = download, remaining.contains(current) else {
+            visible = false; download = nil; bytes = 0
+            return
+        }
+    }
+}
+
 @MainActor final class HostLifecycle: ObservableObject {
     static let shared = HostLifecycle()
     @Published var phase: ScenePhase = .inactive
@@ -48,6 +113,8 @@ struct YoruHostRoot: View {
         if let url { (UIApplication.shared.delegate as? AppDelegate)?.handleUrl(url: url) }
     }
     static func dismiss() {
+        NotificationCenter.default.post(name: Notification.Name("Yoru.flushReadingProgress"), object: nil)
+        CoreDataManager.shared.saveIfNeeded()
         let previous = window?.snapshotView(afterScreenUpdates: false)
         EmbeddedNetwork.shared.saveCookies()
         wantsOpen = false
@@ -109,10 +176,20 @@ private final class AidokuModernTabs: UITabBarController {
         back.addTarget(self, action: #selector(returnToYoru), for: .touchUpInside)
         back.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(back)
+        let downloadBar = UIHostingController(rootView: DownloadStatusBar())
+        downloadBar.sizingOptions = .intrinsicContentSize
+        addChild(downloadBar)
+        downloadBar.view.backgroundColor = .clear
+        downloadBar.view.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(downloadBar.view)
+        downloadBar.didMove(toParent: self)
         NSLayoutConstraint.activate([
             back.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 12),
             back.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            back.heightAnchor.constraint(equalToConstant: 34)
+            back.heightAnchor.constraint(equalToConstant: 34),
+            downloadBar.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            downloadBar.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -55),
+            downloadBar.view.widthAnchor.constraint(lessThanOrEqualTo: view.widthAnchor, constant: -24)
         ])
     }
     @objc private func returnToYoru() { AidokuIntegration.dismiss() }

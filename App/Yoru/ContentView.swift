@@ -7,16 +7,26 @@ struct ContentView: View {
     @State private var showCheckIn = false
     var body: some View {
         TabView(selection: $selectedTab) {
-            Tab("Tonight", systemImage: "moon.stars", value: 0) { TonightScreen(library: library) }
-            Tab("Calendar", systemImage: "calendar", value: 1) { CalendarScreen(library: library) }
-            Tab("Explore", systemImage: "sparkle.magnifyingglass", value: 2) { ExploreScreen(library: library) }
-            Tab("Library", systemImage: "square.stack", value: 3) { LibraryScreen(library: library) }
-            Tab("aidoku", systemImage: "books.vertical", value: 4) { Color.clear }
+            Tab("Tonight", systemImage: "moon.stars", value: 0) { TonightScreen(library: library).modifier(YoruSwitchMotion(trigger: selectedTab)) }
+            Tab("Calendar", systemImage: "calendar", value: 1) { CalendarScreen(library: library).modifier(YoruSwitchMotion(trigger: selectedTab)) }
+            Tab("Explore", systemImage: "sparkle.magnifyingglass", value: 2) { ExploreScreen(library: library).modifier(YoruSwitchMotion(trigger: selectedTab)) }
+            Tab("aidoku", systemImage: "books.vertical", value: 3) { Color.clear }
+            Tab("Library", systemImage: "square.stack", value: 4) { LibraryScreen(library: library).modifier(YoruSwitchMotion(trigger: selectedTab)) }
         }.onChange(of: selectedTab) { old, value in
-            if value == 4 { selectedTab = old; AidokuIntegration.present() }
+            if value == 3 { selectedTab = old; AidokuIntegration.present() }
         }.tint(YoruTheme.violet).preferredColorScheme(.dark)
+            .safeAreaInset(edge: .bottom) {
+                if let error = library.saveError {
+                    Text(error).font(.caption).foregroundStyle(.orange)
+                        .padding(12).frame(maxWidth: .infinity).background(.regularMaterial)
+                }
+            }
             .tabBarMinimizeBehavior(.onScrollDown)
             .sheet(isPresented: $showCheckIn) { DailyCheckInScreen(library: library) }
+            .task(id: "\(scenePhase == .active)-\(library.saved.map(\.id).sorted())") {
+                guard scenePhase == .active else { return }
+                await ReleaseReminders.refresh(library: library)
+            }
             .task(id: scenePhase) {
                 guard scenePhase == .active else { return }
                 repeat {
@@ -39,8 +49,8 @@ struct TonightScreen: View {
             ZStack {
                 NightBackground()
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 26) {
-                        PageHeader(eyebrow: "\(season.label) · ON YOUR RADAR", title: "Your night.\nA whole new world.", subtitle: "This season’s stories, all in one place.")
+                    VStack(alignment: .leading, spacing: 22) {
+                        PageHeader(eyebrow: "\(season.label) · ON YOUR RADAR", title: "Tonight,\nwell spent.", subtitle: "A few stories worth staying up for.")
                         if let featured = store.items.first(where: { $0.airing == true && $0.type == "TV" }) ?? store.items.first { hero(featured) }
                         if !library.saved.isEmpty {
                             SectionHeading(title: "Continue your story", trailing: "YOUR LIBRARY")
@@ -71,7 +81,7 @@ struct TonightScreen: View {
     private func hero(_ anime: Anime) -> some View {
         Button { selection = anime } label: {
             ZStack(alignment: .bottomLeading) {
-                Poster(anime: anime).frame(height: 390)
+                Poster(anime: anime).frame(height: 340)
                 LinearGradient(stops: [.init(color: .clear, location: 0.1), .init(color: .black.opacity(0.25), location: 0.4), .init(color: .black.opacity(0.95), location: 1)], startPoint: .top, endPoint: .bottom)
                 VStack(alignment: .leading, spacing: 14) {
                     HStack { StatusPill(title: anime.statusLabel, live: anime.airing == true); Spacer(); Image(systemName: "arrow.up.right").font(.system(size: 15)).padding(12).glassEffect(.regular, in: .circle) }
@@ -80,7 +90,7 @@ struct TonightScreen: View {
                     Text(anime.displayTitle).font(.system(size: 33, weight: .semibold, design: .rounded)).tracking(-1).lineLimit(3).multilineTextAlignment(.leading)
                     HStack { Text("\(anime.type ?? "Anime") · \(anime.episodeLabel)").font(.system(size: 12)); Spacer(); Text("EXPLORE STORY").font(.system(size: 8, weight: .bold, design: .monospaced)).tracking(1.4) }.foregroundStyle(.white.opacity(0.7))
                 }.padding(23)
-            }.frame(height: 390).clipShape(RoundedRectangle(cornerRadius: 31))
+            }.frame(height: 340).clipShape(RoundedRectangle(cornerRadius: 31))
                 .overlay(RoundedRectangle(cornerRadius: 31).stroke(.white.opacity(0.15), lineWidth: 0.8))
         }.buttonStyle(.plain).foregroundStyle(.white).accessibilityLabel("Featured: \(anime.displayTitle). Open details")
     }
@@ -168,16 +178,27 @@ struct CalendarScreen: View {
     var library: Library
     @State private var store = ScheduleStore()
     @State private var onlySaved = false
-    @State private var day = BroadcastDay.todayInJapan
+    @State private var day = BroadcastDay.today
+    @State private var kitsuPosters: [Int: String] = [:]
+    @State private var broadcastTimes: [Int: Broadcast] = [:]
+    @State private var titleDescriptions: [Int: String] = [:]
     @State private var selection: Anime?
     @State private var sources = false
-    private var titles: [Anime] { (store.week?.titles(for: day) ?? []).filter { !onlySaved || library.isSaved($0) } }
+    private var titles: [Anime] {
+        (store.week?.titles(for: day) ?? []).filter { !onlySaved || library.isSaved($0) }.map { anime in
+            var updated = anime
+            updated.synopsis = titleDescriptions[anime.id] ?? anime.synopsis
+            if let broadcast = broadcastTimes[anime.id] { updated.broadcast = broadcast }
+            if let poster = kitsuPosters[anime.id] { updated.images = .init(jpg: .init(imageUrl: poster, largeImageUrl: poster)) }
+            return updated
+        }
+    }
     var body: some View {
         NavigationStack {
             ZStack {
                 NightBackground()
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
+                    LazyVStack(alignment: .leading, spacing: 24) {
                         PageHeader(eyebrow: "A WEEK OF NEW WORLDS", title: "Make room\nfor one more.", subtitle: "Your weekly broadcast guide. Find a story for every night.")
                         GlassEffectContainer(spacing: 8) {
                             ScrollView(.horizontal, showsIndicators: false) {
@@ -203,7 +224,7 @@ struct CalendarScreen: View {
                         HStack {
                             Toggle("My library", isOn: $onlySaved).toggleStyle(.button).buttonStyle(.glass)
                             Spacer()
-                            Button("Today") { day = .todayInJapan }.buttonStyle(.glass)
+                            Button("Today") { day = .today }.buttonStyle(.glass)
                             Button { Task { await load(refresh: true) } } label: { Image(systemName: "arrow.clockwise") }.buttonStyle(.glass).disabled(store.isLoading).accessibilityLabel("Refresh weekly schedule")
                             Text("\(titles.count) SHOWS").font(.system(size: 10, design: .monospaced)).foregroundStyle(YoruTheme.muted)
                         }
@@ -212,11 +233,17 @@ struct CalendarScreen: View {
                                 HStack(spacing: 8) {
                                     Circle().fill(YoruTheme.mint).frame(width: 5, height: 5)
                                     Text(anime.broadcast?.day ?? "DAY TBA").font(.system(size: 10, weight: .semibold, design: .monospaced)).foregroundStyle(YoruTheme.mint)
-                                    if let next = anime.nextRelease {
-                                        Text("· \(next.formatted(.dateTime.weekday(.abbreviated).hour().minute())) locally").font(.system(size: 10)).foregroundStyle(YoruTheme.muted)
+                                    if let next = anime.broadcast?.nextDate() ?? anime.nextRelease {
+                                        Text("· Broadcast \(next.formatted(.dateTime.weekday(.abbreviated).hour().minute())) locally").font(.system(size: 10)).foregroundStyle(YoruTheme.muted)
                                     }
                                 }.padding(.leading, 8)
                                 AnimeRow(anime: anime, library: library) { selection = anime }
+                            }.task(id: anime.id) {
+                                guard broadcastTimes[anime.id] == nil || titleDescriptions[anime.id] == nil else { return }
+                                if let metadata = await TitleMetadataAPI.shared.metadata(for: anime.id), !Task.isCancelled {
+                                    if let broadcast = metadata.broadcast { broadcastTimes[anime.id] = broadcast }
+                                    if let synopsis = metadata.synopsis { titleDescriptions[anime.id] = synopsis }
+                                }
                             }
                         }
                         if store.isLoading { HStack { ProgressView(); Text(store.week == nil ? "Loading this week’s schedule…" : "Refreshing this week…").font(.system(size: 12)) }.padding(.vertical) }
@@ -234,7 +261,16 @@ struct CalendarScreen: View {
                     }.padding(.horizontal, 22).padding(.top, 20).padding(.bottom, 20)
                 }.refreshable { await load(refresh: true) }
             }.toolbar(.hidden, for: .navigationBar)
-                .task { if store.week == nil { await load() } }
+                .task {
+                    if store.week == nil { await store.load() }
+                    await loadKitsuPosters()
+                }
+                .task(id: day) {
+                    let times = await BroadcastTimeAPI.shared.times(for: day)
+                    guard !Task.isCancelled else { return }
+                    broadcastTimes.merge(times) { _, new in new }
+                    if store.week != nil { await loadKitsuPosters() }
+                }
                 .sheet(item: $selection) { DetailScreen(initial: $0, library: library) }
                 .sheet(isPresented: $sources) { SourcesScreen() }
         }
@@ -254,7 +290,17 @@ struct CalendarScreen: View {
             }.font(.system(size: 13, weight: .semibold))
         }.padding(.top, 16)
     }
-    private func load(refresh: Bool = false) async { await store.load(refresh: refresh) }
+    private func load(refresh: Bool = false) async {
+        await store.load(refresh: refresh)
+        await loadKitsuPosters()
+    }
+    private func loadKitsuPosters() async {
+        let ids = (store.week?.titles(for: day) ?? []).map(\.id)
+        guard !ids.isEmpty else { return }
+        let posters = await AnimeAPI.shared.posterURLs(for: ids)
+        guard !Task.isCancelled else { return }
+        kitsuPosters.merge(posters) { _, newer in newer }
+    }
 }
 
 struct SourcesScreen: View {
@@ -268,15 +314,31 @@ struct SourcesScreen: View {
                         Eyebrow(text: "OPEN WORLDS, HONEST SOURCES")
                         Text("A little context.").font(.system(size: 32, weight: .semibold, design: .rounded)).tracking(-1)
                         Text("Yoru uses Kitsu’s public anime catalog and streaming-link data. Explicit adult entries are excluded. Seasonal catalogs load every available page. The archive and global search load more results as you browse.")
-                        Text("The calendar reads MyAnimeList’s public weekly broadcast schedule in a single request and caches the week for six hours. Days follow Japan’s broadcast week, not your local day. Exact times are not supplied here. All includes other and unknown-day listings. This is not a guarantee of streaming premieres: delays, batch releases, dubs, and regional differences may apply.")
+                        Text("The calendar reads MyAnimeList’s public weekly broadcast schedule in a single request and caches the week for six hours. Days follow Japan’s broadcast week, not your local day. Listed broadcast times are supplied through Jikan and shown in your local time. Some titles have no published time. All includes other and unknown-day listings. This is not a guarantee of streaming premieres: delays, batch releases, dubs, and regional differences may apply.")
                         Text("Streaming links are listed only when Kitsu provides them for that title. A missing provider means the data is unknown, not that the title is unavailable. Availability, subscription requirements, and languages depend on your region.")
                         Text("Cached results can be shown offline and are labeled. Pull down to refresh. Catalog responses are refreshed after six hours or when you pull to refresh.")
                         Link("About Kitsu ↗", destination: URL(string: "https://kitsu.app")!)
                         Link("MyAnimeList ↗", destination: URL(string: "https://myanimelist.net")!)
-                        Text("Your watchlist and progress are stored locally. Search terms and catalog requests are sent to Kitsu. Weekly schedule requests and some cover artwork load from MyAnimeList. Check-ins stay on this device.").font(.system(size: 12)).foregroundStyle(YoruTheme.muted)
+                        Text("Your watchlist and progress are stored locally. Search terms and catalog requests are sent to Kitsu. Weekly schedule requests and some cover artwork load from MyAnimeList. Broadcast time requests are sent to Jikan. Check-ins stay on this device.").font(.system(size: 12)).foregroundStyle(YoruTheme.muted)
                     }.font(.system(size: 15)).foregroundStyle(.white.opacity(0.8)).padding(24)
                 }
             }.toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } } }
         }.presentationDragIndicator(.visible).preferredColorScheme(.dark)
+    }
+}
+
+private struct YoruSwitchMotion: ViewModifier {
+    let trigger: Int
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    func body(content: Content) -> some View {
+        content.keyframeAnimator(initialValue: CGFloat.zero, trigger: trigger) { view, amount in
+            view
+                .blur(radius: reduceMotion ? 0 : amount * 2)
+                .offset(x: reduceMotion ? 0 : amount * 6)
+                .scaleEffect(x: reduceMotion ? 1 : 1 + amount * 0.008, y: 1)
+        } keyframes: { _ in
+            LinearKeyframe(1, duration: 0.04)
+            CubicKeyframe(0, duration: 0.24)
+        }
     }
 }

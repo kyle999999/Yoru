@@ -108,6 +108,8 @@ final class CoreDataManager {
         container.performBackgroundTask { context in
             let object = context.object(with: object.objectID)
             context.delete(object)
+            do { try context.save() }
+            catch { LogManager.logger.error("CoreDataManager.remove: \(error.localizedDescription)") }
         }
     }
 

@@ -367,9 +367,23 @@ extension Source {
     }
 
     func fetchSearchManga(query: String, filters: [FilterBase] = [], page: Int = 1) async throws -> MangaPageResult {
+        try Task.checkCancellation()
         var newFilters = filters
         newFilters.append(TitleFilter(value: query))
-        return try await actor.getMangaList(filters: newFilters, page: page)
+        guard let modern else { return try await actor.getMangaList(filters: newFilters, page: page) }
+        // Register before installing the handler, so cancellation cannot race
+        // ahead of the engine's request registration.
+        let requestID = UUID().uuidString
+        _ = try modern.call("beginSearch", ["RequestID": requestID])
+        defer { _ = try? modern.call("endSearch", ["RequestID": requestID]) }
+        return try await withTaskCancellationHandler {
+            try Task.checkCancellation()
+            let result = try await actor.getMangaList(filters: newFilters, page: page, requestID: requestID)
+            try Task.checkCancellation()
+            return result
+        } onCancel: {
+            _ = try? modern.call("cancelSearch", ["RequestID": requestID])
+        }
     }
 
     func getMangaList(filters: [FilterBase], page: Int = 1) async throws -> MangaPageResult {

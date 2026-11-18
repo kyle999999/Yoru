@@ -61,8 +61,9 @@ actor SourceActor {
         }
     }
 
-    func getMangaList(filters: [FilterBase], page: Int = 1) throws -> MangaPageResult {
-        if let modern = source.modern { return try modern.browse(filters: filters, page: page) }
+    func getMangaList(filters: [FilterBase], page: Int = 1, requestID: String? = nil) throws -> MangaPageResult {
+        try Task.checkCancellation()
+        if let modern = source.modern { return try modern.browse(filters: filters, page: page, requestID: requestID) }
         let filterDescriptor = source.globalStore.storeStdValue(filters)
         defer { source.globalStore.removeStdValue(filterDescriptor) }
 

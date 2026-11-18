@@ -192,16 +192,25 @@ extension CoreDataManager {
 
             var needsSave = false
             var historyDict: [String: (page: Int, date: Int)] = [:]
+            var retained: [String: HistoryObject] = [:]
 
             let inLibrary = self.hasLibraryManga(sourceId: sourceId, mangaId: mangaId, context: context)
 
             for history in objects {
                 // remove duplicate read history objects for the same chapter
-                if historyDict[history.chapterId] != nil {
+                if let keep = retained[history.chapterId] {
                     needsSave = true
+                    if (history.dateRead ?? .distantPast) > (keep.dateRead ?? .distantPast) {
+                        keep.progress = history.progress
+                        keep.dateRead = history.dateRead
+                    }
+                    keep.completed = keep.completed || history.completed
+                    keep.total = max(keep.total, history.total)
+                    if keep.chapter == nil { keep.chapter = history.chapter }
                     context.delete(history)
                     continue
                 }
+                retained[history.chapterId] = history
                 // link history to chapter if link is missing
                 if inLibrary && history.chapter == nil {
                     if let chapter = self.getChapter(
@@ -214,10 +223,9 @@ extension CoreDataManager {
                         needsSave = true
                     }
                 }
-                historyDict[history.chapterId] = (
-                    history.completed ? -1 : Int(history.progress),
-                    Int(history.dateRead?.timeIntervalSince1970 ?? -1)
-                )
+            }
+            for (id, history) in retained {
+                historyDict[id] = (history.completed ? -1 : Int(history.progress), Int(history.dateRead?.timeIntervalSince1970 ?? -1))
             }
 
             if needsSave {
@@ -254,10 +262,10 @@ extension CoreDataManager {
             chapterId: chapterId,
             context: context
         )
-        historyObject.progress = Int16(progress)
+        historyObject.progress = Int16(clamping: progress)
         historyObject.dateRead = Date()
         if let totalPages = totalPages {
-            historyObject.total = Int16(totalPages)
+            historyObject.total = Int16(clamping: totalPages)
         }
     }
 
@@ -280,7 +288,7 @@ extension CoreDataManager {
             guard historyObject.completed != completed else { return }
             historyObject.completed = completed
             if let progress = progress {
-                historyObject.progress = Int16(progress)
+                historyObject.progress = Int16(clamping: progress)
             }
             historyObject.dateRead = date
             do {
