@@ -177,3 +177,43 @@ actor BroadcastTimeAPI {
         return result.isEmpty ? fallback : result
     }
 }
+
+actor TitleMetadataAPI {
+    static let shared = TitleMetadataAPI()
+    struct Metadata: Codable, Sendable { var broadcast: Broadcast?; var synopsis: String? }
+    private var cache: [Int: Metadata] = [:]
+    private var nextRequest = Date.distantPast
+    func metadata(for id: Int) async -> Metadata? {
+        guard id > 0 else { return nil }
+        if let value = cache[id] { return value }
+        do {
+            let slot = max(Date(), nextRequest); nextRequest = slot.addingTimeInterval(1)
+            if slot > Date() { try await Task.sleep(for: .seconds(slot.timeIntervalSinceNow)) }
+            try Task.checkCancellation()
+            var request = URLRequest(url: URL(string: "https://myanimelist.net/anime/\(id)")!)
+            request.timeoutInterval = 12
+            request.setValue("Mozilla/5.0 Yoru", forHTTPHeaderField: "User-Agent")
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard (response as? HTTPURLResponse)?.statusCode == 200, let html = String(data: data, encoding: .utf8) else { return nil }
+            let value = Self.parse(html)
+            cache[id] = value
+            return value
+        } catch { return nil }
+    }
+    static func parse(_ html: String) -> Metadata {
+        func groups(_ pattern: String) -> [String]? {
+            guard let regex = try? NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators]),
+                  let match = regex.firstMatch(in: html, range: NSRange(html.startIndex..., in: html)) else { return nil }
+            return (1..<match.numberOfRanges).map { i in Range(match.range(at: i), in: html).map { String(html[$0]) } ?? "" }
+        }
+        var broadcast: Broadcast?
+        if let values = groups(#"Broadcast:</span>\s*(\w+) at (\d{2}:\d{2}) \(JST\)"#) {
+            let candidate = Broadcast(day: values[0], time: values[1], timezone: "Asia/Tokyo", string: "\(values[0]) at \(values[1]) JST")
+            if candidate.nextDate() != nil { broadcast = candidate }
+        }
+        let synopsis = groups(#"<p\b[^>]*itemprop="description"[^>]*>(.*?)</p>"#)?.first.map {
+            WeeklySchedule.decodeEntities($0.replacingOccurrences(of: #"<br\s*/?>"#, with: "\n", options: .regularExpression).replacingOccurrences(of: #"<[^>]+>"#, with: "", options: .regularExpression))
+        }
+        return Metadata(broadcast: broadcast, synopsis: synopsis)
+    }
+}

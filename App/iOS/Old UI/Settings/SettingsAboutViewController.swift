@@ -32,7 +32,7 @@ class SettingsAboutViewController: UITableViewController {
 extension SettingsAboutViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        3
+        4
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -54,6 +54,11 @@ extension SettingsAboutViewController {
             cell?.textLabel?.text = "Open-source notices"
             cell?.detailTextLabel?.text = nil
             cell?.accessoryType = .disclosureIndicator
+        case 3:
+            cell?.textLabel?.text = "Yoru + Aidoku made by: v0rx"
+            cell?.textLabel?.numberOfLines = 0
+            cell?.detailTextLabel?.text = nil
+            cell?.accessoryType = .none
         default: break
         }
         cell?.detailTextLabel?.textColor = .secondaryLabel

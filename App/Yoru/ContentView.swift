@@ -181,11 +181,13 @@ struct CalendarScreen: View {
     @State private var day = BroadcastDay.today
     @State private var kitsuPosters: [Int: String] = [:]
     @State private var broadcastTimes: [Int: Broadcast] = [:]
+    @State private var titleDescriptions: [Int: String] = [:]
     @State private var selection: Anime?
     @State private var sources = false
     private var titles: [Anime] {
         (store.week?.titles(for: day) ?? []).filter { !onlySaved || library.isSaved($0) }.map { anime in
             var updated = anime
+            updated.synopsis = titleDescriptions[anime.id] ?? anime.synopsis
             if let broadcast = broadcastTimes[anime.id] { updated.broadcast = broadcast }
             if let poster = kitsuPosters[anime.id] { updated.images = .init(jpg: .init(imageUrl: poster, largeImageUrl: poster)) }
             return updated
@@ -236,6 +238,12 @@ struct CalendarScreen: View {
                                     }
                                 }.padding(.leading, 8)
                                 AnimeRow(anime: anime, library: library) { selection = anime }
+                            }.task(id: anime.id) {
+                                guard broadcastTimes[anime.id] == nil || titleDescriptions[anime.id] == nil else { return }
+                                if let metadata = await TitleMetadataAPI.shared.metadata(for: anime.id), !Task.isCancelled {
+                                    if let broadcast = metadata.broadcast { broadcastTimes[anime.id] = broadcast }
+                                    if let synopsis = metadata.synopsis { titleDescriptions[anime.id] = synopsis }
+                                }
                             }
                         }
                         if store.isLoading { HStack { ProgressView(); Text(store.week == nil ? "Loading this week’s schedule…" : "Refreshing this week…").font(.system(size: 12)) }.padding(.vertical) }

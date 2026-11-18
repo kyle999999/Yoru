@@ -12,7 +12,13 @@ struct DetailScreen: View {
     @State private var showSources = false
     @State private var organizing = false
     @State private var writingEpisode = false
-    private var anime: Anime { detail ?? initial }
+    @State private var supplemental: TitleMetadataAPI.Metadata?
+    private var anime: Anime {
+        var value = detail ?? initial
+        if value.synopsis?.isEmpty != false { value.synopsis = supplemental?.synopsis ?? initial.synopsis }
+        if value.broadcast?.time == nil { value.broadcast = supplemental?.broadcast ?? initial.broadcast }
+        return value
+    }
     var body: some View {
         NavigationStack {
             ZStack {
@@ -29,15 +35,15 @@ struct DetailScreen: View {
                                 Text(anime.episodeLabel).foregroundStyle(YoruTheme.muted)
                             }.font(.system(size: 12, weight: .medium))
                         }
-                        watchProgress
-                        AnimeJournalSection(anime: anime, library: library)
-                        streamingSources
                         if let synopsis = anime.synopsis, !synopsis.isEmpty {
                             VStack(alignment: .leading, spacing: 13) {
-                                SectionHeading(title: "The story")
+                                SectionHeading(title: "Description")
                                 Text(synopsis).font(.system(size: 14)).lineSpacing(6).foregroundStyle(.white.opacity(0.72)).textSelection(.enabled)
                             }
                         }
+                        watchProgress
+                        AnimeJournalSection(anime: anime, library: library)
+                        streamingSources
                         if let genres = anime.genres, !genres.isEmpty {
                             Text(genres.map(\.name).joined(separator: "  ·  ")).font(.system(size: 11, weight: .medium)).foregroundStyle(YoruTheme.violet)
                         }
@@ -48,7 +54,7 @@ struct DetailScreen: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Eyebrow(text: anime.nextRelease == nil ? "WEEKLY BROADCAST GUIDE" : "NEXT LISTED RELEASE")
                                 Text(schedule).font(.system(size: 14))
-                                if anime.airing == true, let next = anime.nextRelease {
+                                if let next = anime.nextRelease ?? anime.broadcast?.nextDate() {
                                     Text("Listed next release: \(next.formatted(date: .abbreviated, time: .shortened)) in your time zone.").font(.system(size: 12)).foregroundStyle(YoruTheme.muted)
                                 }
                                 Text("Streaming release times may differ.").font(.system(size: 11)).foregroundStyle(YoruTheme.muted)
@@ -59,12 +65,13 @@ struct DetailScreen: View {
                         }
                         Button("About sources & availability") { showSources = true }.font(.system(size: 12))
                         SourceFooter(date: fetchedAt)
-                    }.padding(.horizontal, 22).padding(.bottom, 24)
+                    }.padding(.horizontal, 22).padding(.top, 8).padding(.bottom, 24)
                 }.refreshable { await load(refresh: true) }
             }.toolbar {
                 ToolbarItem(placement: .topBarLeading) { Button { organizing = true } label: { Image(systemName: "folder.badge.plus") }.accessibilityLabel("Organize into collections") }
                 ToolbarItem(placement: .topBarTrailing) { Button { dismiss() } label: { Image(systemName: "xmark") }.accessibilityLabel("Close anime details") }
             }.task { await load() }
+                .task(id: initial.id) { supplemental = await TitleMetadataAPI.shared.metadata(for: initial.id) }
                 .sheet(isPresented: $writingEpisode) { JournalEditor(anime: anime, library: library) }
                 .sheet(isPresented: $showSources) { SourcesScreen() }
                 .sheet(isPresented: $organizing) { CollectionMembershipScreen(anime: anime, library: library) }
