@@ -180,7 +180,7 @@ actor BroadcastTimeAPI {
 
 actor TitleMetadataAPI {
     static let shared = TitleMetadataAPI()
-    struct Metadata: Codable, Sendable { var broadcast: Broadcast?; var synopsis: String? }
+    struct Metadata: Codable, Sendable { var broadcast: Broadcast?; var synopsis: String?; var episodes: Int? }
     private var cache: [Int: Metadata] = [:]
     private var nextRequest = Date.distantPast
     func metadata(for id: Int) async -> Metadata? {
@@ -214,6 +214,52 @@ actor TitleMetadataAPI {
         let synopsis = groups(#"<p\b[^>]*itemprop="description"[^>]*>(.*?)</p>"#)?.first.map {
             WeeklySchedule.decodeEntities($0.replacingOccurrences(of: #"<br\s*/?>"#, with: "\n", options: .regularExpression).replacingOccurrences(of: #"<[^>]+>"#, with: "", options: .regularExpression))
         }
-        return Metadata(broadcast: broadcast, synopsis: synopsis)
+        let episodes = groups(#"Episodes:</span>\s*(\d+)\s*<"#)?.first.flatMap(Int.init).flatMap { $0 > 0 ? $0 : nil }
+        return Metadata(broadcast: broadcast, synopsis: synopsis, episodes: episodes)
+    }
+}
+
+actor EpisodeReleaseAPI {
+    static let shared = EpisodeReleaseAPI()
+    struct Episode: Decodable {
+        let mal_id: Int
+        let aired: String?
+    }
+    private struct Response: Decodable {
+        struct Pagination: Decodable { let last_visible_page: Int }
+        let data: [Episode]
+        let pagination: Pagination
+    }
+    private var cache: [Int: (Date, Int)] = [:]
+    private var nextSlot = Date.distantPast
+    func latestAired(for id: Int) async -> Int? {
+        guard id > 0 else { return nil }
+        if let cached = cache[id], Date().timeIntervalSince(cached.0) < 1800 { return cached.1 }
+        do {
+            let first = try await page(id: id, number: 1)
+            var latest = Self.latestAired(in: first.data)
+            if first.pagination.last_visible_page > 1 {
+                let last = try await page(id: id, number: first.pagination.last_visible_page)
+                if let number = Self.latestAired(in: last.data) { latest = max(latest ?? 0, number) }
+            }
+            if let latest { cache[id] = (Date(), latest) }
+            return latest
+        } catch { return nil }
+    }
+    static func latestAired(in episodes: [Episode], now: Date = .now) -> Int? {
+        episodes.filter { episode in
+            guard episode.mal_id > 0, let value = episode.aired, let date = KitsuDocument.parseDate(value) else { return false }
+            return date <= now
+        }.map(\.mal_id).max()
+    }
+    private func page(id: Int, number: Int) async throws -> Response {
+        let slot = max(Date(), nextSlot); nextSlot = slot.addingTimeInterval(1.1)
+        if slot > Date() { try await Task.sleep(for: .seconds(slot.timeIntervalSinceNow)) }
+        try Task.checkCancellation()
+        var request = URLRequest(url: URL(string: "https://api.jikan.moe/v4/anime/\(id)/episodes?page=\(number)")!)
+        request.timeoutInterval = 12
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw ScheduleError.changedFormat }
+        return try JSONDecoder().decode(Response.self, from: data)
     }
 }

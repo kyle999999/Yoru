@@ -50,7 +50,7 @@ struct TonightScreen: View {
                 NightBackground()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
-                        PageHeader(eyebrow: "\(season.label) · ON YOUR RADAR", title: "Tonight,\nwell spent.", subtitle: "A few stories worth staying up for.")
+                        PageHeader(eyebrow: "\(season.label) · ON YOUR RADAR", title: "Tonight", subtitle: "Your library and this season’s anime.")
                         if let featured = store.items.first(where: { $0.airing == true && $0.type == "TV" }) ?? store.items.first { hero(featured) }
                         if !library.saved.isEmpty {
                             SectionHeading(title: "Continue your story", trailing: "YOUR LIBRARY")
@@ -182,12 +182,14 @@ struct CalendarScreen: View {
     @State private var kitsuPosters: [Int: String] = [:]
     @State private var broadcastTimes: [Int: Broadcast] = [:]
     @State private var titleDescriptions: [Int: String] = [:]
+    @State private var episodeTotals: [Int: Int] = [:]
     @State private var selection: Anime?
     @State private var sources = false
     private var titles: [Anime] {
         (store.week?.titles(for: day) ?? []).filter { !onlySaved || library.isSaved($0) }.map { anime in
             var updated = anime
             updated.synopsis = titleDescriptions[anime.id] ?? anime.synopsis
+            updated.episodes = episodeTotals[anime.id] ?? anime.episodes
             if let broadcast = broadcastTimes[anime.id] { updated.broadcast = broadcast }
             if let poster = kitsuPosters[anime.id] { updated.images = .init(jpg: .init(imageUrl: poster, largeImageUrl: poster)) }
             return updated
@@ -199,7 +201,7 @@ struct CalendarScreen: View {
                 NightBackground()
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 24) {
-                        PageHeader(eyebrow: "A WEEK OF NEW WORLDS", title: "Make room\nfor one more.", subtitle: "Your weekly broadcast guide. Find a story for every night.")
+                        PageHeader(eyebrow: "A WEEK OF NEW WORLDS", title: "Calendar", subtitle: "Weekly broadcasts in one place.")
                         GlassEffectContainer(spacing: 8) {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 8) {
@@ -243,6 +245,7 @@ struct CalendarScreen: View {
                                 if let metadata = await TitleMetadataAPI.shared.metadata(for: anime.id), !Task.isCancelled {
                                     if let broadcast = metadata.broadcast { broadcastTimes[anime.id] = broadcast }
                                     if let synopsis = metadata.synopsis { titleDescriptions[anime.id] = synopsis }
+                                    if let episodes = metadata.episodes { episodeTotals[anime.id] = episodes }
                                 }
                             }
                         }

@@ -12,10 +12,13 @@ struct DetailScreen: View {
     @State private var showSources = false
     @State private var organizing = false
     @State private var writingEpisode = false
+    @State private var latestAired: Int?
+    @State private var checkingEpisodes = true
     @State private var supplemental: TitleMetadataAPI.Metadata?
     private var anime: Anime {
         var value = detail ?? initial
         if value.synopsis?.isEmpty != false { value.synopsis = supplemental?.synopsis ?? initial.synopsis }
+        if value.episodes == nil { value.episodes = supplemental?.episodes ?? initial.episodes }
         if value.broadcast?.time == nil { value.broadcast = supplemental?.broadcast ?? initial.broadcast }
         return value
     }
@@ -35,6 +38,11 @@ struct DetailScreen: View {
                                 Text(anime.episodeLabel).foregroundStyle(YoruTheme.muted)
                             }.font(.system(size: 12, weight: .medium))
                         }
+                        HStack(spacing: 0) {
+                            episodeFact("TOTAL", value: anime.episodes.map(String.init) ?? "TBA")
+                            episodeFact("LATEST AIRED", value: latestAired.map { "Ep \($0)" } ?? (checkingEpisodes ? "Checking…" : "Unknown"))
+                            episodeFact("YOU WATCHED", value: String(library.watched(anime)))
+                        }.padding(.vertical, 16).background(.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 20))
                         if let synopsis = anime.synopsis, !synopsis.isEmpty {
                             VStack(alignment: .leading, spacing: 13) {
                                 SectionHeading(title: "Description")
@@ -72,10 +80,21 @@ struct DetailScreen: View {
                 ToolbarItem(placement: .topBarTrailing) { Button { dismiss() } label: { Image(systemName: "xmark") }.accessibilityLabel("Close anime details") }
             }.task { await load() }
                 .task(id: initial.id) { supplemental = await TitleMetadataAPI.shared.metadata(for: initial.id) }
+                .task(id: initial.id) {
+                    checkingEpisodes = true
+                    latestAired = await EpisodeReleaseAPI.shared.latestAired(for: initial.id)
+                    checkingEpisodes = false
+                }
                 .sheet(isPresented: $writingEpisode) { JournalEditor(anime: anime, library: library) }
                 .sheet(isPresented: $showSources) { SourcesScreen() }
                 .sheet(isPresented: $organizing) { CollectionMembershipScreen(anime: anime, library: library) }
         }.presentationDragIndicator(.visible).preferredColorScheme(.dark)
+    }
+    private func episodeFact(_ label: String, value: String) -> some View {
+        VStack(spacing: 6) {
+            Text(value).font(.system(size: 18, weight: .semibold, design: .rounded)).monospacedDigit()
+            Text(label).font(.system(size: 8, weight: .medium)).tracking(0.7).foregroundStyle(YoruTheme.muted)
+        }.frame(maxWidth: .infinity)
     }
     private var posterHeader: some View {
         ZStack(alignment: .bottomLeading) {
@@ -93,7 +112,7 @@ struct DetailScreen: View {
     private var watchProgress: some View {
         VStack(alignment: .leading, spacing: 15) {
             HStack {
-                Eyebrow(text: "YOUR JOURNEY")
+                Eyebrow(text: "YOUR PROGRESS")
                 Spacer()
                 Text("\(library.watched(anime)) / \(anime.episodes.map(String.init) ?? "?")").font(.system(size: 13, weight: .medium, design: .monospaced))
             }
