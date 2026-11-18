@@ -128,3 +128,52 @@ actor ScheduleAPI {
         } catch is CancellationError {} catch { self.error = error.localizedDescription }
     }
 }
+
+// Jikan exposes MAL's broadcast metadata, including the clock time omitted
+// from the public weekly HTML. Keep this supplemental lookup independent.
+actor BroadcastTimeAPI {
+    static let shared = BroadcastTimeAPI()
+    private struct Page: Decodable {
+        struct Item: Decodable { let mal_id: Int; let broadcast: Broadcast? }
+        struct Pagination: Decodable { let has_next_page: Bool }
+        let data: [Item]
+        let pagination: Pagination
+    }
+    private var cache: [String: (Date, [Int: Broadcast])] = [:]
+    private var nextSlot = Date.distantPast
+    private struct SavedTimes: Codable { let fetchedAt: Date; let times: [Int: Broadcast] }
+    private func cacheURL(_ day: BroadcastDay) -> URL {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("yoru-broadcast-times-\(day.rawValue).json")
+    }
+    func times(for day: BroadcastDay) async -> [Int: Broadcast] {
+        guard day != .other, day != .unknown else { return [:] }
+        if let cached = cache[day.rawValue], Date().timeIntervalSince(cached.0) < 21600 { return cached.1 }
+        let disk = (try? Data(contentsOf: cacheURL(day))).flatMap { try? JSONDecoder().decode(SavedTimes.self, from: $0) }
+        if let disk, Date().timeIntervalSince(disk.fetchedAt) < 21600 { return disk.times }
+        let fallback = disk?.times ?? cache[day.rawValue]?.1 ?? [:]
+        var result: [Int: Broadcast] = [:]
+        do {
+            for page in 1...10 {
+                try Task.checkCancellation()
+                let slot = max(Date(), nextSlot); nextSlot = slot.addingTimeInterval(1.1)
+                if slot > Date() { try await Task.sleep(for: .seconds(slot.timeIntervalSinceNow)) }
+                let url = URL(string: "https://api.jikan.moe/v4/schedules?filter=\(day.rawValue)&sfw=true&limit=25&page=\(page)")!
+                var request = URLRequest(url: url); request.timeoutInterval = 15
+                let (data, response) = try await URLSession.shared.data(for: request)
+                guard let response = response as? HTTPURLResponse, response.statusCode == 200 else { return result.isEmpty ? fallback : result }
+                let decoded = try JSONDecoder().decode(Page.self, from: data)
+                for item in decoded.data {
+                    if let broadcast = item.broadcast, broadcast.nextDate() != nil { result[item.mal_id] = broadcast }
+                }
+                if !decoded.pagination.has_next_page {
+                    cache[day.rawValue] = (Date(), result)
+                    let saved = SavedTimes(fetchedAt: Date(), times: result)
+                    if let encoded = try? JSONEncoder().encode(saved) { try? encoded.write(to: cacheURL(day), options: .atomic) }
+                    return result
+                }
+            }
+        } catch { return result.isEmpty ? fallback : result }
+        return result.isEmpty ? fallback : result
+    }
+}

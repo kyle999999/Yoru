@@ -7,11 +7,11 @@ struct ContentView: View {
     @State private var showCheckIn = false
     var body: some View {
         TabView(selection: $selectedTab) {
-            Tab("Tonight", systemImage: "moon.stars", value: 0) { TonightScreen(library: library) }
-            Tab("Calendar", systemImage: "calendar", value: 1) { CalendarScreen(library: library) }
-            Tab("Explore", systemImage: "sparkle.magnifyingglass", value: 2) { ExploreScreen(library: library) }
+            Tab("Tonight", systemImage: "moon.stars", value: 0) { TonightScreen(library: library).modifier(YoruSwitchMotion(trigger: selectedTab)) }
+            Tab("Calendar", systemImage: "calendar", value: 1) { CalendarScreen(library: library).modifier(YoruSwitchMotion(trigger: selectedTab)) }
+            Tab("Explore", systemImage: "sparkle.magnifyingglass", value: 2) { ExploreScreen(library: library).modifier(YoruSwitchMotion(trigger: selectedTab)) }
             Tab("aidoku", systemImage: "books.vertical", value: 3) { Color.clear }
-            Tab("Library", systemImage: "square.stack", value: 4) { LibraryScreen(library: library) }
+            Tab("Library", systemImage: "square.stack", value: 4) { LibraryScreen(library: library).modifier(YoruSwitchMotion(trigger: selectedTab)) }
         }.onChange(of: selectedTab) { old, value in
             if value == 3 { selectedTab = old; AidokuIntegration.present() }
         }.tint(YoruTheme.violet).preferredColorScheme(.dark)
@@ -180,13 +180,14 @@ struct CalendarScreen: View {
     @State private var onlySaved = false
     @State private var day = BroadcastDay.today
     @State private var kitsuPosters: [Int: String] = [:]
+    @State private var broadcastTimes: [Int: Broadcast] = [:]
     @State private var selection: Anime?
     @State private var sources = false
     private var titles: [Anime] {
         (store.week?.titles(for: day) ?? []).filter { !onlySaved || library.isSaved($0) }.map { anime in
-            guard let poster = kitsuPosters[anime.id] else { return anime }
             var updated = anime
-            updated.images = .init(jpg: .init(imageUrl: poster, largeImageUrl: poster))
+            if let broadcast = broadcastTimes[anime.id] { updated.broadcast = broadcast }
+            if let poster = kitsuPosters[anime.id] { updated.images = .init(jpg: .init(imageUrl: poster, largeImageUrl: poster)) }
             return updated
         }
     }
@@ -230,8 +231,8 @@ struct CalendarScreen: View {
                                 HStack(spacing: 8) {
                                     Circle().fill(YoruTheme.mint).frame(width: 5, height: 5)
                                     Text(anime.broadcast?.day ?? "DAY TBA").font(.system(size: 10, weight: .semibold, design: .monospaced)).foregroundStyle(YoruTheme.mint)
-                                    if let next = anime.nextRelease {
-                                        Text("· \(next.formatted(.dateTime.weekday(.abbreviated).hour().minute())) locally").font(.system(size: 10)).foregroundStyle(YoruTheme.muted)
+                                    if let next = anime.broadcast?.nextDate() ?? anime.nextRelease {
+                                        Text("· Broadcast \(next.formatted(.dateTime.weekday(.abbreviated).hour().minute())) locally").font(.system(size: 10)).foregroundStyle(YoruTheme.muted)
                                     }
                                 }.padding(.leading, 8)
                                 AnimeRow(anime: anime, library: library) { selection = anime }
@@ -257,8 +258,10 @@ struct CalendarScreen: View {
                     await loadKitsuPosters()
                 }
                 .task(id: day) {
-                    guard store.week != nil else { return }
-                    await loadKitsuPosters()
+                    let times = await BroadcastTimeAPI.shared.times(for: day)
+                    guard !Task.isCancelled else { return }
+                    broadcastTimes.merge(times) { _, new in new }
+                    if store.week != nil { await loadKitsuPosters() }
                 }
                 .sheet(item: $selection) { DetailScreen(initial: $0, library: library) }
                 .sheet(isPresented: $sources) { SourcesScreen() }
@@ -303,15 +306,31 @@ struct SourcesScreen: View {
                         Eyebrow(text: "OPEN WORLDS, HONEST SOURCES")
                         Text("A little context.").font(.system(size: 32, weight: .semibold, design: .rounded)).tracking(-1)
                         Text("Yoru uses Kitsu’s public anime catalog and streaming-link data. Explicit adult entries are excluded. Seasonal catalogs load every available page. The archive and global search load more results as you browse.")
-                        Text("The calendar reads MyAnimeList’s public weekly broadcast schedule in a single request and caches the week for six hours. Days follow Japan’s broadcast week, not your local day. Exact times are not supplied here. All includes other and unknown-day listings. This is not a guarantee of streaming premieres: delays, batch releases, dubs, and regional differences may apply.")
+                        Text("The calendar reads MyAnimeList’s public weekly broadcast schedule in a single request and caches the week for six hours. Days follow Japan’s broadcast week, not your local day. Listed broadcast times are supplied through Jikan and shown in your local time. Some titles have no published time. All includes other and unknown-day listings. This is not a guarantee of streaming premieres: delays, batch releases, dubs, and regional differences may apply.")
                         Text("Streaming links are listed only when Kitsu provides them for that title. A missing provider means the data is unknown, not that the title is unavailable. Availability, subscription requirements, and languages depend on your region.")
                         Text("Cached results can be shown offline and are labeled. Pull down to refresh. Catalog responses are refreshed after six hours or when you pull to refresh.")
                         Link("About Kitsu ↗", destination: URL(string: "https://kitsu.app")!)
                         Link("MyAnimeList ↗", destination: URL(string: "https://myanimelist.net")!)
-                        Text("Your watchlist and progress are stored locally. Search terms and catalog requests are sent to Kitsu. Weekly schedule requests and some cover artwork load from MyAnimeList. Check-ins stay on this device.").font(.system(size: 12)).foregroundStyle(YoruTheme.muted)
+                        Text("Your watchlist and progress are stored locally. Search terms and catalog requests are sent to Kitsu. Weekly schedule requests and some cover artwork load from MyAnimeList. Broadcast time requests are sent to Jikan. Check-ins stay on this device.").font(.system(size: 12)).foregroundStyle(YoruTheme.muted)
                     }.font(.system(size: 15)).foregroundStyle(.white.opacity(0.8)).padding(24)
                 }
             }.toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } } }
         }.presentationDragIndicator(.visible).preferredColorScheme(.dark)
+    }
+}
+
+private struct YoruSwitchMotion: ViewModifier {
+    let trigger: Int
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    func body(content: Content) -> some View {
+        content.keyframeAnimator(initialValue: CGFloat.zero, trigger: trigger) { view, amount in
+            view
+                .blur(radius: reduceMotion ? 0 : amount * 2)
+                .offset(x: reduceMotion ? 0 : amount * 6)
+                .scaleEffect(x: reduceMotion ? 1 : 1 + amount * 0.008, y: 1)
+        } keyframes: { _ in
+            LinearKeyframe(1, duration: 0.04)
+            CubicKeyframe(0, duration: 0.24)
+        }
     }
 }
